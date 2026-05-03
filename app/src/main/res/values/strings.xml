@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">AviFacil</string>
+    <string name="title_cadastro_avicultor">Bem-vindo ao AviFacil</string>
+    <string name="subtitle_cadastro_avicultor">Para começar, cadastre o produtor</string>
+    <string name="hint_nome_avicultor">Nome do Avicultor</string>
+    <string name="hint_email_opcional">E-mail (opcional)</string>
+    <string name="hint_nome_propriedade">Nome da Propriedade</string>
+    <string name="btn_salvar_cadastro">SALVAR CADASTRO</string>
+    <string name="msg_erro_nome">Informe o nome do produtor</string>
+    <string name="msg_erro_propriedade">Informe o nome da propriedade</string>
+    <string name="msg_sucesso_cadastro">Cadastro salvo com sucesso</string>
+    <string name="welcome_message">Bem-vindo, %1$s!\n%2$s</string>
+    <string name="next_step_lotes">Próximo passo: cadastrar lotes (Em breve)</string>
 </resources>

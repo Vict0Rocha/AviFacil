@@ -10,13 +10,15 @@ public class AvicultorEntity {
     
     private String nome;
     private String email;
+    private String nomePropriedade;
     private boolean deleted = false;
     private boolean sincronizado = false;
     private long updatedAt;
 
-    public AvicultorEntity(String nome, String email) {
+    public AvicultorEntity(String nome, String email, String nomePropriedade) {
         this.nome = nome;
         this.email = email;
+        this.nomePropriedade = nomePropriedade;
         this.updatedAt = System.currentTimeMillis();
     }
 
@@ -27,6 +29,8 @@ public class AvicultorEntity {
     public void setNome(String nome) { this.nome = nome; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+    public String getNomePropriedade() { return nomePropriedade; }
+    public void setNomePropriedade(String nomePropriedade) { this.nomePropriedade = nomePropriedade; }
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public boolean isSincronizado() { return sincronizado; }

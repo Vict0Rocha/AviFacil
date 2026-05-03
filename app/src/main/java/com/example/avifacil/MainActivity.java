@@ -1,52 +1,64 @@
 package com.example.avifacil;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.data.local.entity.AvicultorEntity;
+import com.example.avifacil.ui.avicultor.CadastroAvicultorActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private TextView label;
+    private TextView txtBoasVindas;
+    private TextView txtStatus;
     private AvicultorViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        label = new TextView(this);
-        label.setText("Iniciando Arquitetura MVVM...");
-        label.setGravity(android.view.Gravity.CENTER);
-        label.setTextSize(20);
-        setContentView(label);
+        // Layout simples provisório para a Home
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 50, 50, 50);
+        layout.setGravity(android.view.Gravity.CENTER);
 
-        // Inicializa o ViewModel
+        txtBoasVindas = new TextView(this);
+        txtBoasVindas.setTextSize(24);
+        txtBoasVindas.setGravity(android.view.Gravity.CENTER);
+        layout.addView(txtBoasVindas);
+
+        txtStatus = new TextView(this);
+        txtStatus.setText(R.string.next_step_lotes);
+        txtStatus.setGravity(android.view.Gravity.CENTER);
+        layout.addView(txtStatus);
+
+        setContentView(layout);
+
         viewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
 
-        // Observa os dados
-        viewModel.getAvicultoresAtivos().observe(this, this::updateUI);
-
-        // Observa erros
-        viewModel.getErrorMessage().observe(this, error -> {
-            if (error != null) label.setText(error);
-        });
-
-        // Testa o fluxo: Salva e carrega
-        viewModel.salvarAvicultor("Victor TCC", "victor@tcc.com");
+        // Observa a lista de avicultores para decidir o fluxo
+        viewModel.getAvicultoresAtivos().observe(this, this::checkFlow);
+        
+        // Carrega os dados iniciais
+        viewModel.carregarAvicultores();
     }
 
-    private void updateUI(List<AvicultorEntity> lista) {
-        if (lista == null || lista.isEmpty()) {
-            label.setText("Nenhum avicultor encontrado.");
-            return;
-        }
+    private void checkFlow(List<AvicultorEntity> avicultores) {
+        if (avicultores == null) return;
 
-        StringBuilder sb = new StringBuilder("Arquitetura MVVM OK!\nAvicultores:\n");
-        for (AvicultorEntity a : lista) {
-            sb.append("- ").append(a.getNome()).append("\n");
+        if (avicultores.isEmpty()) {
+            // Caso 1: NÃO existe avicultor -> Ir para Cadastro
+            Intent intent = new Intent(this, CadastroAvicultorActivity.class);
+            startActivity(intent);
+            finish();
+        } else {
+            // Caso 2: EXISTE avicultor -> Mostrar Boas-vindas
+            AvicultorEntity avicultor = avicultores.get(0);
+            txtBoasVindas.setText(getString(R.string.welcome_message, avicultor.getNome(), avicultor.getNomePropriedade()));
         }
-        label.setText(sb.toString());
     }
 }

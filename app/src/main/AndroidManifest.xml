@@ -18,6 +18,10 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.avicultor.CadastroAvicultorActivity"
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

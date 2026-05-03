@@ -5,6 +5,8 @@ import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import com.example.avifacil.R;
+import com.example.avifacil.R;
 import com.example.avifacil.data.local.database.AppDatabase;
 import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.data.repository.AvicultorRepository;
@@ -49,17 +51,20 @@ public class AvicultorViewModel extends AndroidViewModel {
         });
     }
 
-    public void salvarAvicultor(String nome, String email) {
+    public void salvarAvicultor(String nome, String email, String propriedade) {
         if (nome == null || nome.trim().isEmpty()) {
-            errorMessage.setValue("Nome é obrigatório");
+            errorMessage.setValue(getApplication().getString(R.string.msg_erro_nome));
+            return;
+        }
+        if (propriedade == null || propriedade.trim().isEmpty()) {
+            errorMessage.setValue(getApplication().getString(R.string.msg_erro_propriedade));
             return;
         }
         executorService.execute(() -> {
             try {
-                AvicultorEntity avicultor = new AvicultorEntity(nome, email);
+                AvicultorEntity avicultor = new AvicultorEntity(nome, email, propriedade);
                 repository.insert(avicultor);
                 successMessage.postValue(true);
-                carregarAvicultores();
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao salvar: " + e.getMessage());
             }
