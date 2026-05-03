@@ -1,9 +1,10 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.dao;
 
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+import com.example.avifacil.data.local.entity.RegistroEntity;
 import java.util.Date;
 import java.util.List;
 
@@ -15,8 +16,8 @@ public interface RegistroDao {
     @Update
     void update(RegistroEntity registro);
 
-    @Query("UPDATE registros SET deleted = 1, sincronizado = 0 WHERE id = :id")
-    void softDelete(long id);
+    @Query("UPDATE registros SET deleted = 1, sincronizado = 0, updatedAt = :timestamp WHERE id = :id")
+    void softDelete(long id, long timestamp);
 
     @Query("SELECT * FROM registros WHERE loteId = :loteId AND deleted = 0 ORDER BY dataRegistro ASC")
     List<RegistroEntity> getRegistrosPorLote(long loteId);

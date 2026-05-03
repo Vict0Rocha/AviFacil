@@ -1,12 +1,18 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.database;
 
 import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 import android.content.Context;
+import com.example.avifacil.data.local.dao.AvicultorDao;
+import com.example.avifacil.data.local.dao.LoteDao;
+import com.example.avifacil.data.local.dao.RegistroDao;
+import com.example.avifacil.data.local.entity.AvicultorEntity;
+import com.example.avifacil.data.local.entity.LoteEntity;
+import com.example.avifacil.data.local.entity.RegistroEntity;
 
-@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 1, exportSchema = false)
+@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 2, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;

@@ -1,9 +1,10 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.entity;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 import java.util.Date;
 
 @Entity(tableName = "lotes",
@@ -28,12 +29,14 @@ public class LoteEntity {
     private StatusLote status = StatusLote.ATIVO;
     private boolean deleted = false;
     private boolean sincronizado = false;
+    private long updatedAt;
 
     public LoteEntity(long avicultorId, String numeroLote, Date dataInicio, int quantidadeAvesInicial) {
         this.avicultorId = avicultorId;
         this.numeroLote = numeroLote;
         this.dataInicio = dataInicio;
         this.quantidadeAvesInicial = quantidadeAvesInicial;
+        this.updatedAt = System.currentTimeMillis();
     }
 
     // Getters and Setters
@@ -53,4 +56,6 @@ public class LoteEntity {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public boolean isSincronizado() { return sincronizado; }
     public void setSincronizado(boolean sincronizado) { this.sincronizado = sincronizado; }
+    public long getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
 }

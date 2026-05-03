@@ -1,4 +1,4 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.entity;
 
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
@@ -12,10 +12,12 @@ public class AvicultorEntity {
     private String email;
     private boolean deleted = false;
     private boolean sincronizado = false;
+    private long updatedAt;
 
     public AvicultorEntity(String nome, String email) {
         this.nome = nome;
         this.email = email;
+        this.updatedAt = System.currentTimeMillis();
     }
 
     // Getters and Setters
@@ -29,4 +31,6 @@ public class AvicultorEntity {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public boolean isSincronizado() { return sincronizado; }
     public void setSincronizado(boolean sincronizado) { this.sincronizado = sincronizado; }
+    public long getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
 }

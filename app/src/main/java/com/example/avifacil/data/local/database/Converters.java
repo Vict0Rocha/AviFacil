@@ -1,6 +1,7 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.database;
 
 import androidx.room.TypeConverter;
+import com.example.avifacil.data.local.entity.StatusLote;
 import java.util.Date;
 
 public class Converters {

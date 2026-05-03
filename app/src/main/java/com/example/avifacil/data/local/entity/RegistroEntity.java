@@ -1,4 +1,4 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.entity;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -28,12 +28,14 @@ public class RegistroEntity {
     private String observacoes;
     private boolean deleted = false;
     private boolean sincronizado = false;
+    private long updatedAt;
 
     public RegistroEntity(long loteId, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo) {
         this.loteId = loteId;
         this.dataRegistro = dataRegistro;
         this.avesMortasPeriodo = avesMortasPeriodo;
         this.consumoRacaoPeriodo = consumoRacaoPeriodo;
+        this.updatedAt = System.currentTimeMillis();
     }
 
     // Getters and Setters
@@ -53,4 +55,6 @@ public class RegistroEntity {
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public boolean isSincronizado() { return sincronizado; }
     public void setSincronizado(boolean sincronizado) { this.sincronizado = sincronizado; }
+    public long getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(long updatedAt) { this.updatedAt = updatedAt; }
 }

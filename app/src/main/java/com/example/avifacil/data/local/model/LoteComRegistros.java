@@ -1,7 +1,9 @@
-package com.example.avifacil;
+package com.example.avifacil.data.local.model;
 
 import androidx.room.Embedded;
 import androidx.room.Relation;
+import com.example.avifacil.data.local.entity.LoteEntity;
+import com.example.avifacil.data.local.entity.RegistroEntity;
 import java.util.List;
 
 public class LoteComRegistros {

@@ -3,50 +3,50 @@ package com.example.avifacil;
 import android.os.Bundle;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+import com.example.avifacil.data.local.entity.AvicultorEntity;
+import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
     private TextView label;
-    private AppDatabase db;
-    private final ExecutorService executorService = Executors.newSingleThreadExecutor();
+    private AvicultorViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         label = new TextView(this);
-        label.setText("Iniciando teste do Room...");
+        label.setText("Iniciando Arquitetura MVVM...");
         label.setGravity(android.view.Gravity.CENTER);
         label.setTextSize(20);
         setContentView(label);
 
-        db = AppDatabase.getInstance(this);
+        // Inicializa o ViewModel
+        viewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
 
-        testDatabase();
+        // Observa os dados
+        viewModel.getAvicultoresAtivos().observe(this, this::updateUI);
+
+        // Observa erros
+        viewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) label.setText(error);
+        });
+
+        // Testa o fluxo: Salva e carrega
+        viewModel.salvarAvicultor("Victor TCC", "victor@tcc.com");
     }
 
-    private void testDatabase() {
-        executorService.execute(() -> {
-            try {
-                // 1. Inserir um Avicultor (Nova Entidade da Task 03)
-                AvicultorEntity novoAvicultor = new AvicultorEntity("Victor", "victor@example.com");
-                db.avicultorDao().insert(novoAvicultor);
+    private void updateUI(List<AvicultorEntity> lista) {
+        if (lista == null || lista.isEmpty()) {
+            label.setText("Nenhum avicultor encontrado.");
+            return;
+        }
 
-                // 2. Buscar todos os avicultores ativos
-                List<AvicultorEntity> lista = db.avicultorDao().getAllAtivos();
-
-                // 3. Atualizar a UI
-                StringBuilder sb = new StringBuilder("Avicultores no Room:\n");
-                for (AvicultorEntity a : lista) {
-                    sb.append("- ").append(a.getNome()).append(" (").append(a.getEmail()).append(")\n");
-                }
-
-                runOnUiThread(() -> label.setText(sb.toString()));
-            } catch (Exception e) {
-                runOnUiThread(() -> label.setText("Erro no banco: " + e.getMessage()));
-            }
-        });
+        StringBuilder sb = new StringBuilder("Arquitetura MVVM OK!\nAvicultores:\n");
+        for (AvicultorEntity a : lista) {
+            sb.append("- ").append(a.getNome()).append("\n");
+        }
+        label.setText(sb.toString());
     }
 }
