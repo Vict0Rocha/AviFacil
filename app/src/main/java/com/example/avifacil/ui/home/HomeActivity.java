@@ -2,6 +2,7 @@ package com.example.avifacil.ui.home;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
@@ -9,12 +10,11 @@ import com.example.avifacil.R;
 import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.ui.lote.ListaLotesActivity;
-import com.google.android.material.button.MaterialButton;
 
 public class HomeActivity extends AppCompatActivity {
 
     private TextView txtBoasVindas, txtPropriedade;
-    private MaterialButton btnIrParaLotes;
+    private Button btnIrParaLotes;
     private AvicultorViewModel viewModel;
 
     @Override

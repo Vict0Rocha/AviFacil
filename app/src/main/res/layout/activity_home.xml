@@ -3,33 +3,50 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:background="@color/screen_background"
     android:gravity="center"
-    android:padding="24dp"
-    android:background="#FAFAFA">
+    android:orientation="vertical"
+    android:padding="24dp">
 
-    <TextView
-        android:id="@+id/txtBoasVindasHome"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:layout_marginBottom="8dp" />
+        android:background="@drawable/bg_card"
+        android:elevation="2dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="32dp">
 
-    <TextView
-        android:id="@+id/txtNomePropriedadeHome"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="18sp"
-        android:textColor="@color/teal_700"
-        android:layout_marginBottom="32dp" />
+        <TextView
+            android:id="@+id/txtBoasVindasHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:text="Olá, Produtor"
+            android:textColor="@color/main_text"
+            android:textSize="24sp"
+            android:textStyle="bold" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnIrParaLotes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/btn_ver_lotes"
-        android:layout_marginTop="16dp"
-        app:cornerRadius="8dp" />
+        <TextView
+            android:id="@+id/txtNomePropriedadeHome"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="32dp"
+            android:text="Fazenda Exemplo"
+            android:textColor="@color/secondary_text"
+            android:textSize="18sp" />
+
+        <Button
+            android:id="@+id/btnIrParaLotes"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_button_primary"
+            android:text="@string/btn_ver_lotes"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:backgroundTint="@null" />
+
+    </LinearLayout>
+
 </LinearLayout>

@@ -1,10 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
+    <!-- Paleta de Cores AviFacil -->
+    <color name="primary_dark_blue">#0B3B75</color>
+    <color name="secondary_support_blue">#1C4E80</color>
+    <color name="screen_background">#F5F6F8</color>
+    <color name="white">#FFFFFF</color>
+    <color name="main_text">#12304A</color>
+    <color name="secondary_text">#6B7A90</color>
+    <color name="soft_border">#D9DEE7</color>
+    <color name="placeholder">#98A4B5</color>
+    <color name="error_red">#D64545</color>
+    <color name="black">#000000</color>
+
+    <!-- Compatibilidade -->
+    <color name="purple_200">#0B3B75</color>
+    <color name="purple_500">#0B3B75</color>
+    <color name="purple_700">#0B3B75</color>
+    <color name="teal_200">#1C4E80</color>
+    <color name="teal_700">#1C4E80</color>
 </resources>

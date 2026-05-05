@@ -18,6 +18,7 @@ public class CadastroAvicultorActivity extends AppCompatActivity {
     private TextInputEditText editNome, editEmail, editPropriedade;
     private TextInputLayout inputLayoutNome, inputLayoutPropriedade;
     private Button btnSalvar;
+    private android.widget.ScrollView scrollView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +26,7 @@ public class CadastroAvicultorActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastro_avicultor);
 
         // Inicialização dos componentes com os novos IDs
+        scrollView = findViewById(R.id.scrollViewCadastro);
         editNome = findViewById(R.id.editNomeAvicultor);
         editEmail = findViewById(R.id.editEmailAvicultor);
         editPropriedade = findViewById(R.id.editPropriedadeAvicultor);

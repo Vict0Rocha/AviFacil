@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">AviFacil</string>
-    <string name="title_cadastro_avicultor">Bem-vindo ao AviFacil</string>
-    <string name="subtitle_cadastro_avicultor">Para começar, cadastre o produtor</string>
-    <string name="hint_nome_avicultor">Nome do Avicultor</string>
-    <string name="hint_email_opcional">E-mail (opcional)</string>
-    <string name="hint_nome_propriedade">Nome da Propriedade</string>
-    <string name="btn_salvar_cadastro">SALVAR CADASTRO</string>
+    <string name="title_cadastro_avicultor">Cadastro do Produtor</string>
+    <string name="subtitle_cadastro_avicultor">Preencha as informações abaixo para começar.</string>
+    <string name="label_nome_avicultor">Nome do Avicultor *</string>
+    <string name="label_email_opcional">E-mail (Opcional)</string>
+    <string name="label_nome_propriedade">Nome da Propriedade *</string>
+    <string name="label_campos_obrigatorios">* Campos obrigatórios</string>
+    <string name="btn_salvar">SALVAR</string>
     <string name="msg_erro_nome">Informe o nome do produtor</string>
     <string name="msg_erro_propriedade">Informe o nome da propriedade</string>
     <string name="msg_sucesso_cadastro">Cadastro salvo com sucesso</string>
@@ -27,6 +28,9 @@
     <string name="empty_lotes_message">Nenhum lote cadastrado.\nClique no botão abaixo para começar.</string>
     <string name="label_quantidade">Qtd: %1$d aves</string>
     <string name="label_data_inicio">Início: %1$s</string>
+    <string name="hint_ex_lote">Ex: Lote 2024-01</string>
+    <string name="hint_formato_data">DD/MM/AAAA</string>
+    <string name="hint_zero">0</string>
 
     <!-- Registros Diários -->
     <string name="title_lista_registros">Registros do Lote</string>

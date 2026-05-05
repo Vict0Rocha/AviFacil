@@ -1,9 +1,16 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.AviFacil" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">#2E7D32</item>
-        <item name="colorPrimaryVariant">#005005</item>
+        <!-- Primary brand color. -->
+        <item name="colorPrimary">@color/primary_dark_blue</item>
+        <item name="colorPrimaryVariant">@color/secondary_support_blue</item>
         <item name="colorOnPrimary">@color/white</item>
-        <item name="colorSecondary">#00796B</item>
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
+        <!-- Secondary brand color. -->
+        <item name="colorSecondary">@color/secondary_support_blue</item>
+        <item name="colorSecondaryVariant">@color/primary_dark_blue</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <!-- Status bar color. -->
+        <item name="android:statusBarColor">@color/primary_dark_blue</item>
+        <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/screen_background</item>
     </style>
 </resources>
