@@ -7,7 +7,7 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.AppCompat.Light">
+        android:theme="@style/Theme.AviFacil">
 
         <activity
             android:name=".MainActivity"
@@ -20,6 +20,28 @@
 
         <activity
             android:name=".ui.avicultor.CadastroAvicultorActivity"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:label="AviFacil - Home" />
+
+        <activity
+            android:name=".ui.lote.ListaLotesActivity"
+            android:label="@string/title_lista_lotes" />
+
+        <activity
+            android:name=".ui.lote.CadastroLoteActivity"
+            android:label="@string/title_cadastro_lote"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".ui.registro.ListaRegistrosActivity"
+            android:label="@string/title_lista_registros" />
+
+        <activity
+            android:name=".ui.registro.CadastroRegistroActivity"
+            android:label="@string/title_cadastro_registro"
             android:windowSoftInputMode="adjustResize" />
 
     </application>

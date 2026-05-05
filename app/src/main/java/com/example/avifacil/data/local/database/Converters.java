@@ -22,6 +22,11 @@ public class Converters {
 
     @TypeConverter
     public static StatusLote toStatus(String status) {
-        return status == null ? null : StatusLote.valueOf(status);
+        if (status == null) return null;
+        try {
+            return StatusLote.valueOf(status);
+        } catch (Exception e) {
+            return StatusLote.ATIVO; // Retorno padrão em caso de erro
+        }
     }
 }

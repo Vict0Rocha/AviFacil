@@ -11,54 +11,76 @@ import com.example.avifacil.ui.avicultor.CadastroAvicultorActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import java.util.List;
 
+import com.example.avifacil.ui.home.HomeActivity;
+
 public class MainActivity extends AppCompatActivity {
-    private TextView txtBoasVindas;
-    private TextView txtStatus;
     private AvicultorViewModel viewModel;
+    private boolean transitionStarted = false;
+    private final android.os.Handler handler = new android.os.Handler();
+    private final Runnable timeoutRunnable = () -> {
+        if (!transitionStarted) {
+            android.util.Log.e("AviFacil", "Timeout: Banco de dados não respondeu. Indo para cadastro.");
+            navigateToCadastro();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Layout simples provisório para a Home
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(50, 50, 50, 50);
-        layout.setGravity(android.view.Gravity.CENTER);
-
-        txtBoasVindas = new TextView(this);
-        txtBoasVindas.setTextSize(24);
-        txtBoasVindas.setGravity(android.view.Gravity.CENTER);
-        layout.addView(txtBoasVindas);
-
-        txtStatus = new TextView(this);
-        txtStatus.setText(R.string.next_step_lotes);
-        txtStatus.setGravity(android.view.Gravity.CENTER);
-        layout.addView(txtStatus);
-
-        setContentView(layout);
+        setContentView(R.layout.activity_main);
 
         viewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
 
-        // Observa a lista de avicultores para decidir o fluxo
-        viewModel.getAvicultoresAtivos().observe(this, this::checkFlow);
+        // Agenda o escape de segurança para 4 segundos
+        handler.postDelayed(timeoutRunnable, 4000);
+
+        viewModel.getAvicultoresAtivos().observe(this, avicultores -> {
+            if (avicultores != null && !transitionStarted) {
+                checkFlow(avicultores);
+            }
+        });
         
-        // Carrega os dados iniciais
+        viewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) {
+                android.widget.Toast.makeText(this, error, android.widget.Toast.LENGTH_LONG).show();
+                // Se houver erro, tenta ir para o cadastro após o Toast
+                handler.postDelayed(this::navigateToCadastro, 2000);
+            }
+        });
+        
         viewModel.carregarAvicultores();
     }
 
     private void checkFlow(List<AvicultorEntity> avicultores) {
-        if (avicultores == null) return;
-
         if (avicultores.isEmpty()) {
-            // Caso 1: NÃO existe avicultor -> Ir para Cadastro
-            Intent intent = new Intent(this, CadastroAvicultorActivity.class);
-            startActivity(intent);
-            finish();
+            navigateToCadastro();
         } else {
-            // Caso 2: EXISTE avicultor -> Mostrar Boas-vindas
-            AvicultorEntity avicultor = avicultores.get(0);
-            txtBoasVindas.setText(getString(R.string.welcome_message, avicultor.getNome(), avicultor.getNomePropriedade()));
+            navigateToHome();
         }
     }
+
+    private void navigateToCadastro() {
+        if (transitionStarted) return;
+        transitionStarted = true;
+        handler.removeCallbacks(timeoutRunnable);
+        Intent intent = new Intent(this, CadastroAvicultorActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    private void navigateToHome() {
+        if (transitionStarted) return;
+        transitionStarted = true;
+        handler.removeCallbacks(timeoutRunnable);
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        handler.removeCallbacks(timeoutRunnable);
+        super.onDestroy();
+    }
 }
+

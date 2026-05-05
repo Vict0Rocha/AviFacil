@@ -12,7 +12,7 @@ import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.data.local.entity.LoteEntity;
 import com.example.avifacil.data.local.entity.RegistroEntity;
 
-@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 2, exportSchema = false)
+@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 6, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
@@ -26,8 +26,9 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
                     instance = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "avifacil_db")
+                            AppDatabase.class, "avifacil_base_v1")
                             .fallbackToDestructiveMigration()
+                            .fallbackToDestructiveMigrationOnDowngrade()
                             .build();
                 }
             }

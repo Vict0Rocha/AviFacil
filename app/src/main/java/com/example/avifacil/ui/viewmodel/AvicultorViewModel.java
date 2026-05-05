@@ -6,7 +6,6 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import com.example.avifacil.R;
-import com.example.avifacil.R;
 import com.example.avifacil.data.local.database.AppDatabase;
 import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.data.repository.AvicultorRepository;
@@ -44,9 +43,13 @@ public class AvicultorViewModel extends AndroidViewModel {
     public void carregarAvicultores() {
         executorService.execute(() -> {
             try {
-                avicultoresAtivos.postValue(repository.getAllAtivos());
+                List<AvicultorEntity> lista = repository.getAllAtivos();
+                avicultoresAtivos.postValue(lista);
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar avicultores: " + e.getMessage());
+                errorMessage.postValue("Erro ao carregar: " + e.getMessage());
+                // Em caso de erro crítico no banco, enviamos uma lista vazia 
+                // para que o app siga para a tela de cadastro e tente se recuperar
+                avicultoresAtivos.postValue(new java.util.ArrayList<>());
             }
         });
     }

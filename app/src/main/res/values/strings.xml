@@ -9,6 +9,38 @@
     <string name="msg_erro_nome">Informe o nome do produtor</string>
     <string name="msg_erro_propriedade">Informe o nome da propriedade</string>
     <string name="msg_sucesso_cadastro">Cadastro salvo com sucesso</string>
-    <string name="welcome_message">Bem-vindo, %1$s!\n%2$s</string>
-    <string name="next_step_lotes">Próximo passo: cadastrar lotes (Em breve)</string>
+    <string name="welcome_message">Bem-vindo, %1$s!</string>
+    <string name="next_step_lotes">Próximo passo: cadastrar lotes</string>
+    <string name="btn_ver_lotes">VER LOTES</string>
+
+    <!-- Lotes -->
+    <string name="title_lista_lotes">Meus Lotes</string>
+    <string name="title_cadastro_lote">Novo Lote</string>
+    <string name="hint_numero_lote">Número do Lote</string>
+    <string name="hint_data_inicio">Data de Início</string>
+    <string name="hint_quantidade_inicial">Quantidade Inicial de Aves</string>
+    <string name="btn_criar_lote">CRIAR LOTE</string>
+    <string name="msg_erro_numero_lote">Informe o número do lote</string>
+    <string name="msg_erro_qtd_inicial">Informe a quantidade inicial</string>
+    <string name="msg_erro_lote_existe">Este número de lote já existe</string>
+    <string name="msg_sucesso_lote">Lote criado com sucesso</string>
+    <string name="empty_lotes_message">Nenhum lote cadastrado.\nClique no botão abaixo para começar.</string>
+    <string name="label_quantidade">Qtd: %1$d aves</string>
+    <string name="label_data_inicio">Início: %1$s</string>
+
+    <!-- Registros Diários -->
+    <string name="title_lista_registros">Registros do Lote</string>
+    <string name="title_cadastro_registro">Novo Registro</string>
+    <string name="hint_data_registro">Data do Registro</string>
+    <string name="hint_aves_mortas">Aves Mortas no Período</string>
+    <string name="hint_consumo_racao">Consumo de Ração (kg)</string>
+    <string name="hint_observacoes">Observações (opcional)</string>
+    <string name="btn_salvar_registro">SALVAR REGISTRO</string>
+    <string name="msg_erro_data">Informe a data do registro</string>
+    <string name="msg_erro_mortas">Informe a quantidade de aves mortas</string>
+    <string name="msg_erro_consumo">Informe o consumo de ração</string>
+    <string name="msg_sucesso_registro">Registro salvo com sucesso</string>
+    <string name="empty_registros_message">Nenhum registro para este lote.\nClique no botão abaixo para adicionar.</string>
+    <string name="label_mortas">Mortas: %1$d</string>
+    <string name="label_consumo">Consumo: %1$.2f kg</string>
 </resources>

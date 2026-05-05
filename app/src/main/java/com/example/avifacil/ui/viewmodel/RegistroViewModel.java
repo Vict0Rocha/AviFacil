@@ -50,7 +50,7 @@ public class RegistroViewModel extends AndroidViewModel {
         });
     }
 
-    public void adicionarRegistro(long loteId, Date data, int mortas, double racao) {
+    public void adicionarRegistro(long loteId, Date data, int mortas, double racao, String observacoes) {
         executorService.execute(() -> {
             try {
                 if (repository.existeRegistroNaData(loteId, data)) {
@@ -58,6 +58,7 @@ public class RegistroViewModel extends AndroidViewModel {
                     return;
                 }
                 RegistroEntity registro = new RegistroEntity(loteId, data, mortas, racao);
+                registro.setObservacoes(observacoes);
                 repository.insert(registro);
                 successMessage.postValue(true);
                 carregarRegistros(loteId);
