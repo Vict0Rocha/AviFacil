@@ -32,6 +32,10 @@ public class RegistroRepository {
         return registroDao.getRegistrosPorLote(loteId);
     }
 
+    public RegistroEntity getById(long id) {
+        return registroDao.getById(id);
+    }
+
     public RegistroEntity getUltimoRegistro(long loteId) {
         return registroDao.getUltimoRegistro(loteId);
     }

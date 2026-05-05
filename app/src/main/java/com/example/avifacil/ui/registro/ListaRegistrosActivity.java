@@ -45,27 +45,14 @@ public class ListaRegistrosActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
         com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
-        com.example.avifacil.ui.viewmodel.AvicultorViewModel avicultorViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.AvicultorViewModel.class);
 
-        avicultorViewModel.getAvicultoresAtivos().observe(this, avicultores -> {
-            if (avicultores != null && !avicultores.isEmpty()) {
-                loteViewModel.carregarLotes(avicultores.get(0).getId());
-            }
-        });
-
-        loteViewModel.getLotesAtivos().observe(this, lotes -> {
-            if (lotes != null) {
-                for (com.example.avifacil.data.local.entity.LoteEntity lote : lotes) {
-                    if (lote.getId() == loteId) {
-                        dataInicioLote = lote.getDataInicio();
-                        isLoteAtivo = (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO);
-                        fab.setVisibility(isLoteAtivo ? View.VISIBLE : View.GONE);
-                        
-                        // Atualizar lista para garantir que a idade seja calculada com a data certa
-                        viewModel.carregarRegistros(loteId);
-                        break;
-                    }
-                }
+        loteViewModel.getLoteAtual().observe(this, lote -> {
+            if (lote != null) {
+                dataInicioLote = lote.getDataInicio();
+                isLoteAtivo = (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO);
+                fab.setVisibility(isLoteAtivo ? View.VISIBLE : View.GONE);
+                adapter.setLoteAtivo(isLoteAtivo);
+                viewModel.carregarRegistros(loteId);
             }
         });
 
@@ -85,9 +72,38 @@ public class ListaRegistrosActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        adapter.setOnRegistroClickListener(new RegistroAdapter.OnRegistroClickListener() {
+            @Override
+            public void onEdit(com.example.avifacil.data.local.entity.RegistroEntity registro) {
+                if (isLoteAtivo) {
+                    Intent intent = new Intent(ListaRegistrosActivity.this, CadastroRegistroActivity.class);
+                    intent.putExtra("REGISTRO_ID", registro.getId());
+                    intent.putExtra("LOTE_ID", loteId);
+                    startActivity(intent);
+                }
+            }
+
+            @Override
+            public void onDelete(com.example.avifacil.data.local.entity.RegistroEntity registro) {
+                if (isLoteAtivo) {
+                    mostrarDialogoExclusao(registro);
+                }
+            }
+        });
+
         // Carregar dados iniciais
-        avicultorViewModel.carregarAvicultores();
-        viewModel.carregarRegistros(loteId);
+        loteViewModel.carregarLote(loteId);
+    }
+
+    private void mostrarDialogoExclusao(com.example.avifacil.data.local.entity.RegistroEntity registro) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(R.string.dialog_excluir_registro_title)
+                .setMessage(R.string.dialog_excluir_registro_msg)
+                .setPositiveButton(R.string.btn_confirmar, (dialog, which) -> {
+                    viewModel.excluirRegistro(registro.getId());
+                })
+                .setNegativeButton(R.string.btn_cancelar, null)
+                .show();
     }
 
     @Override

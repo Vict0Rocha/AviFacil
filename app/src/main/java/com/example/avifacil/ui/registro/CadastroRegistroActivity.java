@@ -17,12 +17,16 @@ import java.util.Locale;
 
 public class CadastroRegistroActivity extends AppCompatActivity {
 
-    private TextInputEditText editData, editMortas, editConsumo, editObs;
+    private TextInputEditText editData, editMortas, editConsumo, editPeso, editObs;
+    private com.google.android.material.textfield.TextInputLayout layoutData, layoutMortas, layoutConsumo, layoutPeso;
     private MaterialButton btnSalvar;
     private RegistroViewModel viewModel;
+    private com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel;
     private Calendar calendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private long loteId = -1;
+    private long registroId = -1;
+    private Date dataAlojamento;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,25 +34,74 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastro_registro);
 
         loteId = getIntent().getLongExtra("LOTE_ID", -1);
-        if (loteId == -1) {
+        registroId = getIntent().getLongExtra("REGISTRO_ID", -1);
+
+        if (loteId == -1 && registroId == -1) {
             finish();
             return;
         }
 
+        initViews();
+
+        viewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
+        loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
+
+        // Busca data de alojamento do lote para validação
+        loteViewModel.getLoteAtual().observe(this, lote -> {
+            if (lote != null) {
+                dataAlojamento = lote.getDataInicio();
+                if (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ENCERRADO) {
+                    desabilitarEdicao();
+                }
+            }
+        });
+
+        if (registroId != -1) {
+            android.widget.TextView txtTitle = findViewById(R.id.txtTitleCadastroRegistro);
+            if (txtTitle != null) txtTitle.setText(R.string.title_edit_registro);
+            viewModel.carregarRegistro(registroId);
+        }
+
+        // Se tivermos o loteId, carregamos o lote para pegar a data de alojamento
+        if (loteId != -1) {
+            loteViewModel.carregarLote(loteId);
+        }
+
+        editData.setOnClickListener(v -> showDatePicker());
+        btnSalvar.setOnClickListener(v -> salvarRegistro());
+
+        observeViewModel();
+    }
+
+    private void initViews() {
         editData = findViewById(R.id.editDataRegistro);
         editMortas = findViewById(R.id.editMortas);
         editConsumo = findViewById(R.id.editConsumo);
+        editPeso = findViewById(R.id.editPesoAtual);
         editObs = findViewById(R.id.editObs);
         btnSalvar = findViewById(R.id.btnSalvarRegistro);
 
-        viewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
-
-        editData.setOnClickListener(v -> showDatePicker());
+        layoutData = findViewById(R.id.inputLayoutDataRegistro);
+        layoutMortas = findViewById(R.id.inputLayoutMortas);
+        layoutConsumo = findViewById(R.id.inputLayoutConsumo);
+        layoutPeso = findViewById(R.id.inputLayoutPesoAtual);
         
-        // Preenche com data atual por padrão
         atualizarLabelData();
+    }
 
-        btnSalvar.setOnClickListener(v -> salvarRegistro());
+    private void observeViewModel() {
+        viewModel.getRegistroParaEdicao().observe(this, registro -> {
+            if (registro != null) {
+                loteId = registro.getLoteId();
+                loteViewModel.carregarLote(loteId); // Carrega o lote do registro para validação de data
+                calendar.setTime(registro.getDataRegistro());
+                atualizarLabelData();
+                editMortas.setText(String.valueOf(registro.getAvesMortasPeriodo()));
+                editConsumo.setText(String.valueOf(registro.getConsumoRacaoPeriodo()));
+                editPeso.setText(String.valueOf(registro.getPesoAtualMedio()));
+                editObs.setText(registro.getObservacoes());
+            }
+        });
 
         viewModel.getSuccessAction().observe(this, success -> {
             if (success != null && success) {
@@ -77,25 +130,59 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         editData.setText(dateFormat.format(calendar.getTime()));
     }
 
+    private void desabilitarEdicao() {
+        editData.setEnabled(false);
+        editMortas.setEnabled(false);
+        editConsumo.setEnabled(false);
+        editPeso.setEnabled(false);
+        editObs.setEnabled(false);
+        btnSalvar.setVisibility(android.view.View.GONE);
+        Toast.makeText(this, "Lote encerrado. Não é possível alterar registros.", Toast.LENGTH_SHORT).show();
+    }
+
     private void salvarRegistro() {
         String mortasStr = editMortas.getText().toString().trim();
         String consumoStr = editConsumo.getText().toString().trim();
+        String pesoStr = editPeso.getText().toString().trim();
         String obs = editObs.getText().toString().trim();
+        Date data = calendar.getTime();
+
+        if (dataAlojamento != null && data.before(dataAlojamento)) {
+            layoutData.setError(getString(R.string.msg_erro_data_lote, dateFormat.format(dataAlojamento)));
+            return;
+        } else {
+            layoutData.setError(null);
+        }
 
         if (mortasStr.isEmpty()) {
-            editMortas.setError(getString(R.string.msg_erro_mortas));
+            layoutMortas.setError(getString(R.string.msg_erro_mortas));
             return;
+        } else {
+            layoutMortas.setError(null);
+        }
+
+        if (pesoStr.isEmpty()) {
+            layoutPeso.setError(getString(R.string.msg_erro_peso_atual));
+            return;
+        } else {
+            layoutPeso.setError(null);
         }
 
         if (consumoStr.isEmpty()) {
-            editConsumo.setError(getString(R.string.msg_erro_consumo));
+            layoutConsumo.setError(getString(R.string.msg_erro_consumo));
             return;
+        } else {
+            layoutConsumo.setError(null);
         }
 
         int mortas = Integer.parseInt(mortasStr);
         double consumo = Double.parseDouble(consumoStr);
-        Date data = calendar.getTime();
+        double peso = Double.parseDouble(pesoStr);
 
-        viewModel.adicionarRegistro(loteId, data, mortas, consumo, obs);
+        if (registroId == -1) {
+            viewModel.adicionarRegistro(loteId, data, mortas, consumo, peso, obs);
+        } else {
+            viewModel.editarRegistro(registroId, data, mortas, consumo, peso, obs);
+        }
     }
 }

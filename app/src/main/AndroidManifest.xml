@@ -44,6 +44,10 @@
             android:label="@string/title_cadastro_registro"
             android:windowSoftInputMode="adjustResize" />
 
+        <activity
+            android:name=".ui.lote.DetalheLoteActivity"
+            android:label="@string/title_detalhe_lote" />
+
     </application>
 
 </manifest>

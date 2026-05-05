@@ -25,16 +25,18 @@ public class RegistroEntity {
     private Date dataRegistro;
     private int avesMortasPeriodo;
     private double consumoRacaoPeriodo;
+    private double pesoAtualMedio;
     private String observacoes;
     private boolean deleted = false;
     private boolean sincronizado = false;
     private long updatedAt;
 
-    public RegistroEntity(long loteId, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo) {
+    public RegistroEntity(long loteId, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo, double pesoAtualMedio) {
         this.loteId = loteId;
         this.dataRegistro = dataRegistro;
         this.avesMortasPeriodo = avesMortasPeriodo;
         this.consumoRacaoPeriodo = consumoRacaoPeriodo;
+        this.pesoAtualMedio = pesoAtualMedio;
         this.updatedAt = System.currentTimeMillis();
     }
 
@@ -49,6 +51,8 @@ public class RegistroEntity {
     public void setAvesMortasPeriodo(int avesMortasPeriodo) { this.avesMortasPeriodo = avesMortasPeriodo; }
     public double getConsumoRacaoPeriodo() { return consumoRacaoPeriodo; }
     public void setConsumoRacaoPeriodo(double consumoRacaoPeriodo) { this.consumoRacaoPeriodo = consumoRacaoPeriodo; }
+    public double getPesoAtualMedio() { return pesoAtualMedio; }
+    public void setPesoAtualMedio(double pesoAtualMedio) { this.pesoAtualMedio = pesoAtualMedio; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     public boolean isDeleted() { return deleted; }

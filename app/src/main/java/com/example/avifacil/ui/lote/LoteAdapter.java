@@ -48,6 +48,11 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
         holder.txtData.setText(dateFormat.format(lote.getDataInicio()));
         holder.txtQtd.setText(holder.itemView.getContext().getString(R.string.label_quantidade, lote.getQuantidadeAvesInicial()));
         
+        // Exibir Galpão no item da lista para facilitar identificação
+        if (lote.getGalpao() != null && !lote.getGalpao().isEmpty()) {
+            holder.txtLinhagem.setText(holder.itemView.getContext().getString(R.string.label_linhagem_galpao, lote.getLinhagem(), lote.getGalpao()));
+        }
+
         if (lote.getStatus() != null) {
             holder.txtStatus.setText(lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO ? 
                 holder.itemView.getContext().getString(R.string.status_ativo) : 

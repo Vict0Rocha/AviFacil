@@ -17,11 +17,27 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
 
     private List<RegistroEntity> registros = new ArrayList<>();
     private java.util.Date dataInicioLote;
+    private boolean isLoteAtivo = true;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+    private OnRegistroClickListener listener;
+
+    public interface OnRegistroClickListener {
+        void onEdit(RegistroEntity registro);
+        void onDelete(RegistroEntity registro);
+    }
+
+    public void setOnRegistroClickListener(OnRegistroClickListener listener) {
+        this.listener = listener;
+    }
 
     public void setRegistros(List<RegistroEntity> registros, java.util.Date dataInicioLote) {
         this.registros = registros;
         this.dataInicioLote = dataInicioLote;
+        notifyDataSetChanged();
+    }
+
+    public void setLoteAtivo(boolean ativo) {
+        this.isLoteAtivo = ativo;
         notifyDataSetChanged();
     }
 
@@ -54,6 +70,15 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
         } else {
             holder.txtObs.setVisibility(View.GONE);
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onEdit(registro);
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) listener.onDelete(registro);
+            return true;
+        });
     }
 
     @Override

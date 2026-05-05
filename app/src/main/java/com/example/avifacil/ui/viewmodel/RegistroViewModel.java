@@ -21,6 +21,8 @@ public class RegistroViewModel extends AndroidViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> successMessage = new MutableLiveData<>();
 
+    private final MutableLiveData<RegistroEntity> registroParaEdicao = new MutableLiveData<>();
+
     public RegistroViewModel(@NonNull Application application) {
         super(application);
         AppDatabase db = AppDatabase.getInstance(application);
@@ -30,6 +32,10 @@ public class RegistroViewModel extends AndroidViewModel {
 
     public LiveData<List<RegistroEntity>> getRegistrosLote() {
         return registrosLote;
+    }
+
+    public LiveData<RegistroEntity> getRegistroParaEdicao() {
+        return registroParaEdicao;
     }
 
     public LiveData<String> getErrorMessage() {
@@ -50,20 +56,70 @@ public class RegistroViewModel extends AndroidViewModel {
         });
     }
 
-    public void adicionarRegistro(long loteId, Date data, int mortas, double racao, String observacoes) {
+    public void carregarRegistro(long id) {
+        executorService.execute(() -> {
+            try {
+                registroParaEdicao.postValue(repository.getById(id));
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao carregar registro: " + e.getMessage());
+            }
+        });
+    }
+
+    public void adicionarRegistro(long loteId, Date data, int mortas, double racao, double peso, String observacoes) {
         executorService.execute(() -> {
             try {
                 if (repository.existeRegistroNaData(loteId, data)) {
                     errorMessage.postValue("Já existe um registro para esta data");
                     return;
                 }
-                RegistroEntity registro = new RegistroEntity(loteId, data, mortas, racao);
+                RegistroEntity registro = new RegistroEntity(loteId, data, mortas, racao, peso);
                 registro.setObservacoes(observacoes);
                 repository.insert(registro);
                 successMessage.postValue(true);
                 carregarRegistros(loteId);
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao salvar registro: " + e.getMessage());
+            }
+        });
+    }
+
+    public void editarRegistro(long id, Date data, int mortas, double racao, double peso, String observacoes) {
+        executorService.execute(() -> {
+            try {
+                RegistroEntity registro = repository.getById(id);
+                if (registro != null) {
+                    // Validação de data única (se mudou a data)
+                    if (!registro.getDataRegistro().equals(data) && repository.existeRegistroNaData(registro.getLoteId(), data)) {
+                        errorMessage.postValue("Já existe um registro para esta nova data");
+                        return;
+                    }
+                    registro.setDataRegistro(data);
+                    registro.setAvesMortasPeriodo(mortas);
+                    registro.setConsumoRacaoPeriodo(racao);
+                    registro.setPesoAtualMedio(peso);
+                    registro.setObservacoes(observacoes);
+                    repository.update(registro);
+                    successMessage.postValue(true);
+                    carregarRegistros(registro.getLoteId());
+                }
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao editar registro: " + e.getMessage());
+            }
+        });
+    }
+
+    public void excluirRegistro(long id) {
+        executorService.execute(() -> {
+            try {
+                RegistroEntity registro = repository.getById(id);
+                if (registro != null) {
+                    repository.softDelete(id);
+                    successMessage.postValue(true);
+                    carregarRegistros(registro.getLoteId());
+                }
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao excluir registro: " + e.getMessage());
             }
         });
     }

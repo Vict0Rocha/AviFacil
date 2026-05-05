@@ -62,4 +62,25 @@
     <string name="label_consumo">Consumo: %1$.2f kg</string>
     <string name="label_idade_lote">Idade: %1$d dias</string>
     <string name="label_taxa_mortalidade">Mortalidade: %1$.2f%%</string>
+    <string name="title_detalhe_lote">Detalhes do Lote</string>
+    <string name="label_lote_numero">Lote: %1$s</string>
+    <string name="label_info_geral">Informações Gerais</string>
+    <string name="label_indicadores">Indicadores de Desempenho</string>
+    <string name="label_aves_vivas">Aves Vivas</string>
+    <string name="label_viabilidade">Viabilidade</string>
+    <string name="label_ca">C.A. (Conversão)</string>
+    <string name="label_mortalidade_simples">Mortalidade</string>
+    <string name="label_linhagem_galpao">%1$s - %2$s</string>
+    <string name="label_peso_medio_unidade">Peso Médio (g)</string>
+    <string name="label_peso_inicial_unidade">Peso Inicial (g)</string>
+    <string name="label_peso_medio">Peso Médio Atual</string>
+    <string name="label_total_consumo">Total Ração Consumida</string>
+    <string name="btn_gerenciar_registros">GERENCIAR REGISTROS</string>
+    <string name="hint_peso_atual">Peso Médio Atual (g) *</string>
+    <string name="msg_erro_peso_atual">Informe o peso médio atual</string>
+    <string name="msg_confirm_delete_registro">Deseja excluir este registro? Esta ação removerá o registro da lista.</string>
+    <string name="title_edit_registro">Editar Registro</string>
+    <string name="msg_erro_data_lote">A data não pode ser anterior ao alojamento do lote (%1$s)</string>
+    <string name="dialog_excluir_registro_title">Excluir Registro</string>
+    <string name="dialog_excluir_registro_msg">Deseja realmente excluir este registro? Esta ação não pode ser desfeita.</string>
 </resources>

@@ -21,6 +21,8 @@ public class LoteViewModel extends AndroidViewModel {
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> successMessage = new MutableLiveData<>();
 
+    private final MutableLiveData<LoteEntity> loteAtual = new MutableLiveData<>();
+
     public LoteViewModel(@NonNull Application application) {
         super(application);
         AppDatabase db = AppDatabase.getInstance(application);
@@ -38,6 +40,20 @@ public class LoteViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getSuccessAction() {
         return successMessage;
+    }
+
+    public LiveData<LoteEntity> getLoteAtual() {
+        return loteAtual;
+    }
+
+    public void carregarLote(long id) {
+        executorService.execute(() -> {
+            try {
+                loteAtual.postValue(repository.getById(id));
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao carregar lote: " + e.getMessage());
+            }
+        });
     }
 
     public void carregarLotes(long avicultorId) {
