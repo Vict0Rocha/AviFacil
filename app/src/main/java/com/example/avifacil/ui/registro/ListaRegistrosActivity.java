@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -20,6 +19,8 @@ public class ListaRegistrosActivity extends AppCompatActivity {
     private TextView txtEmpty;
     private long loteId = -1;
     private String numeroLote = "";
+    private boolean isLoteAtivo = true;
+    private java.util.Date dataInicioLote;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +35,6 @@ public class ListaRegistrosActivity extends AppCompatActivity {
             return;
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbarRegistros);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            getSupportActionBar().setTitle(getString(R.string.title_lista_registros) + ": " + numeroLote);
-        }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
         RecyclerView recyclerView = findViewById(R.id.recyclerRegistros);
         txtEmpty = findViewById(R.id.txtEmptyRegistros);
         FloatingActionButton fab = findViewById(R.id.fabAddRegistro);
@@ -51,14 +44,38 @@ public class ListaRegistrosActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
-        
+        com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
+        com.example.avifacil.ui.viewmodel.AvicultorViewModel avicultorViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.AvicultorViewModel.class);
+
+        avicultorViewModel.getAvicultoresAtivos().observe(this, avicultores -> {
+            if (avicultores != null && !avicultores.isEmpty()) {
+                loteViewModel.carregarLotes(avicultores.get(0).getId());
+            }
+        });
+
+        loteViewModel.getLotesAtivos().observe(this, lotes -> {
+            if (lotes != null) {
+                for (com.example.avifacil.data.local.entity.LoteEntity lote : lotes) {
+                    if (lote.getId() == loteId) {
+                        dataInicioLote = lote.getDataInicio();
+                        isLoteAtivo = (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO);
+                        fab.setVisibility(isLoteAtivo ? View.VISIBLE : View.GONE);
+                        
+                        // Atualizar lista para garantir que a idade seja calculada com a data certa
+                        viewModel.carregarRegistros(loteId);
+                        break;
+                    }
+                }
+            }
+        });
+
         viewModel.getRegistrosLote().observe(this, registros -> {
             if (registros == null || registros.isEmpty()) {
                 txtEmpty.setVisibility(View.VISIBLE);
-                adapter.setRegistros(new java.util.ArrayList<>());
+                adapter.setRegistros(new java.util.ArrayList<>(), dataInicioLote);
             } else {
                 txtEmpty.setVisibility(View.GONE);
-                adapter.setRegistros(registros);
+                adapter.setRegistros(registros, dataInicioLote);
             }
         });
 
@@ -68,6 +85,8 @@ public class ListaRegistrosActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+        // Carregar dados iniciais
+        avicultorViewModel.carregarAvicultores();
         viewModel.carregarRegistros(loteId);
     }
 

@@ -50,7 +50,7 @@ public class LoteViewModel extends AndroidViewModel {
         });
     }
 
-    public void criarLote(long avicultorId, String numero, Date inicio, int qtdInicial) {
+    public void criarLote(long avicultorId, String numero, String linhagem, String galpao, Date inicio, int qtdInicial, double pesoInicial, String observacoes) {
         if (numero == null || numero.trim().isEmpty()) {
             errorMessage.setValue("Número do lote é obrigatório");
             return;
@@ -61,12 +61,25 @@ public class LoteViewModel extends AndroidViewModel {
                     errorMessage.postValue("Este número de lote já existe para este avicultor");
                     return;
                 }
-                LoteEntity lote = new LoteEntity(avicultorId, numero, inicio, qtdInicial);
+                LoteEntity lote = new LoteEntity(avicultorId, numero, linhagem, galpao, inicio, qtdInicial, pesoInicial, observacoes);
                 repository.insert(lote);
                 successMessage.postValue(true);
                 carregarLotes(avicultorId);
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao criar lote: " + e.getMessage());
+            }
+        });
+    }
+
+    public void encerrarLote(LoteEntity lote) {
+        executorService.execute(() -> {
+            try {
+                lote.setStatus(com.example.avifacil.data.local.entity.StatusLote.ENCERRADO);
+                repository.update(lote);
+                successMessage.postValue(true);
+                carregarLotes(lote.getAvicultorId());
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao encerrar lote: " + e.getMessage());
             }
         });
     }

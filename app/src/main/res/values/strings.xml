@@ -18,19 +18,32 @@
     <string name="title_lista_lotes">Meus Lotes</string>
     <string name="title_cadastro_lote">Novo Lote</string>
     <string name="hint_numero_lote">Número do Lote</string>
-    <string name="hint_data_inicio">Data de Início</string>
-    <string name="hint_quantidade_inicial">Quantidade Inicial de Aves</string>
+    <string name="label_linhagem">Linhagem *</string>
+    <string name="label_galpao">Local / Galpão</string>
+    <string name="hint_data_inicio">Data de Alojamento</string>
+    <string name="hint_quantidade_inicial">Quantidade Inicial de Aves *</string>
+    <string name="label_peso_inicial">Peso Inicial (g) *</string>
+    <string name="label_observacoes">Observações</string>
     <string name="btn_criar_lote">CRIAR LOTE</string>
     <string name="msg_erro_numero_lote">Informe o número do lote</string>
-    <string name="msg_erro_qtd_inicial">Informe a quantidade inicial</string>
+    <string name="msg_erro_linhagem">Informe a linhagem</string>
+    <string name="msg_erro_qtd_inicial">Informe a quantidade inicial (mínimo 1)</string>
+    <string name="msg_erro_peso_inicial">Informe o peso inicial</string>
     <string name="msg_erro_lote_existe">Este número de lote já existe</string>
     <string name="msg_sucesso_lote">Lote criado com sucesso</string>
     <string name="empty_lotes_message">Nenhum lote cadastrado.\nClique no botão abaixo para começar.</string>
-    <string name="label_quantidade">Qtd: %1$d aves</string>
-    <string name="label_data_inicio">Início: %1$s</string>
+    <string name="label_quantidade">%1$d aves</string>
+    <string name="label_data_inicio">Alojamento: %1$s</string>
     <string name="hint_ex_lote">Ex: Lote 2024-01</string>
     <string name="hint_formato_data">DD/MM/AAAA</string>
     <string name="hint_zero">0</string>
+    <string name="btn_encerrar_lote">ENCERRAR LOTE</string>
+    <string name="dialog_encerrar_lote_title">Encerrar Lote</string>
+    <string name="dialog_encerrar_lote_msg">Deseja realmente encerrar este lote? Esta ação não pode ser desfeita.</string>
+    <string name="btn_confirmar">CONFIRMAR</string>
+    <string name="btn_cancelar">CANCELAR</string>
+    <string name="status_ativo">ATIVO</string>
+    <string name="status_encerrado">ENCERRADO</string>
 
     <!-- Registros Diários -->
     <string name="title_lista_registros">Registros do Lote</string>
@@ -47,4 +60,6 @@
     <string name="empty_registros_message">Nenhum registro para este lote.\nClique no botão abaixo para adicionar.</string>
     <string name="label_mortas">Mortas: %1$d</string>
     <string name="label_consumo">Consumo: %1$.2f kg</string>
+    <string name="label_idade_lote">Idade: %1$d dias</string>
+    <string name="label_taxa_mortalidade">Mortalidade: %1$.2f%%</string>
 </resources>

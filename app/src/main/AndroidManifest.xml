@@ -27,7 +27,7 @@
             android:label="AviFacil - Home" />
 
         <activity
-            android:name=".ui.lote.ListaLotesActivity"
+            android:name=".ui.lote.LotesActivity"
             android:label="@string/title_lista_lotes" />
 
         <activity

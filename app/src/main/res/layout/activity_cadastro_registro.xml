@@ -6,16 +6,6 @@
     android:background="@color/screen_background"
     android:orientation="vertical">
 
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/toolbarCadastroRegistro"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/primary_dark_blue"
-        app:navigationIcon="?attr/homeAsUpIndicator"
-        app:navigationIconTint="@color/white"
-        app:title="@string/title_cadastro_registro"
-        app:titleTextColor="@color/white" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"

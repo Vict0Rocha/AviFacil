@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
 import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
-import com.example.avifacil.ui.lote.ListaLotesActivity;
+import com.example.avifacil.ui.lote.LotesActivity;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -27,7 +27,7 @@ public class HomeActivity extends AppCompatActivity {
         btnIrParaLotes = findViewById(R.id.btnIrParaLotes);
 
         btnIrParaLotes.setOnClickListener(v -> {
-            Intent intent = new Intent(HomeActivity.this, ListaLotesActivity.class);
+            Intent intent = new Intent(HomeActivity.this, LotesActivity.class);
             startActivity(intent);
         });
 

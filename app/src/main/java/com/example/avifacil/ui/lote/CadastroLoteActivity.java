@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
 import com.example.avifacil.ui.viewmodel.LoteViewModel;
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import java.text.SimpleDateFormat;
@@ -17,8 +16,8 @@ import java.util.Locale;
 
 public class CadastroLoteActivity extends AppCompatActivity {
 
-    private TextInputLayout layoutNumero, layoutData, layoutQtd;
-    private TextInputEditText editNumero, editData, editQtd;
+    private TextInputLayout layoutNumero, layoutLinhagem, layoutData, layoutQtd, layoutPeso;
+    private TextInputEditText editNumero, editLinhagem, editGalpao, editData, editQtd, editPeso, editObs;
     private LoteViewModel viewModel;
     private Calendar calendar = Calendar.getInstance();
     private long avicultorId;
@@ -45,11 +44,18 @@ public class CadastroLoteActivity extends AppCompatActivity {
 
     private void initViews() {
         layoutNumero = findViewById(R.id.inputLayoutNumeroLote);
+        layoutLinhagem = findViewById(R.id.inputLayoutLinhagem);
         layoutData = findViewById(R.id.inputLayoutDataInicio);
         layoutQtd = findViewById(R.id.inputLayoutQtdAves);
+        layoutPeso = findViewById(R.id.inputLayoutPesoInicial);
+
         editNumero = findViewById(R.id.editNumeroLote);
+        editLinhagem = findViewById(R.id.editLinhagem);
+        editGalpao = findViewById(R.id.editGalpao);
         editData = findViewById(R.id.editDataInicio);
         editQtd = findViewById(R.id.editQtdAves);
+        editPeso = findViewById(R.id.editPesoInicial);
+        editObs = findViewById(R.id.editObservacoes);
 
         updateLabel();
     }
@@ -71,10 +77,15 @@ public class CadastroLoteActivity extends AppCompatActivity {
 
     private void salvarLote() {
         String numero = editNumero.getText().toString().trim();
+        String linhagem = editLinhagem.getText().toString().trim();
+        String galpao = editGalpao.getText().toString().trim();
         String qtdStr = editQtd.getText().toString().trim();
+        String pesoStr = editPeso.getText().toString().trim();
+        String obs = editObs.getText().toString().trim();
         Date dataInicio = calendar.getTime();
 
         boolean isValid = true;
+
         if (numero.isEmpty()) {
             layoutNumero.setError(getString(R.string.msg_erro_numero_lote));
             isValid = false;
@@ -82,22 +93,37 @@ public class CadastroLoteActivity extends AppCompatActivity {
             layoutNumero.setError(null);
         }
 
-        if (qtdStr.isEmpty()) {
+        if (linhagem.isEmpty()) {
+            layoutLinhagem.setError(getString(R.string.msg_erro_linhagem));
+            isValid = false;
+        } else {
+            layoutLinhagem.setError(null);
+        }
+
+        if (qtdStr.isEmpty() || Integer.parseInt(qtdStr) <= 0) {
             layoutQtd.setError(getString(R.string.msg_erro_qtd_inicial));
             isValid = false;
         } else {
             layoutQtd.setError(null);
         }
 
+        if (pesoStr.isEmpty()) {
+            layoutPeso.setError(getString(R.string.msg_erro_peso_inicial));
+            isValid = false;
+        } else {
+            layoutPeso.setError(null);
+        }
+
         if (isValid) {
             int qtd = Integer.parseInt(qtdStr);
-            viewModel.criarLote(avicultorId, numero, dataInicio, qtd);
+            double peso = Double.parseDouble(pesoStr);
+            viewModel.criarLote(avicultorId, numero, linhagem, galpao, dataInicio, qtd, peso, obs);
         }
     }
 
     private void observeViewModel() {
         viewModel.getSuccessAction().observe(this, success -> {
-            if (success) {
+            if (success != null && success) {
                 Toast.makeText(this, R.string.msg_sucesso_lote, Toast.LENGTH_SHORT).show();
                 finish();
             }

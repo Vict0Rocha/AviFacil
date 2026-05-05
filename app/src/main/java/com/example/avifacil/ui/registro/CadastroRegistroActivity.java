@@ -35,13 +35,6 @@ public class CadastroRegistroActivity extends AppCompatActivity {
             return;
         }
 
-        Toolbar toolbar = findViewById(R.id.toolbarCadastroRegistro);
-        setSupportActionBar(toolbar);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        toolbar.setNavigationOnClickListener(v -> onBackPressed());
-
         editData = findViewById(R.id.editDataRegistro);
         editMortas = findViewById(R.id.editMortas);
         editConsumo = findViewById(R.id.editConsumo);

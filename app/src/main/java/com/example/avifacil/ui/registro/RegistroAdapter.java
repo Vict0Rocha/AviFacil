@@ -16,10 +16,12 @@ import java.util.Locale;
 public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.RegistroViewHolder> {
 
     private List<RegistroEntity> registros = new ArrayList<>();
+    private java.util.Date dataInicioLote;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
 
-    public void setRegistros(List<RegistroEntity> registros) {
+    public void setRegistros(List<RegistroEntity> registros, java.util.Date dataInicioLote) {
         this.registros = registros;
+        this.dataInicioLote = dataInicioLote;
         notifyDataSetChanged();
     }
 
@@ -37,6 +39,15 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
         holder.txtMortas.setText(holder.itemView.getContext().getString(R.string.label_mortas, registro.getAvesMortasPeriodo()));
         holder.txtConsumo.setText(holder.itemView.getContext().getString(R.string.label_consumo, registro.getConsumoRacaoPeriodo()));
         
+        if (dataInicioLote != null) {
+            long diff = registro.getDataRegistro().getTime() - dataInicioLote.getTime();
+            long dias = java.util.concurrent.TimeUnit.DAYS.convert(diff, java.util.concurrent.TimeUnit.MILLISECONDS);
+            holder.txtIdade.setText(holder.itemView.getContext().getString(R.string.label_idade_lote, Math.max(0, dias)));
+            holder.txtIdade.setVisibility(View.VISIBLE);
+        } else {
+            holder.txtIdade.setVisibility(View.GONE);
+        }
+
         if (registro.getObservacoes() != null && !registro.getObservacoes().isEmpty()) {
             holder.txtObs.setVisibility(View.VISIBLE);
             holder.txtObs.setText(registro.getObservacoes());
@@ -51,7 +62,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
     }
 
     static class RegistroViewHolder extends RecyclerView.ViewHolder {
-        TextView txtData, txtMortas, txtConsumo, txtObs;
+        TextView txtData, txtMortas, txtConsumo, txtObs, txtIdade;
 
         public RegistroViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -59,6 +70,7 @@ public class RegistroAdapter extends RecyclerView.Adapter<RegistroAdapter.Regist
             txtMortas = itemView.findViewById(R.id.txtMortas);
             txtConsumo = itemView.findViewById(R.id.txtConsumo);
             txtObs = itemView.findViewById(R.id.txtObservacoes);
+            txtIdade = itemView.findViewById(R.id.txtIdadeLote);
         }
     }
 }

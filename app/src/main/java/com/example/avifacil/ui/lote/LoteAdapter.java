@@ -21,6 +21,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
 
     public interface OnLoteClickListener {
         void onLoteClick(LoteEntity lote);
+        void onLoteLongClick(LoteEntity lote);
     }
 
     public void setLotes(List<LoteEntity> lotes) {
@@ -43,13 +44,35 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
     public void onBindViewHolder(@NonNull LoteViewHolder holder, int position) {
         LoteEntity lote = lotes.get(position);
         holder.txtNumero.setText(lote.getNumeroLote());
-        holder.txtData.setText(holder.itemView.getContext().getString(R.string.label_data_inicio, dateFormat.format(lote.getDataInicio())));
+        holder.txtLinhagem.setText(lote.getLinhagem());
+        holder.txtData.setText(dateFormat.format(lote.getDataInicio()));
         holder.txtQtd.setText(holder.itemView.getContext().getString(R.string.label_quantidade, lote.getQuantidadeAvesInicial()));
+        
+        if (lote.getStatus() != null) {
+            holder.txtStatus.setText(lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO ? 
+                holder.itemView.getContext().getString(R.string.status_ativo) : 
+                holder.itemView.getContext().getString(R.string.status_encerrado));
+            
+            holder.txtStatus.setBackgroundResource(lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO ? 
+                R.drawable.bg_status_active : 
+                R.drawable.bg_status_encerrado);
+                
+            holder.txtStatus.setTextColor(lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO ? 
+                holder.itemView.getContext().getResources().getColor(R.color.primary_dark_blue) : 
+                holder.itemView.getContext().getResources().getColor(R.color.secondary_text));
+        }
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onLoteClick(lote);
             }
+        });
+
+        holder.itemView.setOnLongClickListener(v -> {
+            if (listener != null) {
+                listener.onLoteLongClick(lote);
+            }
+            return true;
         });
     }
 
@@ -59,13 +82,15 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
     }
 
     static class LoteViewHolder extends RecyclerView.ViewHolder {
-        TextView txtNumero, txtData, txtQtd;
+        TextView txtNumero, txtLinhagem, txtData, txtQtd, txtStatus;
 
         public LoteViewHolder(@NonNull View itemView) {
             super(itemView);
             txtNumero = itemView.findViewById(R.id.txtNumeroLote);
+            txtLinhagem = itemView.findViewById(R.id.txtLinhagemLote);
             txtData = itemView.findViewById(R.id.txtDataInicio);
             txtQtd = itemView.findViewById(R.id.txtQtdAves);
+            txtStatus = itemView.findViewById(R.id.txtStatusLote);
         }
     }
 }
