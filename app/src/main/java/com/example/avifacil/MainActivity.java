@@ -11,6 +11,7 @@ import com.example.avifacil.ui.avicultor.CadastroAvicultorActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import java.util.List;
 
+import com.example.avifacil.ui.dashboard.DashboardActivity;
 import com.example.avifacil.ui.home.HomeActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
         if (transitionStarted) return;
         transitionStarted = true;
         handler.removeCallbacks(timeoutRunnable);
-        Intent intent = new Intent(this, HomeActivity.class);
+        Intent intent = new Intent(this, DashboardActivity.class);
         startActivity(intent);
         finish();
     }

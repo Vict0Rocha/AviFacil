@@ -29,4 +29,16 @@ public interface LoteDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM lotes WHERE avicultorId = :avicultorId AND numeroLote = :numeroLote AND deleted = 0)")
     boolean existeNumeroLote(long avicultorId, String numeroLote);
+
+    @Query("SELECT COUNT(*) FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0")
+    int countTotalLotes(long avicultorId);
+
+    @Query("SELECT COUNT(*) FROM lotes WHERE avicultorId = :avicultorId AND status = :statusName AND deleted = 0")
+    int countLotesPorStatus(long avicultorId, String statusName);
+
+    @Query("SELECT COALESCE(SUM(quantidadeAvesInicial), 0) FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0")
+    int sumAvesAlojadas(long avicultorId);
+
+    @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0 ORDER BY dataInicio DESC")
+    List<LoteEntity> getAllLotesDashboard(long avicultorId);
 }

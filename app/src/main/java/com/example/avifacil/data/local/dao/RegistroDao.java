@@ -36,4 +36,9 @@ public interface RegistroDao {
 
     @Query("SELECT EXISTS(SELECT 1 FROM registros WHERE loteId = :loteId AND dataRegistro = :dataRegistro AND deleted = 0)")
     boolean existeRegistroNaData(long loteId, Date dataRegistro);
+
+    @Query("SELECT COALESCE(SUM(r.avesMortasPeriodo), 0) FROM registros r " +
+           "INNER JOIN lotes l ON r.loteId = l.id " +
+           "WHERE l.avicultorId = :avicultorId AND r.deleted = 0 AND l.deleted = 0")
+    int getTotalAvesMortasGeral(long avicultorId);
 }

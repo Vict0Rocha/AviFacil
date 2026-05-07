@@ -23,6 +23,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".ui.dashboard.DashboardActivity"
+            android:label="AviFacil - Dashboard"
+            android:windowSoftInputMode="adjustPan" />
+
+        <activity
             android:name=".ui.home.HomeActivity"
             android:label="AviFacil - Home" />
 

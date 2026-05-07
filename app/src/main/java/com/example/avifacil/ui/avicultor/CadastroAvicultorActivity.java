@@ -7,7 +7,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
-import com.example.avifacil.ui.home.HomeActivity;
+import com.example.avifacil.ui.dashboard.DashboardActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -55,8 +55,8 @@ public class CadastroAvicultorActivity extends AppCompatActivity {
         viewModel.getSuccessAction().observe(this, success -> {
             if (success != null && success) {
                 Toast.makeText(this, R.string.msg_sucesso_cadastro, Toast.LENGTH_SHORT).show();
-                // Navega para a Home após o cadastro com sucesso
-                Intent intent = new Intent(this, HomeActivity.class);
+                // Navega para o Dashboard após o cadastro com sucesso
+                Intent intent = new Intent(this, DashboardActivity.class);
                 startActivity(intent);
                 finish();
             }
