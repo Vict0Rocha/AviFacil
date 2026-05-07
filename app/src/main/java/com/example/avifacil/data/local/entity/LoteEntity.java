@@ -29,6 +29,8 @@ public class LoteEntity {
     private Date dataInicio;
     private int quantidadeAvesInicial;
     private double pesoInicial;
+    private double pesoAtualMedio; // Calculado
+    private double conversaoAlimentar; // Calculada
     private String observacoes;
     private StatusLote status = StatusLote.ATIVO;
     private boolean deleted = false;
@@ -64,6 +66,10 @@ public class LoteEntity {
     public void setQuantidadeAvesInicial(int quantidadeAvesInicial) { this.quantidadeAvesInicial = quantidadeAvesInicial; }
     public double getPesoInicial() { return pesoInicial; }
     public void setPesoInicial(double pesoInicial) { this.pesoInicial = pesoInicial; }
+    public double getPesoAtualMedio() { return pesoAtualMedio; }
+    public void setPesoAtualMedio(double pesoAtualMedio) { this.pesoAtualMedio = pesoAtualMedio; }
+    public double getConversaoAlimentar() { return conversaoAlimentar; }
+    public void setConversaoAlimentar(double conversaoAlimentar) { this.conversaoAlimentar = conversaoAlimentar; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     public StatusLote getStatus() { return status; }

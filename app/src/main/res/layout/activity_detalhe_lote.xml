@@ -149,6 +149,54 @@
                         android:columnCount="2"
                         android:alignmentMode="alignMargins">
 
+                        <!-- Aves Inicial -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Aves Inicial"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorAvesInicial"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/main_text"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Idade -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Idade (dias)"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorIdade"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/main_text"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
                         <!-- Aves Vivas -->
                         <LinearLayout
                             android:layout_width="0dp"
@@ -169,6 +217,30 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/main_text"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Aves Mortas -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Aves Mortas"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorAvesMortas"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="#E53935"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
                         </LinearLayout>
@@ -197,30 +269,6 @@
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <!-- Peso Médio -->
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_columnWeight="1"
-                            android:layout_marginBottom="16dp"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Peso Médio (g)"
-                                android:textColor="@color/secondary_text"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/txtIndicadorPesoMedio"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:textColor="@color/main_text"
-                                android:textSize="18sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-
                         <!-- Viabilidade -->
                         <LinearLayout
                             android:layout_width="0dp"
@@ -241,6 +289,54 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="#43A047"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Último Peso -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Último Peso Cadastrado"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorPesoMedio"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/main_text"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Ganho Médio -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="GMD (g/dia)"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorGMD"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/main_text"
                                 android:textSize="18sp"
                                 android:textStyle="bold" />
                         </LinearLayout>

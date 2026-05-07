@@ -23,9 +23,11 @@ public class RegistroViewModel extends AndroidViewModel {
 
     private final MutableLiveData<RegistroEntity> registroParaEdicao = new MutableLiveData<>();
 
+    private final AppDatabase db;
+
     public RegistroViewModel(@NonNull Application application) {
         super(application);
-        AppDatabase db = AppDatabase.getInstance(application);
+        db = AppDatabase.getInstance(application);
         repository = new RegistroRepository(db.registroDao());
         executorService = Executors.newSingleThreadExecutor();
     }
@@ -76,6 +78,9 @@ public class RegistroViewModel extends AndroidViewModel {
                 RegistroEntity registro = new RegistroEntity(loteId, data, mortas, racao, peso);
                 registro.setObservacoes(observacoes);
                 repository.insert(registro);
+                
+                atualizarEstatisticasLote(loteId);
+                
                 successMessage.postValue(true);
                 carregarRegistros(loteId);
             } catch (Exception e) {
@@ -89,7 +94,6 @@ public class RegistroViewModel extends AndroidViewModel {
             try {
                 RegistroEntity registro = repository.getById(id);
                 if (registro != null) {
-                    // Validação de data única (se mudou a data)
                     if (!registro.getDataRegistro().equals(data) && repository.existeRegistroNaData(registro.getLoteId(), data)) {
                         errorMessage.postValue("Já existe um registro para esta nova data");
                         return;
@@ -100,6 +104,9 @@ public class RegistroViewModel extends AndroidViewModel {
                     registro.setPesoAtualMedio(peso);
                     registro.setObservacoes(observacoes);
                     repository.update(registro);
+                    
+                    atualizarEstatisticasLote(registro.getLoteId());
+                    
                     successMessage.postValue(true);
                     carregarRegistros(registro.getLoteId());
                 }
@@ -114,13 +121,32 @@ public class RegistroViewModel extends AndroidViewModel {
             try {
                 RegistroEntity registro = repository.getById(id);
                 if (registro != null) {
+                    long loteId = registro.getLoteId();
                     repository.softDelete(id);
+                    
+                    atualizarEstatisticasLote(loteId);
+                    
                     successMessage.postValue(true);
-                    carregarRegistros(registro.getLoteId());
+                    carregarRegistros(loteId);
                 }
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao excluir registro: " + e.getMessage());
             }
         });
+    }
+
+    private void atualizarEstatisticasLote(long loteId) {
+        com.example.avifacil.data.local.entity.LoteEntity lote = db.loteDao().getById(loteId);
+        if (lote == null) return;
+
+        List<RegistroEntity> registros = repository.getRegistrosPorLote(loteId);
+        
+        double pesoMedio = com.example.avifacil.util.ZootecniaCalculator.calcularPesoMedioAtual(registros);
+        double ca = com.example.avifacil.util.ZootecniaCalculator.calcularConversaoAlimentar(lote, registros);
+        
+        lote.setPesoAtualMedio(pesoMedio);
+        lote.setConversaoAlimentar(ca);
+
+        db.loteDao().update(lote);
     }
 }

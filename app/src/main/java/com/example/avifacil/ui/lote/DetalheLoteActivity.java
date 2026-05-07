@@ -20,7 +20,7 @@ import java.util.Locale;
 public class DetalheLoteActivity extends AppCompatActivity {
 
     private TextView txtNumero, txtLinhagem, txtGalpao, txtData;
-    private TextView txtAvesVivas, txtMortalidade, txtPesoMedio, txtViabilidade, txtConsumoTotal, txtCA;
+    private TextView txtAvesInicial, txtAvesVivas, txtAvesMortas, txtIdade, txtMortalidade, txtPesoMedio, txtGMD, txtViabilidade, txtConsumoTotal, txtCA;
     private Button btnGerenciar;
     private LoteViewModel loteViewModel;
     private RegistroViewModel registroViewModel;
@@ -75,9 +75,13 @@ public class DetalheLoteActivity extends AppCompatActivity {
         txtGalpao = findViewById(R.id.txtDetalheGalpao);
         txtData = findViewById(R.id.txtDetalheDataAlojamento);
         
+        txtAvesInicial = findViewById(R.id.txtIndicadorAvesInicial);
+        txtIdade = findViewById(R.id.txtIndicadorIdade);
         txtAvesVivas = findViewById(R.id.txtIndicadorAvesVivas);
+        txtAvesMortas = findViewById(R.id.txtIndicadorAvesMortas);
         txtMortalidade = findViewById(R.id.txtIndicadorMortalidade);
         txtPesoMedio = findViewById(R.id.txtIndicadorPesoMedio);
+        txtGMD = findViewById(R.id.txtIndicadorGMD);
         txtViabilidade = findViewById(R.id.txtIndicadorViabilidade);
         txtConsumoTotal = findViewById(R.id.txtIndicadorConsumoTotal);
         txtCA = findViewById(R.id.txtIndicadorCA);
@@ -90,19 +94,26 @@ public class DetalheLoteActivity extends AppCompatActivity {
         txtLinhagem.setText(currentLote.getLinhagem());
         txtGalpao.setText(currentLote.getGalpao());
         txtData.setText(dateFormat.format(currentLote.getDataInicio()));
+        txtAvesInicial.setText(String.valueOf(currentLote.getQuantidadeAvesInicial()));
     }
 
     private void atualizarIndicadores(List<RegistroEntity> registros) {
         int vivas = ZootecniaCalculator.calcularAvesVivas(currentLote, registros);
+        int mortas = ZootecniaCalculator.calcularTotalMortas(registros);
+        int idade = ZootecniaCalculator.calcularIdadeDias(currentLote);
         double mortalidade = ZootecniaCalculator.calcularMortalidade(currentLote, registros);
         double pesoMedio = ZootecniaCalculator.calcularPesoMedioAtual(registros);
+        double gmd = ZootecniaCalculator.calcularGanhoMedioDiario(currentLote, registros);
         double viabilidade = ZootecniaCalculator.calcularViabilidade(currentLote, registros);
         double consumoTotal = ZootecniaCalculator.calcularTotalConsumoRacao(registros);
         double ca = ZootecniaCalculator.calcularConversaoAlimentar(currentLote, registros);
 
         txtAvesVivas.setText(String.valueOf(vivas));
+        txtAvesMortas.setText(String.valueOf(mortas));
+        txtIdade.setText(String.format(Locale.getDefault(), "%d dias", idade));
         txtMortalidade.setText(String.format(Locale.getDefault(), "%.2f%%", mortalidade));
         txtPesoMedio.setText(pesoMedio > 0 ? String.format(Locale.getDefault(), "%.1f g", pesoMedio) : "---");
+        txtGMD.setText(gmd > 0 ? String.format(Locale.getDefault(), "%.2f g", gmd) : "---");
         txtViabilidade.setText(String.format(Locale.getDefault(), "%.1f%%", viabilidade));
         txtConsumoTotal.setText(String.format(Locale.getDefault(), "%.2f kg", consumoTotal));
         txtCA.setText(ca > 0 ? String.format(Locale.getDefault(), "%.3f", ca) : "---");
