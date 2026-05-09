@@ -21,6 +21,7 @@ public class CadastroLoteActivity extends AppCompatActivity {
     private LoteViewModel viewModel;
     private Calendar calendar = Calendar.getInstance();
     private long avicultorId;
+    private String avicultorUuid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,7 +29,9 @@ public class CadastroLoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastro_lote);
 
         avicultorId = getIntent().getLongExtra("AVICULTOR_ID", -1);
-        if (avicultorId == -1) {
+        avicultorUuid = getIntent().getStringExtra("AVICULTOR_UUID");
+        
+        if (avicultorId == -1 || avicultorUuid == null) {
             finish();
             return;
         }
@@ -117,7 +120,7 @@ public class CadastroLoteActivity extends AppCompatActivity {
         if (isValid) {
             int qtd = Integer.parseInt(qtdStr);
             double peso = Double.parseDouble(pesoStr);
-            viewModel.criarLote(avicultorId, numero, linhagem, galpao, dataInicio, qtd, peso, obs);
+            viewModel.criarLote(avicultorId, avicultorUuid, numero, linhagem, galpao, dataInicio, qtd, peso, obs);
         }
     }
 

@@ -21,6 +21,7 @@ public class LotesActivity extends AppCompatActivity {
     private LoteAdapter adapter;
     private TextView txtEmpty;
     private long avicultorId = -1;
+    private String avicultorUuid = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,9 @@ public class LotesActivity extends AppCompatActivity {
 
         avicultorViewModel.getAvicultoresAtivos().observe(this, avicultores -> {
             if (avicultores != null && !avicultores.isEmpty()) {
-                avicultorId = avicultores.get(0).getId();
+                com.example.avifacil.data.local.entity.AvicultorEntity avicultor = avicultores.get(0);
+                avicultorId = avicultor.getId();
+                avicultorUuid = avicultor.getUuid();
                 loteViewModel.carregarLotes(avicultorId);
             }
         });
@@ -74,6 +77,7 @@ public class LotesActivity extends AppCompatActivity {
             if (avicultorId != -1) {
                 Intent intent = new Intent(this, CadastroLoteActivity.class);
                 intent.putExtra("AVICULTOR_ID", avicultorId);
+                intent.putExtra("AVICULTOR_UUID", avicultorUuid);
                 startActivity(intent);
             }
         });

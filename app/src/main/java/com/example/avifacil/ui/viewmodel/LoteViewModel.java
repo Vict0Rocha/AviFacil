@@ -66,7 +66,7 @@ public class LoteViewModel extends AndroidViewModel {
         });
     }
 
-    public void criarLote(long avicultorId, String numero, String linhagem, String galpao, Date inicio, int qtdInicial, double pesoInicial, String observacoes) {
+    public void criarLote(long avicultorId, String avicultorUuid, String numero, String linhagem, String galpao, Date inicio, int qtdInicial, double pesoInicial, String observacoes) {
         if (numero == null || numero.trim().isEmpty()) {
             errorMessage.setValue("Número do lote é obrigatório");
             return;
@@ -77,7 +77,7 @@ public class LoteViewModel extends AndroidViewModel {
                     errorMessage.postValue("Este número de lote já existe para este avicultor");
                     return;
                 }
-                LoteEntity lote = new LoteEntity(avicultorId, numero, linhagem, galpao, inicio, qtdInicial, pesoInicial, observacoes);
+                LoteEntity lote = new LoteEntity(avicultorId, avicultorUuid, numero, linhagem, galpao, inicio, qtdInicial, pesoInicial, observacoes);
                 repository.insert(lote);
                 successMessage.postValue(true);
                 carregarLotes(avicultorId);

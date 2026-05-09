@@ -22,7 +22,9 @@ public class LoteEntity {
     @PrimaryKey(autoGenerate = true)
     private long id;
     
+    private String uuid; // ID estável para Firebase
     private long avicultorId;
+    private String avicultorUuid; // UUID do pai para sync
     private String numeroLote;
     private String linhagem;
     private String galpao;
@@ -37,8 +39,10 @@ public class LoteEntity {
     private boolean sincronizado = false;
     private long updatedAt;
 
-    public LoteEntity(long avicultorId, String numeroLote, String linhagem, String galpao, Date dataInicio, int quantidadeAvesInicial, double pesoInicial, String observacoes) {
+    public LoteEntity(long avicultorId, String avicultorUuid, String numeroLote, String linhagem, String galpao, Date dataInicio, int quantidadeAvesInicial, double pesoInicial, String observacoes) {
+        this.uuid = java.util.UUID.randomUUID().toString();
         this.avicultorId = avicultorId;
+        this.avicultorUuid = avicultorUuid;
         this.numeroLote = numeroLote;
         this.linhagem = linhagem;
         this.galpao = galpao;
@@ -52,8 +56,12 @@ public class LoteEntity {
     // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
     public long getAvicultorId() { return avicultorId; }
     public void setAvicultorId(long avicultorId) { this.avicultorId = avicultorId; }
+    public String getAvicultorUuid() { return avicultorUuid; }
+    public void setAvicultorUuid(String avicultorUuid) { this.avicultorUuid = avicultorUuid; }
     public String getNumeroLote() { return numeroLote; }
     public void setNumeroLote(String numeroLote) { this.numeroLote = numeroLote; }
     public String getLinhagem() { return linhagem; }

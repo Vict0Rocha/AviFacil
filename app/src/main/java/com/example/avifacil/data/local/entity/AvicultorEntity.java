@@ -8,6 +8,7 @@ public class AvicultorEntity {
     @PrimaryKey(autoGenerate = true)
     private long id;
     
+    private String uuid; // ID estável para Firebase
     private String nome;
     private String email;
     private String nomePropriedade;
@@ -16,6 +17,7 @@ public class AvicultorEntity {
     private long updatedAt;
 
     public AvicultorEntity(String nome, String email, String nomePropriedade) {
+        this.uuid = java.util.UUID.randomUUID().toString();
         this.nome = nome;
         this.email = email;
         this.nomePropriedade = nomePropriedade;
@@ -25,6 +27,8 @@ public class AvicultorEntity {
     // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
     public String getEmail() { return email; }

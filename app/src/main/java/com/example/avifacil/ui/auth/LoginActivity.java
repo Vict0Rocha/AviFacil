@@ -1,0 +1,120 @@
+package com.example.avifacil.ui.auth;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ProgressBar;
+import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
+import com.example.avifacil.R;
+import com.example.avifacil.data.local.entity.AvicultorEntity;
+import com.example.avifacil.ui.avicultor.CadastroAvicultorActivity;
+import com.example.avifacil.ui.dashboard.DashboardActivity;
+import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import androidx.lifecycle.ViewModelProvider;
+
+public class LoginActivity extends AppCompatActivity {
+
+    private TextInputEditText editEmail, editSenha;
+    private Button btnLogin, btnRegistrar;
+    private ProgressBar progressBar;
+    private FirebaseAuth mAuth;
+    private AvicultorViewModel avicultorViewModel;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+        mAuth = FirebaseAuth.getInstance();
+        avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
+
+        // Se já estiver logado, verifica se tem perfil local
+        if (mAuth.getCurrentUser() != null) {
+            verificarPerfilLocal(mAuth.getCurrentUser().getUid());
+        }
+
+        editEmail = findViewById(R.id.editEmail);
+        editSenha = findViewById(R.id.editSenha);
+        btnLogin = findViewById(R.id.btnLogin);
+        btnRegistrar = findViewById(R.id.btnRegistrar);
+        progressBar = findViewById(R.id.progressBar);
+
+        btnLogin.setOnClickListener(v -> loginUsuario());
+        btnRegistrar.setOnClickListener(v -> registrarUsuario());
+    }
+
+    private void loginUsuario() {
+        String email = editEmail.getText().toString().trim();
+        String senha = editSenha.getText().toString().trim();
+
+        if (email.isEmpty() || senha.isEmpty()) {
+            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        btnLogin.setEnabled(false);
+
+        mAuth.signInWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        verificarPerfilLocal(task.getResult().getUser().getUid());
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        btnLogin.setEnabled(true);
+                        Toast.makeText(LoginActivity.this, "Erro: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    private void verificarPerfilLocal(String uuid) {
+        avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
+            progressBar.setVisibility(View.GONE);
+            if (avicultor != null && avicultor.getUuid().equals(uuid)) {
+                startActivity(new Intent(this, DashboardActivity.class));
+                finish();
+            } else {
+                // Se não tem perfil local para este UUID, vai para cadastro
+                startActivity(new Intent(this, CadastroAvicultorActivity.class));
+                finish();
+            }
+        });
+        avicultorViewModel.carregarAvicultorPorUuid(uuid);
+    }
+
+    private void registrarUsuario() {
+        String email = editEmail.getText().toString().trim();
+        String senha = editSenha.getText().toString().trim();
+
+        if (email.isEmpty() || senha.isEmpty()) {
+            Toast.makeText(this, "Preencha todos os campos", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (senha.length() < 6) {
+            Toast.makeText(this, "A senha deve ter pelo menos 6 caracteres", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        btnRegistrar.setEnabled(false);
+
+        mAuth.createUserWithEmailAndPassword(email, senha)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(LoginActivity.this, "Conta criada com sucesso!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(this, CadastroAvicultorActivity.class));
+                        finish();
+                    } else {
+                        progressBar.setVisibility(View.GONE);
+                        btnRegistrar.setEnabled(true);
+                        Toast.makeText(LoginActivity.this, "Erro: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+}

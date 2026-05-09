@@ -23,4 +23,13 @@ public interface AvicultorDao {
 
     @Query("SELECT * FROM avicultores WHERE id = :id AND deleted = 0")
     AvicultorEntity getById(long id);
+
+    @Query("SELECT * FROM avicultores WHERE uuid = :uuid AND deleted = 0")
+    AvicultorEntity getByUuid(String uuid);
+
+    @Query("SELECT * FROM avicultores WHERE sincronizado = 0")
+    List<AvicultorEntity> getPendentesSincronizacao();
+
+    @Query("UPDATE avicultores SET sincronizado = 1 WHERE id = :id")
+    void marcarComoSincronizado(long id);
 }

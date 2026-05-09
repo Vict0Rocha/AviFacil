@@ -18,6 +18,7 @@ public class ListaRegistrosActivity extends AppCompatActivity {
     private RegistroAdapter adapter;
     private TextView txtEmpty;
     private long loteId = -1;
+    private String loteUuid = null;
     private String numeroLote = "";
     private boolean isLoteAtivo = true;
     private java.util.Date dataInicioLote;
@@ -49,6 +50,7 @@ public class ListaRegistrosActivity extends AppCompatActivity {
         loteViewModel.getLoteAtual().observe(this, lote -> {
             if (lote != null) {
                 dataInicioLote = lote.getDataInicio();
+                loteUuid = lote.getUuid();
                 isLoteAtivo = (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO);
                 fab.setVisibility(isLoteAtivo ? View.VISIBLE : View.GONE);
                 adapter.setLoteAtivo(isLoteAtivo);
@@ -69,6 +71,7 @@ public class ListaRegistrosActivity extends AppCompatActivity {
         fab.setOnClickListener(v -> {
             Intent intent = new Intent(this, CadastroRegistroActivity.class);
             intent.putExtra("LOTE_ID", loteId);
+            intent.putExtra("LOTE_UUID", loteUuid);
             startActivity(intent);
         });
 

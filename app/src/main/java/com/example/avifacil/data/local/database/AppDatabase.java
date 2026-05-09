@@ -12,7 +12,7 @@ import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.data.local.entity.LoteEntity;
 import com.example.avifacil.data.local.entity.RegistroEntity;
 
-@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 12, exportSchema = false)
+@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 13, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;

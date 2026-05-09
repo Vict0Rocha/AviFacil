@@ -41,4 +41,10 @@ public interface LoteDao {
 
     @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0 ORDER BY dataInicio DESC")
     List<LoteEntity> getAllLotesDashboard(long avicultorId);
+
+    @Query("SELECT * FROM lotes WHERE sincronizado = 0")
+    List<LoteEntity> getPendentesSincronizacao();
+
+    @Query("UPDATE lotes SET sincronizado = 1 WHERE id = :id")
+    void marcarComoSincronizado(long id);
 }

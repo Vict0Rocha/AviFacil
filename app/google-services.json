@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "890428953647",
+    "project_id": "avifacil",
+    "storage_bucket": "avifacil.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:890428953647:android:411728ecc990f86aa2a2da",
+        "android_client_info": {
+          "package_name": "com.example.avifacil"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDalpnzo3k3lLjCwkTU_hupwkdfOay9vyE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

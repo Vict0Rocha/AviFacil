@@ -25,6 +25,7 @@ public class CadastroRegistroActivity extends AppCompatActivity {
     private Calendar calendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private long loteId = -1;
+    private String loteUuid = null;
     private long registroId = -1;
     private Date dataAlojamento;
 
@@ -34,6 +35,7 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastro_registro);
 
         loteId = getIntent().getLongExtra("LOTE_ID", -1);
+        loteUuid = getIntent().getStringExtra("LOTE_UUID");
         registroId = getIntent().getLongExtra("REGISTRO_ID", -1);
 
         if (loteId == -1 && registroId == -1) {
@@ -93,6 +95,7 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         viewModel.getRegistroParaEdicao().observe(this, registro -> {
             if (registro != null) {
                 loteId = registro.getLoteId();
+                loteUuid = registro.getLoteUuid();
                 loteViewModel.carregarLote(loteId); // Carrega o lote do registro para validação de data
                 calendar.setTime(registro.getDataRegistro());
                 atualizarLabelData();
@@ -180,7 +183,7 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         double peso = Double.parseDouble(pesoStr);
 
         if (registroId == -1) {
-            viewModel.adicionarRegistro(loteId, data, mortas, consumo, peso, obs);
+            viewModel.adicionarRegistro(loteId, loteUuid, data, mortas, consumo, peso, obs);
         } else {
             viewModel.editarRegistro(registroId, data, mortas, consumo, peso, obs);
         }

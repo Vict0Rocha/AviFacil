@@ -18,6 +18,7 @@ public class AvicultorViewModel extends AndroidViewModel {
     private final ExecutorService executorService;
 
     private final MutableLiveData<List<AvicultorEntity>> avicultoresAtivos = new MutableLiveData<>();
+    private final MutableLiveData<AvicultorEntity> avicultorLogado = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
     private final MutableLiveData<Boolean> successMessage = new MutableLiveData<>();
 
@@ -30,6 +31,10 @@ public class AvicultorViewModel extends AndroidViewModel {
 
     public LiveData<List<AvicultorEntity>> getAvicultoresAtivos() {
         return avicultoresAtivos;
+    }
+
+    public LiveData<AvicultorEntity> getAvicultorLogado() {
+        return avicultorLogado;
     }
 
     public LiveData<String> getErrorMessage() {
@@ -45,16 +50,28 @@ public class AvicultorViewModel extends AndroidViewModel {
             try {
                 List<AvicultorEntity> lista = repository.getAllAtivos();
                 avicultoresAtivos.postValue(lista);
+                if (!lista.isEmpty()) {
+                    avicultorLogado.postValue(lista.get(0));
+                }
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao carregar: " + e.getMessage());
-                // Em caso de erro crítico no banco, enviamos uma lista vazia 
-                // para que o app siga para a tela de cadastro e tente se recuperar
                 avicultoresAtivos.postValue(new java.util.ArrayList<>());
             }
         });
     }
 
-    public void salvarAvicultor(String nome, String email, String propriedade) {
+    public void carregarAvicultorPorUuid(String uuid) {
+        executorService.execute(() -> {
+            try {
+                AvicultorEntity avicultor = repository.getByUuid(uuid);
+                avicultorLogado.postValue(avicultor);
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao carregar por UUID: " + e.getMessage());
+            }
+        });
+    }
+
+    public void salvarAvicultor(String nome, String email, String propriedade, String uuid) {
         if (nome == null || nome.trim().isEmpty()) {
             errorMessage.setValue(getApplication().getString(R.string.msg_erro_nome));
             return;
@@ -66,6 +83,9 @@ public class AvicultorViewModel extends AndroidViewModel {
         executorService.execute(() -> {
             try {
                 AvicultorEntity avicultor = new AvicultorEntity(nome, email, propriedade);
+                if (uuid != null) {
+                    avicultor.setUuid(uuid);
+                }
                 repository.insert(avicultor);
                 successMessage.postValue(true);
             } catch (Exception e) {

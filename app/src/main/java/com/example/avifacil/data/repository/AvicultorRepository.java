@@ -34,4 +34,8 @@ public class AvicultorRepository {
     public AvicultorEntity getById(long id) {
         return avicultorDao.getById(id);
     }
+
+    public AvicultorEntity getByUuid(String uuid) {
+        return avicultorDao.getByUuid(uuid);
+    }
 }

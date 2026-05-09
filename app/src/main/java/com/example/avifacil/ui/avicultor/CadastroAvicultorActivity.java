@@ -11,6 +11,8 @@ import com.example.avifacil.ui.dashboard.DashboardActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class CadastroAvicultorActivity extends AppCompatActivity {
 
@@ -47,7 +49,10 @@ public class CadastroAvicultorActivity extends AppCompatActivity {
             String email = editEmail.getText().toString();
             String propriedade = editPropriedade.getText().toString();
             
-            viewModel.salvarAvicultor(nome, email, propriedade);
+            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+            String uuid = (user != null) ? user.getUid() : null;
+            
+            viewModel.salvarAvicultor(nome, email, propriedade, uuid);
         });
     }
 

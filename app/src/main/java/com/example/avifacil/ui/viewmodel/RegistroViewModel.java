@@ -68,14 +68,14 @@ public class RegistroViewModel extends AndroidViewModel {
         });
     }
 
-    public void adicionarRegistro(long loteId, Date data, int mortas, double racao, double peso, String observacoes) {
+    public void adicionarRegistro(long loteId, String loteUuid, Date data, int mortas, double racao, double peso, String observacoes) {
         executorService.execute(() -> {
             try {
                 if (repository.existeRegistroNaData(loteId, data)) {
                     errorMessage.postValue("Já existe um registro para esta data");
                     return;
                 }
-                RegistroEntity registro = new RegistroEntity(loteId, data, mortas, racao, peso);
+                RegistroEntity registro = new RegistroEntity(loteId, loteUuid, data, mortas, racao, peso);
                 registro.setObservacoes(observacoes);
                 repository.insert(registro);
                 

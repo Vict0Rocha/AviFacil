@@ -21,7 +21,9 @@ public class RegistroEntity {
     @PrimaryKey(autoGenerate = true)
     private long id;
     
+    private String uuid; // ID estável para Firebase
     private long loteId;
+    private String loteUuid; // UUID do pai para sync
     private Date dataRegistro;
     private int avesMortasPeriodo;
     private double consumoRacaoPeriodo;
@@ -31,8 +33,10 @@ public class RegistroEntity {
     private boolean sincronizado = false;
     private long updatedAt;
 
-    public RegistroEntity(long loteId, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo, double pesoAtualMedio) {
+    public RegistroEntity(long loteId, String loteUuid, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo, double pesoAtualMedio) {
+        this.uuid = java.util.UUID.randomUUID().toString();
         this.loteId = loteId;
+        this.loteUuid = loteUuid;
         this.dataRegistro = dataRegistro;
         this.avesMortasPeriodo = avesMortasPeriodo;
         this.consumoRacaoPeriodo = consumoRacaoPeriodo;
@@ -43,8 +47,12 @@ public class RegistroEntity {
     // Getters and Setters
     public long getId() { return id; }
     public void setId(long id) { this.id = id; }
+    public String getUuid() { return uuid; }
+    public void setUuid(String uuid) { this.uuid = uuid; }
     public long getLoteId() { return loteId; }
     public void setLoteId(long loteId) { this.loteId = loteId; }
+    public String getLoteUuid() { return loteUuid; }
+    public void setLoteUuid(String loteUuid) { this.loteUuid = loteUuid; }
     public Date getDataRegistro() { return dataRegistro; }
     public void setDataRegistro(Date dataRegistro) { this.dataRegistro = dataRegistro; }
     public int getAvesMortasPeriodo() { return avesMortasPeriodo; }
