@@ -41,4 +41,10 @@ public interface RegistroDao {
            "INNER JOIN lotes l ON r.loteId = l.id " +
            "WHERE l.avicultorId = :avicultorId AND r.deleted = 0 AND l.deleted = 0")
     int getTotalAvesMortasGeral(long avicultorId);
+
+    @Query("SELECT * FROM registros WHERE sincronizado = 0")
+    List<RegistroEntity> getPendentesSincronizacao();
+
+    @Query("UPDATE registros SET sincronizado = 1 WHERE id = :id")
+    void marcarComoSincronizado(long id);
 }
