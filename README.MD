@@ -1,6 +1,6 @@
 # Documento de Requisitos
 
-**Documento Elaborado por:** Engº Lourivaldo Pereira
+**Documento Elaborado por:** 
 
 ---
 
