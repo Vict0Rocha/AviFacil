@@ -25,6 +25,9 @@ public interface RegistroDao {
     @Query("SELECT * FROM registros WHERE id = :id AND deleted = 0")
     RegistroEntity getById(long id);
 
+    @Query("SELECT * FROM registros WHERE uuid = :uuid AND deleted = 0")
+    RegistroEntity getByUuid(String uuid);
+
     @Query("SELECT * FROM registros WHERE loteId = :loteId AND deleted = 0 ORDER BY dataRegistro DESC LIMIT 1")
     RegistroEntity getUltimoRegistro(long loteId);
 

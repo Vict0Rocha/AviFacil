@@ -16,6 +16,10 @@ public class AvicultorEntity {
     private boolean sincronizado = false;
     private long updatedAt;
 
+    public AvicultorEntity() {
+        // Necessário para o Firebase
+    }
+
     public AvicultorEntity(String nome, String email, String nomePropriedade) {
         this.uuid = java.util.UUID.randomUUID().toString();
         this.nome = nome;

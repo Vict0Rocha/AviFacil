@@ -39,6 +39,10 @@ public class LoteEntity {
     private boolean sincronizado = false;
     private long updatedAt;
 
+    public LoteEntity() {
+        // Necessário para o Firebase
+    }
+
     public LoteEntity(long avicultorId, String avicultorUuid, String numeroLote, String linhagem, String galpao, Date dataInicio, int quantidadeAvesInicial, double pesoInicial, String observacoes) {
         this.uuid = java.util.UUID.randomUUID().toString();
         this.avicultorId = avicultorId;

@@ -1,6 +1,7 @@
 package com.example.avifacil.ui.viewmodel;
 
 import android.app.Application;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -9,12 +10,14 @@ import com.example.avifacil.R;
 import com.example.avifacil.data.local.database.AppDatabase;
 import com.example.avifacil.data.local.entity.AvicultorEntity;
 import com.example.avifacil.data.repository.AvicultorRepository;
+import com.example.avifacil.data.repository.SyncRepository;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class AvicultorViewModel extends AndroidViewModel {
     private final AvicultorRepository repository;
+    private final SyncRepository syncRepository;
     private final ExecutorService executorService;
 
     private final MutableLiveData<List<AvicultorEntity>> avicultoresAtivos = new MutableLiveData<>();
@@ -26,6 +29,7 @@ public class AvicultorViewModel extends AndroidViewModel {
         super(application);
         AppDatabase db = AppDatabase.getInstance(application);
         repository = new AvicultorRepository(db.avicultorDao());
+        syncRepository = new SyncRepository(db.avicultorDao(), db.loteDao(), db.registroDao());
         executorService = Executors.newSingleThreadExecutor();
     }
 
@@ -63,10 +67,27 @@ public class AvicultorViewModel extends AndroidViewModel {
     public void carregarAvicultorPorUuid(String uuid) {
         executorService.execute(() -> {
             try {
+                // Tenta carregar local primeiro
                 AvicultorEntity avicultor = repository.getByUuid(uuid);
+                
+                if (avicultor == null) {
+                    // Se não tem local, tenta baixar do Firestore
+                    boolean encontrado = syncRepository.baixarDados(uuid);
+                    if (encontrado) {
+                        avicultor = repository.getByUuid(uuid);
+                    } else {
+                        // Não existe nem no Firestore, é uma conta realmente nova
+                        errorMessage.postValue("Perfil não encontrado");
+                        avicultorLogado.postValue(null);
+                        return;
+                    }
+                }
+                
                 avicultorLogado.postValue(avicultor);
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar por UUID: " + e.getMessage());
+                Log.e("AvicultorViewModel", "Erro ao carregar dados", e);
+                errorMessage.postValue("Erro ao carregar dados: " + e.getMessage());
+                avicultorLogado.postValue(null);
             }
         });
     }

@@ -33,6 +33,10 @@ public class RegistroEntity {
     private boolean sincronizado = false;
     private long updatedAt;
 
+    public RegistroEntity() {
+        // Necessário para o Firebase
+    }
+
     public RegistroEntity(long loteId, String loteUuid, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo, double pesoAtualMedio) {
         this.uuid = java.util.UUID.randomUUID().toString();
         this.loteId = loteId;

@@ -91,19 +91,29 @@ public class DashboardActivity extends AppCompatActivity {
         WorkManager.getInstance(this).getWorkInfoByIdLiveData(syncRequest.getId())
                 .observe(this, workInfo -> {
                     if (workInfo != null) {
-                        if (workInfo.getState() == WorkInfo.State.RUNNING) {
+                        WorkInfo.State state = workInfo.getState();
+                        
+                        if (state == WorkInfo.State.RUNNING) {
                             txtSyncStatus.setText("Sincronizando...");
                             btnSyncNow.setEnabled(false);
-                        } else if (workInfo.getState().isFinished()) {
-                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                        } else if (state == WorkInfo.State.ENQUEUED) {
+                            txtSyncStatus.setText("Aguardando conexão...");
+                            btnSyncNow.setEnabled(false);
+                        } else if (state.isFinished()) {
+                            btnSyncNow.setEnabled(true);
+                            if (state == WorkInfo.State.SUCCEEDED) {
                                 txtSyncStatus.setText("Sincronizado com sucesso");
                                 Toast.makeText(this, "Sincronização concluída!", Toast.LENGTH_SHORT).show();
+                                
+                                // Recarregar dados após sync
+                                AvicultorEntity av = avicultorViewModel.getAvicultorLogado().getValue();
+                                if (av != null) {
+                                    dashboardViewModel.carregarDados(av.getId());
+                                }
                             } else {
                                 txtSyncStatus.setText("Falha na sincronização");
+                                Toast.makeText(this, "Erro ao sincronizar. Verifique sua internet.", Toast.LENGTH_LONG).show();
                             }
-                            btnSyncNow.setEnabled(true);
-                            // Recarregar dados após sync
-                            dashboardViewModel.carregarDados(avicultorViewModel.getAvicultorLogado().getValue().getId());
                         }
                     }
                 });

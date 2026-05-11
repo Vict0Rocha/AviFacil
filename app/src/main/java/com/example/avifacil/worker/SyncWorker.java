@@ -6,6 +6,7 @@ import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 import com.example.avifacil.data.local.database.AppDatabase;
 import com.example.avifacil.data.repository.SyncRepository;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SyncWorker extends Worker {
     public SyncWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
@@ -23,9 +24,18 @@ public class SyncWorker extends Worker {
         );
 
         try {
+            // 1. Enviar alterações locais para a nuvem
             syncRepository.sincronizarPendentes();
+
+            // 2. Baixar dados da nuvem para o local (se houver usuário logado)
+            String uid = FirebaseAuth.getInstance().getUid();
+            if (uid != null) {
+                syncRepository.baixarDados(uid);
+            }
+
             return Result.success();
         } catch (Exception e) {
+            e.printStackTrace();
             return Result.retry();
         }
     }
