@@ -8,17 +8,11 @@
     android:padding="24dp"
     android:background="@color/screen_background">
 
-    <ImageView
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_marginBottom="32dp"
-        android:src="@mipmap/ic_launcher" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="32dp"
-        android:text="@string/title_login"
+        android:text="@string/title_registrar"
         android:textSize="24sp"
         android:textStyle="bold"
         android:textColor="@color/primary_dark_blue" />
@@ -33,7 +27,7 @@
         app:hintTextColor="@color/primary_dark_blue">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editEmail"
+            android:id="@+id/editRegisterEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_email"
@@ -44,7 +38,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="16dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         app:passwordToggleEnabled="true"
         app:boxStrokeColor="@color/primary_dark_blue"
@@ -52,7 +46,7 @@
         android:textColorHint="@color/secondary_text">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editSenha"
+            android:id="@+id/editRegisterSenha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/hint_senha"
@@ -60,50 +54,36 @@
             android:textColor="@color/main_text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/txtEsqueciSenha"
-        android:layout_width="wrap_content"
+    <com.google.android.material.textfield.TextInputLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="end"
         android:layout_marginBottom="24dp"
-        android:text="@string/btn_esqueci_senha"
-        android:textColor="@color/primary_dark_blue"
-        android:textStyle="bold"
-        android:clickable="true"
-        android:focusable="true" />
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        app:passwordToggleEnabled="true"
+        app:boxStrokeColor="@color/primary_dark_blue"
+        app:hintTextColor="@color/primary_dark_blue"
+        android:textColorHint="@color/secondary_text">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/editRegisterConfirmarSenha"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_confirmar_senha"
+            android:inputType="textPassword"
+            android:textColor="@color/main_text" />
+    </com.google.android.material.textfield.TextInputLayout>
 
     <Button
-        android:id="@+id/btnLogin"
+        android:id="@+id/btnFinalizarRegistro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="12dp"
-        android:text="@string/btn_entrar"
+        android:text="@string/btn_registrar"
         android:backgroundTint="@color/primary_dark_blue"
         android:textColor="@color/white" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnGoogle"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/btn_login_google"
-        android:textAllCaps="false"
-        android:textColor="@color/primary_dark_blue"
-        app:strokeColor="@color/primary_dark_blue"
-        app:cornerRadius="4dp" />
-
-    <Button
-        android:id="@+id/btnIrParaRegistro"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/btn_criar_conta"
-        android:textColor="@color/primary_dark_blue" />
-
     <ProgressBar
-        android:id="@+id/progressBar"
+        android:id="@+id/progressBarRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

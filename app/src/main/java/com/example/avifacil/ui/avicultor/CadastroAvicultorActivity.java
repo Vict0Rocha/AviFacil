@@ -17,7 +17,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class CadastroAvicultorActivity extends AppCompatActivity {
 
     private AvicultorViewModel viewModel;
-    private TextInputEditText editNome, editEmail, editPropriedade;
+    private TextInputEditText editNome, editPropriedade;
     private TextInputLayout inputLayoutNome, inputLayoutPropriedade;
     private Button btnSalvar;
     private android.widget.ScrollView scrollView;
@@ -30,7 +30,6 @@ public class CadastroAvicultorActivity extends AppCompatActivity {
         // Inicialização dos componentes com os novos IDs
         scrollView = findViewById(R.id.scrollViewCadastro);
         editNome = findViewById(R.id.editNomeAvicultor);
-        editEmail = findViewById(R.id.editEmailAvicultor);
         editPropriedade = findViewById(R.id.editPropriedadeAvicultor);
         inputLayoutNome = findViewById(R.id.inputLayoutNome);
         inputLayoutPropriedade = findViewById(R.id.inputLayoutPropriedade);
@@ -46,11 +45,11 @@ public class CadastroAvicultorActivity extends AppCompatActivity {
             inputLayoutPropriedade.setError(null);
 
             String nome = editNome.getText().toString();
-            String email = editEmail.getText().toString();
             String propriedade = editPropriedade.getText().toString();
             
             FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
             String uuid = (user != null) ? user.getUid() : null;
+            String email = (user != null) ? user.getEmail() : "";
             
             viewModel.salvarAvicultor(nome, email, propriedade, uuid);
         });

@@ -12,7 +12,20 @@
           "package_name": "com.example.avifacil"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "890428953647-t6qdndm1ec4vhg3nes0qmcnbb0i5m0n2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.avifacil",
+            "certificate_hash": "89270b1bd80915278daa81d24935bc5839248bac"
+          }
+        },
+        {
+          "client_id": "890428953647-rbbj947c09ugatju8huas2t0eecum1pi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDalpnzo3k3lLjCwkTU_hupwkdfOay9vyE"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "890428953647-rbbj947c09ugatju8huas2t0eecum1pi.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

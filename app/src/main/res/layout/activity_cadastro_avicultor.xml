@@ -94,41 +94,6 @@
                         android:textColorHint="@color/placeholder" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Campo: E-mail -->
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/label_email_opcional"
-                    android:textColor="@color/main_text"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutEmail"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
-                    app:boxStrokeWidth="0dp"
-                    app:boxStrokeWidthFocused="0dp"
-                    app:hintEnabled="false">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editEmailAvicultor"
-                        android:layout_width="match_parent"
-                        android:layout_height="56dp"
-                        android:background="@drawable/bg_edit_text"
-                        android:hint="@string/label_email_opcional"
-                        android:imeOptions="actionNext"
-                        android:inputType="textEmailAddress"
-                        android:paddingStart="16dp"
-                        android:paddingEnd="16dp"
-                        android:textColor="@color/main_text"
-                        android:textColorHint="@color/placeholder" />
-                </com.google.android.material.textfield.TextInputLayout>
-
                 <!-- Campo: Propriedade -->
                 <TextView
                     android:layout_width="wrap_content"
