@@ -69,6 +69,7 @@ public class LoginActivity extends AppCompatActivity {
         } else if (currentUser != null) {
             // Se logado mas não verificado, desloga para forçar login com verificação
             mAuth.signOut();
+            mGoogleSignInClient.signOut();
         }
 
         btnLogin.setOnClickListener(v -> loginUsuario());
@@ -175,6 +176,7 @@ public class LoginActivity extends AppCompatActivity {
                                 progressBar.setVisibility(View.GONE);
                                 btnLogin.setEnabled(true);
                                 mAuth.signOut();
+                                mGoogleSignInClient.signOut();
                                 Toast.makeText(this, "Por favor, verifique seu e-mail antes de entrar.", Toast.LENGTH_LONG).show();
                             }
                         }

@@ -22,6 +22,9 @@ import com.example.avifacil.ui.lote.LotesActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.ui.viewmodel.DashboardViewModel;
 import com.example.avifacil.worker.SyncWorker;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.Locale;
@@ -35,8 +38,9 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView txtBoasVindas, txtPropriedade, txtTotalLotes, txtAvesAlojadas, txtMortalidade, txtAtivosEncerrados;
     private RecyclerView recyclerLotes;
     private TextView btnVerTodos, txtSyncStatus;
-    private ImageView imgSyncStatus;
+    private ImageView imgSyncStatus, btnSair;
     private Button btnSyncNow;
+    private GoogleSignInClient mGoogleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +64,14 @@ public class DashboardActivity extends AppCompatActivity {
         txtSyncStatus = findViewById(R.id.txtSyncStatus);
         imgSyncStatus = findViewById(R.id.imgSyncStatus);
         btnSyncNow = findViewById(R.id.btnSyncNow);
+        btnSair = findViewById(R.id.btnSair);
+
+        // Configurar Google Sign-In para possibilitar o logout completo
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         btnVerTodos.setOnClickListener(v -> {
             startActivity(new Intent(this, LotesActivity.class));
@@ -67,14 +79,32 @@ public class DashboardActivity extends AppCompatActivity {
 
         btnSyncNow.setOnClickListener(v -> iniciarSincronizacao());
 
-        findViewById(R.id.imgSyncStatus).setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            startActivity(new Intent(this, com.example.avifacil.ui.auth.LoginActivity.class));
-            finish();
-        });
+        btnSair.setOnClickListener(v -> confirmarSaida());
         
         // Observar status do WorkManager se necessário ou apenas atualizar UI
         txtSyncStatus.setText("Sincronização configurada");
+    }
+
+    private void confirmarSaida() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Sair do AviFácil")
+                .setMessage("Deseja realmente sair e trocar de conta?")
+                .setPositiveButton("Sair", (dialog, which) -> deslogar())
+                .setNegativeButton("Cancelar", null)
+                .show();
+    }
+
+    private void deslogar() {
+        // Logout do Firebase
+        FirebaseAuth.getInstance().signOut();
+        
+        // Logout do Google (para permitir escolher outra conta na próxima vez)
+        mGoogleSignInClient.signOut().addOnCompleteListener(this, task -> {
+            Intent intent = new Intent(DashboardActivity.this, com.example.avifacil.ui.auth.LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
     }
 
     private void iniciarSincronizacao() {
