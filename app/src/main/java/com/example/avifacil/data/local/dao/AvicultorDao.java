@@ -9,7 +9,7 @@ import java.util.List;
 
 @Dao
 public interface AvicultorDao {
-    @Insert
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     long insert(AvicultorEntity avicultor);
 
     @Update

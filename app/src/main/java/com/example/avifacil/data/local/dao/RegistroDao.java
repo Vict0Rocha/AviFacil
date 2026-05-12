@@ -10,7 +10,7 @@ import java.util.List;
 
 @Dao
 public interface RegistroDao {
-    @Insert
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     long insert(RegistroEntity registro);
 
     @Update

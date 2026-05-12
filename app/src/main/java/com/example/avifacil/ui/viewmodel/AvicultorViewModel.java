@@ -49,21 +49,6 @@ public class AvicultorViewModel extends AndroidViewModel {
         return successMessage;
     }
 
-    public void carregarAvicultores() {
-        executorService.execute(() -> {
-            try {
-                List<AvicultorEntity> lista = repository.getAllAtivos();
-                avicultoresAtivos.postValue(lista);
-                if (!lista.isEmpty()) {
-                    avicultorLogado.postValue(lista.get(0));
-                }
-            } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar: " + e.getMessage());
-                avicultoresAtivos.postValue(new java.util.ArrayList<>());
-            }
-        });
-    }
-
     public void carregarAvicultorPorUuid(String uuid) {
         executorService.execute(() -> {
             try {

@@ -33,14 +33,20 @@ public class HomeActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
 
-        viewModel.getAvicultoresAtivos().observe(this, avicultores -> {
-            if (avicultores != null && !avicultores.isEmpty()) {
-                AvicultorEntity avicultor = avicultores.get(0);
+        viewModel.getAvicultorLogado().observe(this, avicultor -> {
+            if (avicultor != null) {
                 txtBoasVindas.setText(getString(R.string.welcome_message, avicultor.getNome()));
                 txtPropriedade.setText(avicultor.getNomePropriedade());
+            } else {
+                // Se não encontrar o perfil do UUID logado, redireciona ou limpa
+                txtBoasVindas.setText("Olá!");
+                txtPropriedade.setText("");
             }
         });
 
-        viewModel.carregarAvicultores();
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUid != null) {
+            viewModel.carregarAvicultorPorUuid(currentUid);
+        }
     }
 }

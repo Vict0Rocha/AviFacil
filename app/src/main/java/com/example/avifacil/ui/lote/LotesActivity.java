@@ -54,12 +54,14 @@ public class LotesActivity extends AppCompatActivity {
         loteViewModel = new ViewModelProvider(this).get(LoteViewModel.class);
         avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
 
-        avicultorViewModel.getAvicultoresAtivos().observe(this, avicultores -> {
-            if (avicultores != null && !avicultores.isEmpty()) {
-                com.example.avifacil.data.local.entity.AvicultorEntity avicultor = avicultores.get(0);
+        avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
+            if (avicultor != null) {
                 avicultorId = avicultor.getId();
                 avicultorUuid = avicultor.getUuid();
                 loteViewModel.carregarLotes(avicultorId);
+            } else {
+                // Se o perfil sumiu ou trocou, volta pro login
+                finish();
             }
         });
 
@@ -82,7 +84,12 @@ public class LotesActivity extends AppCompatActivity {
             }
         });
 
-        avicultorViewModel.carregarAvicultores();
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUid != null) {
+            avicultorViewModel.carregarAvicultorPorUuid(currentUid);
+        } else {
+            finish();
+        }
     }
 
     private void mostrarDialogoEncerrar(com.example.avifacil.data.local.entity.LoteEntity lote) {

@@ -16,7 +16,8 @@ import java.util.Date;
         ),
         indices = {
                 @Index("avicultorId"),
-                @Index(value = {"avicultorId", "numeroLote"}, unique = true)
+                @Index(value = {"avicultorId", "numeroLote"}, unique = true),
+                @Index(value = {"uuid"}, unique = true)
         })
 public class LoteEntity {
     @PrimaryKey(autoGenerate = true)

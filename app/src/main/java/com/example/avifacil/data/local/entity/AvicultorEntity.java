@@ -1,9 +1,11 @@
 package com.example.avifacil.data.local.entity;
 
 import androidx.room.Entity;
+import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "avicultores")
+@Entity(tableName = "avicultores",
+        indices = {@Index(value = {"uuid"}, unique = true)})
 public class AvicultorEntity {
     @PrimaryKey(autoGenerate = true)
     private long id;

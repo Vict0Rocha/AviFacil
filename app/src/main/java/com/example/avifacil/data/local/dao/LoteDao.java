@@ -9,7 +9,7 @@ import java.util.List;
 
 @Dao
 public interface LoteDao {
-    @Insert
+    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     long insert(LoteEntity lote);
 
     @Update
