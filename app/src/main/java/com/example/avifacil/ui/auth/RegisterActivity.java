@@ -1,6 +1,8 @@
 package com.example.avifacil.ui.auth;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -8,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.avifacil.R;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
@@ -15,6 +18,7 @@ import com.google.firebase.auth.FirebaseUser;
 public class RegisterActivity extends AppCompatActivity {
 
     private TextInputEditText editEmail, editSenha, editConfirmarSenha;
+    private TextInputLayout inputLayoutSenha, inputLayoutConfirmarSenha;
     private Button btnRegistrar;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
@@ -27,12 +31,33 @@ public class RegisterActivity extends AppCompatActivity {
         editEmail = findViewById(R.id.editRegisterEmail);
         editSenha = findViewById(R.id.editRegisterSenha);
         editConfirmarSenha = findViewById(R.id.editRegisterConfirmarSenha);
+        inputLayoutSenha = findViewById(R.id.inputLayoutRegisterSenha);
+        inputLayoutConfirmarSenha = findViewById(R.id.inputLayoutRegisterConfirmarSenha);
         btnRegistrar = findViewById(R.id.btnFinalizarRegistro);
         progressBar = findViewById(R.id.progressBarRegister);
 
         mAuth = FirebaseAuth.getInstance();
 
         btnRegistrar.setOnClickListener(v -> registrarUsuario());
+
+        // Mostrar ícone de senha apenas ao digitar
+        setupPasswordToggle(editSenha, inputLayoutSenha);
+        setupPasswordToggle(editConfirmarSenha, inputLayoutConfirmarSenha);
+    }
+
+    private void setupPasswordToggle(TextInputEditText editText, TextInputLayout inputLayout) {
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                inputLayout.setEndIconMode(s.length() > 0 ? TextInputLayout.END_ICON_PASSWORD_TOGGLE : TextInputLayout.END_ICON_NONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
     }
 
     private void registrarUsuario() {

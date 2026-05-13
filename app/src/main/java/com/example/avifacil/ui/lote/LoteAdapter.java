@@ -67,6 +67,13 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
                 holder.itemView.getContext().getResources().getColor(R.color.secondary_text));
         }
 
+        if (lote.getObservacoes() != null && !lote.getObservacoes().isEmpty()) {
+            holder.txtObservacoes.setText(lote.getObservacoes());
+            holder.txtObservacoes.setVisibility(View.VISIBLE);
+        } else {
+            holder.txtObservacoes.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onLoteClick(lote);
@@ -87,7 +94,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
     }
 
     static class LoteViewHolder extends RecyclerView.ViewHolder {
-        TextView txtNumero, txtLinhagem, txtData, txtQtd, txtStatus;
+        TextView txtNumero, txtLinhagem, txtData, txtQtd, txtStatus, txtObservacoes;
 
         public LoteViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -96,6 +103,7 @@ public class LoteAdapter extends RecyclerView.Adapter<LoteAdapter.LoteViewHolder
             txtData = itemView.findViewById(R.id.txtDataInicio);
             txtQtd = itemView.findViewById(R.id.txtQtdAves);
             txtStatus = itemView.findViewById(R.id.txtStatusLote);
+            txtObservacoes = itemView.findViewById(R.id.txtObservacoesLote);
         }
     }
 }

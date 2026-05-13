@@ -2,6 +2,8 @@ package com.example.avifacil.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
@@ -18,6 +20,7 @@ import com.example.avifacil.ui.avicultor.CadastroAvicultorActivity;
 import com.example.avifacil.ui.dashboard.DashboardActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 9001;
     private TextInputEditText editEmail, editSenha;
+    private TextInputLayout inputLayoutSenha;
     private Button btnLogin, btnIrParaRegistro, btnGoogle;
     private TextView txtEsqueciSenha;
     private ProgressBar progressBar;
@@ -56,6 +60,7 @@ public class LoginActivity extends AppCompatActivity {
 
         editEmail = findViewById(R.id.editEmail);
         editSenha = findViewById(R.id.editSenha);
+        inputLayoutSenha = findViewById(R.id.inputLayoutSenha);
         btnLogin = findViewById(R.id.btnLogin);
         btnIrParaRegistro = findViewById(R.id.btnIrParaRegistro);
         btnGoogle = findViewById(R.id.btnGoogle);
@@ -83,6 +88,21 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         btnLogin.setOnClickListener(v -> loginUsuario());
+
+        // Mostrar ícone de senha apenas ao digitar
+        editSenha.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                inputLayoutSenha.setEndIconMode(s.length() > 0 ? TextInputLayout.END_ICON_PASSWORD_TOGGLE : TextInputLayout.END_ICON_NONE);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         btnIrParaRegistro.setOnClickListener(v -> {
             startActivity(new Intent(this, RegisterActivity.class));
         });

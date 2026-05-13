@@ -36,11 +36,13 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayoutRegisterSenha"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:passwordToggleEnabled="true"
+        app:endIconMode="none"
+        app:endIconTint="@color/primary_dark_blue"
         app:boxStrokeColor="@color/primary_dark_blue"
         app:hintTextColor="@color/primary_dark_blue"
         android:textColorHint="@color/secondary_text">
@@ -55,11 +57,13 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/inputLayoutRegisterConfirmarSenha"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:passwordToggleEnabled="true"
+        app:endIconMode="none"
+        app:endIconTint="@color/primary_dark_blue"
         app:boxStrokeColor="@color/primary_dark_blue"
         app:hintTextColor="@color/primary_dark_blue"
         android:textColorHint="@color/secondary_text">
