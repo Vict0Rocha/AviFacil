@@ -5,6 +5,9 @@ import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
 import com.example.avifacil.data.local.entity.LoteEntity;
@@ -12,6 +15,7 @@ import com.example.avifacil.data.local.entity.RegistroEntity;
 import com.example.avifacil.ui.registro.ListaRegistrosActivity;
 import com.example.avifacil.ui.viewmodel.LoteViewModel;
 import com.example.avifacil.ui.viewmodel.RegistroViewModel;
+import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.util.ZootecniaCalculator;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -24,6 +28,7 @@ public class DetalheLoteActivity extends AppCompatActivity {
     private Button btnGerenciar;
     private LoteViewModel loteViewModel;
     private RegistroViewModel registroViewModel;
+    private AvicultorViewModel avicultorViewModel;
     private long loteId;
     private LoteEntity currentLote;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -32,6 +37,13 @@ public class DetalheLoteActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detalhe_lote);
+
+        // Ajuste para bordas infinitas (Edge-to-Edge)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return windowInsets;
+        });
 
         loteId = getIntent().getLongExtra("LOTE_ID", -1);
         if (loteId == -1) {
@@ -43,6 +55,14 @@ public class DetalheLoteActivity extends AppCompatActivity {
         
         loteViewModel = new ViewModelProvider(this).get(LoteViewModel.class);
         registroViewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
+        avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
+
+        // Observa o avicultor logado para filtrar o carregamento do lote
+        avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
+            if (avicultor != null) {
+                loteViewModel.carregarLote(loteId, avicultor.getId());
+            }
+        });
 
         // Observa o lote para preencher as informações básicas
         loteViewModel.getLoteAtual().observe(this, lote -> {
@@ -122,7 +142,10 @@ public class DetalheLoteActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Recarrega os dados para garantir que os indicadores estejam atualizados
-        loteViewModel.carregarLote(loteId);
+        // Recarrega o avicultor para disparar o carregamento do lote com segurança
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUid != null) {
+            avicultorViewModel.carregarAvicultorPorUuid(currentUid);
+        }
     }
 }

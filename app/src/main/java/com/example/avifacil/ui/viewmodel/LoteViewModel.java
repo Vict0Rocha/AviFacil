@@ -46,10 +46,10 @@ public class LoteViewModel extends AndroidViewModel {
         return loteAtual;
     }
 
-    public void carregarLote(long id) {
+    public void carregarLote(long id, long avicultorId) {
         executorService.execute(() -> {
             try {
-                loteAtual.postValue(repository.getById(id));
+                loteAtual.postValue(repository.getById(id, avicultorId));
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao carregar lote: " + e.getMessage());
             }

@@ -31,8 +31,8 @@ public class LoteRepository {
         return loteDao.getLotesAtivosPorAvicultor(avicultorId);
     }
 
-    public LoteEntity getById(long id) {
-        return loteDao.getById(id);
+    public LoteEntity getById(long id, long avicultorId) {
+        return loteDao.getById(id, avicultorId);
     }
 
     public LoteEntity getLoteAtivo(long avicultorId) {

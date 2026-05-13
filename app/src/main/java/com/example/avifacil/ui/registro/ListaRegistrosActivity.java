@@ -5,16 +5,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.avifacil.R;
+import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.ui.viewmodel.RegistroViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 public class ListaRegistrosActivity extends AppCompatActivity {
 
     private RegistroViewModel viewModel;
+    private com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel;
+    private AvicultorViewModel avicultorViewModel;
     private RegistroAdapter adapter;
     private TextView txtEmpty;
     private long loteId = -1;
@@ -27,6 +33,13 @@ public class ListaRegistrosActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lista_registros);
+
+        // Ajuste para bordas infinitas (Edge-to-Edge)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return windowInsets;
+        });
 
         loteId = getIntent().getLongExtra("LOTE_ID", -1);
         numeroLote = getIntent().getStringExtra("NUMERO_LOTE");
@@ -45,7 +58,14 @@ public class ListaRegistrosActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         viewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
-        com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
+        loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
+        avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
+
+        avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
+            if (avicultor != null) {
+                loteViewModel.carregarLote(loteId, avicultor.getId());
+            }
+        });
 
         loteViewModel.getLoteAtual().observe(this, lote -> {
             if (lote != null) {
@@ -94,8 +114,13 @@ public class ListaRegistrosActivity extends AppCompatActivity {
             }
         });
 
-        // Carregar dados iniciais
-        loteViewModel.carregarLote(loteId);
+        // Carregar dados iniciais com segurança
+        String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+        if (currentUid != null) {
+            avicultorViewModel.carregarAvicultorPorUuid(currentUid);
+        } else {
+            finish();
+        }
     }
 
     private void mostrarDialogoExclusao(com.example.avifacil.data.local.entity.RegistroEntity registro) {

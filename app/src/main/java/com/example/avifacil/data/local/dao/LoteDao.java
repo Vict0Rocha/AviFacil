@@ -21,11 +21,14 @@ public interface LoteDao {
     @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0")
     List<LoteEntity> getLotesAtivosPorAvicultor(long avicultorId);
 
-    @Query("SELECT * FROM lotes WHERE id = :id AND deleted = 0")
-    LoteEntity getById(long id);
+    @Query("SELECT * FROM lotes WHERE id = :id AND avicultorId = :avicultorId AND deleted = 0")
+    LoteEntity getById(long id, long avicultorId);
 
-    @Query("SELECT * FROM lotes WHERE uuid = :uuid AND deleted = 0")
-    LoteEntity getByUuid(String uuid);
+    @Query("SELECT * FROM lotes WHERE uuid = :uuid AND avicultorId = :avicultorId AND deleted = 0")
+    LoteEntity getByUuid(String uuid, long avicultorId);
+
+    @Query("SELECT * FROM lotes WHERE id = :id AND deleted = 0")
+    LoteEntity getByIdSemFiltro(long id);
 
     @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND status = 'ATIVO' AND deleted = 0 LIMIT 1")
     LoteEntity getLoteAtivo(long avicultorId);

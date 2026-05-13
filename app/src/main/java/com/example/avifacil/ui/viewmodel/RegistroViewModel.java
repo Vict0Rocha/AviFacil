@@ -136,7 +136,7 @@ public class RegistroViewModel extends AndroidViewModel {
     }
 
     private void atualizarEstatisticasLote(long loteId) {
-        com.example.avifacil.data.local.entity.LoteEntity lote = db.loteDao().getById(loteId);
+        com.example.avifacil.data.local.entity.LoteEntity lote = db.loteDao().getByIdSemFiltro(loteId);
         if (lote == null) return;
 
         List<RegistroEntity> registros = repository.getRegistrosPorLote(loteId);

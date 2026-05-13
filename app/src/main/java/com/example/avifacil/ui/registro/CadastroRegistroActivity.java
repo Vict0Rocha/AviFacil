@@ -5,8 +5,12 @@ import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
+import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.ui.viewmodel.RegistroViewModel;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -22,6 +26,7 @@ public class CadastroRegistroActivity extends AppCompatActivity {
     private MaterialButton btnSalvar;
     private RegistroViewModel viewModel;
     private com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel;
+    private AvicultorViewModel avicultorViewModel;
     private Calendar calendar = Calendar.getInstance();
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private long loteId = -1;
@@ -33,6 +38,13 @@ public class CadastroRegistroActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro_registro);
+
+        // Ajuste para bordas infinitas (Edge-to-Edge)
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
+            Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return windowInsets;
+        });
 
         loteId = getIntent().getLongExtra("LOTE_ID", -1);
         loteUuid = getIntent().getStringExtra("LOTE_UUID");
@@ -47,6 +59,14 @@ public class CadastroRegistroActivity extends AppCompatActivity {
 
         viewModel = new ViewModelProvider(this).get(RegistroViewModel.class);
         loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
+        avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
+
+        // Observa o avicultor para carregar o lote com segurança
+        avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
+            if (avicultor != null) {
+                loteViewModel.carregarLote(loteId, avicultor.getId());
+            }
+        });
 
         // Busca data de alojamento do lote para validação
         loteViewModel.getLoteAtual().observe(this, lote -> {
@@ -64,9 +84,12 @@ public class CadastroRegistroActivity extends AppCompatActivity {
             viewModel.carregarRegistro(registroId);
         }
 
-        // Se tivermos o loteId, carregamos o lote para pegar a data de alojamento
+        // Se tivermos o loteId, carregamos o avicultor para disparar o fluxo
         if (loteId != -1) {
-            loteViewModel.carregarLote(loteId);
+            String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+            if (currentUid != null) {
+                avicultorViewModel.carregarAvicultorPorUuid(currentUid);
+            }
         }
 
         editData.setOnClickListener(v -> showDatePicker());
@@ -96,7 +119,12 @@ public class CadastroRegistroActivity extends AppCompatActivity {
             if (registro != null) {
                 loteId = registro.getLoteId();
                 loteUuid = registro.getLoteUuid();
-                loteViewModel.carregarLote(loteId); // Carrega o lote do registro para validação de data
+                
+                String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
+                if (currentUid != null) {
+                    avicultorViewModel.carregarAvicultorPorUuid(currentUid);
+                }
+
                 calendar.setTime(registro.getDataRegistro());
                 atualizarLabelData();
                 editMortas.setText(String.valueOf(registro.getAvesMortasPeriodo()));

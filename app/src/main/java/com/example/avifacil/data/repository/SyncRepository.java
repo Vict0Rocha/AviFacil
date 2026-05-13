@@ -40,9 +40,15 @@ public class SyncRepository {
         for (AvicultorEntity avicultor : pendentes) {
             try {
                 if (avicultor.getUuid() == null) continue;
-                Tasks.await(firestore.collection("avicultores")
-                        .document(avicultor.getUuid())
-                        .set(avicultor));
+                if (avicultor.isDeleted()) {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(avicultor.getUuid())
+                            .delete());
+                } else {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(avicultor.getUuid())
+                            .set(avicultor));
+                }
                 avicultorDao.marcarComoSincronizado(avicultor.getId());
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao sincronizar avicultor: " + avicultor.getUuid(), e);
@@ -55,11 +61,19 @@ public class SyncRepository {
         for (LoteEntity lote : pendentes) {
             try {
                 if (lote.getUuid() == null || lote.getAvicultorUuid() == null) continue;
-                Tasks.await(firestore.collection("avicultores")
-                        .document(lote.getAvicultorUuid())
-                        .collection("lotes")
-                        .document(lote.getUuid())
-                        .set(lote));
+                if (lote.isDeleted()) {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(lote.getAvicultorUuid())
+                            .collection("lotes")
+                            .document(lote.getUuid())
+                            .delete());
+                } else {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(lote.getAvicultorUuid())
+                            .collection("lotes")
+                            .document(lote.getUuid())
+                            .set(lote));
+                }
                 loteDao.marcarComoSincronizado(lote.getId());
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao sincronizar lote: " + lote.getUuid(), e);
@@ -71,16 +85,26 @@ public class SyncRepository {
         List<RegistroEntity> pendentes = registroDao.getPendentesSincronizacao();
         for (RegistroEntity registro : pendentes) {
             try {
-                LoteEntity lote = loteDao.getById(registro.getLoteId());
+                LoteEntity lote = loteDao.getByIdSemFiltro(registro.getLoteId());
                 if (lote != null && lote.getUuid() != null && lote.getAvicultorUuid() != null) {
                     registro.setLoteUuid(lote.getUuid());
-                    Tasks.await(firestore.collection("avicultores")
-                            .document(lote.getAvicultorUuid())
-                            .collection("lotes")
-                            .document(lote.getUuid())
-                            .collection("registros")
-                            .document(registro.getUuid())
-                            .set(registro));
+                    if (registro.isDeleted()) {
+                        Tasks.await(firestore.collection("avicultores")
+                                .document(lote.getAvicultorUuid())
+                                .collection("lotes")
+                                .document(lote.getUuid())
+                                .collection("registros")
+                                .document(registro.getUuid())
+                                .delete());
+                    } else {
+                        Tasks.await(firestore.collection("avicultores")
+                                .document(lote.getAvicultorUuid())
+                                .collection("lotes")
+                                .document(lote.getUuid())
+                                .collection("registros")
+                                .document(registro.getUuid())
+                                .set(registro));
+                    }
                     registroDao.marcarComoSincronizado(registro.getId());
                 }
             } catch (Exception e) {
@@ -127,7 +151,7 @@ public class SyncRepository {
         for (QueryDocumentSnapshot loteDoc : loteDocs) {
             LoteEntity remoteLote = loteDoc.toObject(LoteEntity.class);
             if (remoteLote != null) {
-                LoteEntity localLote = loteDao.getByUuid(remoteLote.getUuid());
+                LoteEntity localLote = loteDao.getByUuid(remoteLote.getUuid(), avLocalId);
                 long loteLocalId;
                 remoteLote.setAvicultorId(avLocalId);
                 if (localLote == null) {
