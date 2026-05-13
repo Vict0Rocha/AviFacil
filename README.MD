@@ -1,6 +1,6 @@
 # 🚧 EM CONSTRUÇÃO!
 ---
-# Documento de Requisitos
+# Descrição
 ---
 
 ### INTRODUÇÃO
