@@ -45,9 +45,9 @@
         android:id="@+id/inputLayoutSenha"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="24dp"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        app:endIconMode="none"
+        app:endIconMode="password_toggle"
         app:endIconTint="@color/primary_dark_blue"
         app:boxStrokeColor="@color/primary_dark_blue"
         app:hintTextColor="@color/primary_dark_blue"
@@ -62,18 +62,6 @@
             android:textColor="@color/main_text" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <TextView
-        android:id="@+id/txtEsqueciSenha"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="end"
-        android:layout_marginBottom="24dp"
-        android:text="@string/btn_esqueci_senha"
-        android:textColor="@color/primary_dark_blue"
-        android:textStyle="bold"
-        android:clickable="true"
-        android:focusable="true" />
-
     <Button
         android:id="@+id/btnLogin"
         android:layout_width="match_parent"
@@ -82,27 +70,6 @@
         android:text="@string/btn_entrar"
         android:backgroundTint="@color/primary_dark_blue"
         android:textColor="@color/white" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnGoogle"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/btn_login_google"
-        android:textAllCaps="false"
-        android:textColor="@color/primary_dark_blue"
-        app:strokeColor="@color/primary_dark_blue"
-        app:cornerRadius="4dp" />
-
-    <Button
-        android:id="@+id/btnIrParaRegistro"
-        style="@style/Widget.MaterialComponents.Button.TextButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="@string/btn_criar_conta"
-        android:textColor="@color/primary_dark_blue" />
 
     <ProgressBar
         android:id="@+id/progressBar"

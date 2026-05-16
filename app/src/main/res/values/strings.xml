@@ -49,20 +49,8 @@
     <string name="title_login">AviFácil Login</string>
     <string name="hint_email">E-mail</string>
     <string name="hint_senha">Senha</string>
-    <string name="hint_confirmar_senha">Confirme sua Senha</string>
     <string name="btn_entrar">Entrar</string>
-    <string name="btn_criar_conta">Criar nova conta</string>
-    <string name="btn_registrar">Registrar</string>
-    <string name="btn_esqueci_senha">Esqueci minha senha</string>
-    <string name="msg_erro_senhas_diferentes">As senhas não coincidem</string>
-    <string name="msg_email_verificacao_enviado">E-mail de verificação enviado para %1$s. Por favor, verifique sua caixa de entrada.</string>
-    <string name="msg_redefinir_senha_enviado">E-mail de redefinição de senha enviado para %1$s.</string>
-    <string name="msg_verifique_email">Por favor, verifique seu e-mail antes de entrar.</string>
-    <string name="title_registrar">Criar Conta</string>
-    <string name="title_recuperar_senha">Recuperar Senha</string>
-    <string name="msg_digite_email_recuperacao">Digite seu e-mail para receber o link de recuperação</string>
-    <string name="btn_enviar">Enviar</string>
-    <string name="btn_login_google">Fazer login com o Google</string>
+
 
     <!-- Registros Diários -->
     <string name="title_lista_registros">Registros do Lote</string>

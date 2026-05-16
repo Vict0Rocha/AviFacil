@@ -7,9 +7,7 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,25 +23,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.GoogleAuthProvider;
-
 public class LoginActivity extends AppCompatActivity {
 
-    private static final int RC_SIGN_IN = 9001;
     private TextInputEditText editEmail, editSenha;
     private TextInputLayout inputLayoutSenha;
-    private Button btnLogin, btnIrParaRegistro, btnGoogle;
-    private TextView txtEsqueciSenha;
+    private Button btnLogin;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
-    private GoogleSignInClient mGoogleSignInClient;
     private AvicultorViewModel avicultorViewModel;
 
     @Override
@@ -62,52 +48,33 @@ public class LoginActivity extends AppCompatActivity {
         editSenha = findViewById(R.id.editSenha);
         inputLayoutSenha = findViewById(R.id.inputLayoutSenha);
         btnLogin = findViewById(R.id.btnLogin);
-        btnIrParaRegistro = findViewById(R.id.btnIrParaRegistro);
-        btnGoogle = findViewById(R.id.btnGoogle);
-        txtEsqueciSenha = findViewById(R.id.txtEsqueciSenha);
         progressBar = findViewById(R.id.progressBar);
 
-        mAuth = FirebaseAuth.getInstance();
-        avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
-
-        // Configurar Google Sign-In
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        // Se já estiver logado e verificado, verifica perfil local
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null && currentUser.isEmailVerified()) {
-            verificarPerfilLocal(currentUser.getUid());
-        } else if (currentUser != null) {
-            // Se logado mas não verificado, desloga para forçar login com verificação
-            mAuth.signOut();
-            mGoogleSignInClient.signOut();
-        }
-
-        btnLogin.setOnClickListener(v -> loginUsuario());
-
-        // Mostrar ícone de senha apenas ao digitar
+        // Mostrar ícone de senha apenas quando houver texto
+        inputLayoutSenha.setEndIconVisible(false);
         editSenha.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                inputLayoutSenha.setEndIconMode(s.length() > 0 ? TextInputLayout.END_ICON_PASSWORD_TOGGLE : TextInputLayout.END_ICON_NONE);
+                inputLayoutSenha.setEndIconVisible(s.length() > 0);
             }
 
             @Override
             public void afterTextChanged(Editable s) {}
         });
 
-        btnIrParaRegistro.setOnClickListener(v -> {
-            startActivity(new Intent(this, RegisterActivity.class));
-        });
-        btnGoogle.setOnClickListener(v -> signInWithGoogle());
-        txtEsqueciSenha.setOnClickListener(v -> mostrarDialogoRecuperarSenha());
+        mAuth = FirebaseAuth.getInstance();
+        avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
+
+        // Se já estiver logado, verifica perfil local
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            verificarPerfilLocal(currentUser.getUid());
+        }
+
+        btnLogin.setOnClickListener(v -> loginUsuario());
 
         // Observar o perfil logado
         avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
@@ -140,49 +107,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void signInWithGoogle() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                firebaseAuthWithGoogle(account.getIdToken());
-            } catch (ApiException e) {
-                Toast.makeText(this, "Erro ao autenticar com Google", Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void firebaseAuthWithGoogle(String idToken) {
-        progressBar.setVisibility(View.VISIBLE);
-        btnLogin.setEnabled(false);
-        btnGoogle.setEnabled(false);
-
-        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        // Google accounts are usually already verified
-                        if (user != null) {
-                            avicultorViewModel.carregarAvicultorPorUuid(user.getUid());
-                        }
-                    } else {
-                        progressBar.setVisibility(View.GONE);
-                        btnLogin.setEnabled(true);
-                        btnGoogle.setEnabled(true);
-                        Toast.makeText(this, "Erro na autenticação Firebase com Google", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
     private void loginUsuario() {
         String email = editEmail.getText().toString().trim();
         String senha = editSenha.getText().toString().trim();
@@ -200,15 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
-                            if (user.isEmailVerified()) {
-                                avicultorViewModel.carregarAvicultorPorUuid(user.getUid());
-                            } else {
-                                progressBar.setVisibility(View.GONE);
-                                btnLogin.setEnabled(true);
-                                mAuth.signOut();
-                                mGoogleSignInClient.signOut();
-                                Toast.makeText(this, "Por favor, verifique seu e-mail antes de entrar.", Toast.LENGTH_LONG).show();
-                            }
+                            avicultorViewModel.carregarAvicultorPorUuid(user.getUid());
                         }
                     } else {
                         progressBar.setVisibility(View.GONE);
@@ -216,32 +132,6 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(this, getErrorMessage(task.getException()), Toast.LENGTH_LONG).show();
                     }
                 });
-    }
-
-    private void mostrarDialogoRecuperarSenha() {
-        final TextInputEditText input = new TextInputEditText(this);
-        input.setHint(R.string.hint_email);
-        input.setInputType(android.text.InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.title_recuperar_senha)
-                .setMessage(R.string.msg_digite_email_recuperacao)
-                .setView(input, 40, 0, 40, 0)
-                .setPositiveButton(R.string.btn_enviar, (dialog, which) -> {
-                    String email = input.getText().toString().trim();
-                    if (!email.isEmpty()) {
-                        mAuth.sendPasswordResetEmail(email)
-                                .addOnCompleteListener(task -> {
-                                    if (task.isSuccessful()) {
-                                        Toast.makeText(this, getString(R.string.msg_redefinir_senha_enviado, email), Toast.LENGTH_LONG).show();
-                                    } else {
-                                        Toast.makeText(this, getErrorMessage(task.getException()), Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                    }
-                })
-                .setNegativeButton(R.string.btn_cancelar, null)
-                .show();
     }
 
     private void verificarPerfilLocal(String uuid) {
