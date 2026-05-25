@@ -1,3 +1,4 @@
+# Android
 *.iml
 .gradle
 /local.properties
@@ -13,3 +14,21 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Firebase & Services (Security)
+**/google-services.json
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Node / Functions
+**/node_modules/
+**/dist/
+**/lib/
+functions/package-lock.json
+web-site/package-lock.json
+
+# Web Site
+web-site/.env
+web-site/.env.local
+web-site/.env.*.local
