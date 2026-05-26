@@ -3,8 +3,7 @@ import { functions } from '../firebase';
 import { httpsCallable } from 'firebase/functions';
 import Sidebar from '../components/Sidebar';
 import IndicatorCard from '../components/IndicatorCard';
-import { Bird, Skull, Scale, Wheat, TrendingUp, RefreshCw } from 'lucide-react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { RefreshCw } from 'lucide-react';
 
 const DashboardPage = () => {
   const [data, setData] = useState(null);
@@ -47,9 +46,7 @@ const DashboardPage = () => {
             </h1>
             <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Produtor: {data?.nomeProdutor}</p>
           </div>
-          <button onClick={fetchDashboardData} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--primary-green)' }}>
-            <RefreshCw size={20} />
-          </button>
+
         </div>
 
         {error && (
@@ -62,17 +59,16 @@ const DashboardPage = () => {
           <IndicatorCard
             title="Mortalidade Média"
             value={data?.estatisticasGerais?.mortalidadeMedia || "0%"}
-            icon={Skull}
+            valueColor="#D64545"
           />
           <IndicatorCard
-            title="Aves em Campo"
+            title="Total de aves vivas"
             value={data?.estatisticasGerais?.avesEmCampo || 0}
-            icon={Bird}
+            valueColor="#2D8A4E"
           />
           <IndicatorCard
             title="Lotes Ativos"
             value={data?.estatisticasGerais?.totalLotes || 0}
-            icon={TrendingUp}
           />
         </div>
 

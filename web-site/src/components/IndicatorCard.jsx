@@ -1,30 +1,22 @@
 import React from 'react';
 
-const IndicatorCard = ({ title, value, unit, icon: Icon, trend }) => {
+const IndicatorCard = ({ title, value, unit, valueColor }) => {
   return (
-    <div className="card-scientific">
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-        <div style={{ background: '#F1F5F9', padding: '10px', borderRadius: '12px', color: 'var(--primary-navy)' }}>
-          <Icon size={22} />
-        </div>
-        {trend && (
-          <span style={{
-            fontSize: '12px',
-            fontWeight: '800',
-            color: trend.startsWith('+') ? '#ef4444' : 'var(--primary-green)',
-            background: trend.startsWith('+') ? '#fee2e2' : '#E6F4EF',
-            padding: '4px 10px',
-            borderRadius: '20px'
-          }}>
-            {trend}
-          </span>
-        )}
-      </div>
-
-      <p style={{ fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', marginBottom: '4px' }}>{title}</p>
+    <div className="card-scientific" style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <p style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-muted)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+        {title}
+      </p>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
-        <h3 style={{ fontSize: '32px', fontWeight: '900', color: 'var(--primary-navy)', letterSpacing: '-1px' }}>{value}</h3>
-        <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--text-muted)' }}>{unit}</span>
+        <h3 style={{
+          fontSize: '36px',
+          fontWeight: '900',
+          color: valueColor || 'var(--primary-navy)',
+          letterSpacing: '-1px',
+          margin: 0
+        }}>
+          {value}
+        </h3>
+        {unit && <span style={{ fontSize: '16px', fontWeight: '700', color: 'var(--text-muted)' }}>{unit}</span>}
       </div>
     </div>
   );
