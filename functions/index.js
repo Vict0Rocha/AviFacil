@@ -1,65 +1,79 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
-const { setGlobalOptions } = require("firebase-functions/v2");
+const {onCall, HttpsError} = require("firebase-functions/v2/https");
+const {setGlobalOptions} = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 
-// Inicializa o Admin SDK para acessar o Firestore
 admin.initializeApp();
+setGlobalOptions({maxInstances: 10, region: "us-central1"});
 
-// Configurações globais (limite de instâncias para economizar custo)
-setGlobalOptions({ maxInstances: 10, region: "us-central1" });
+exports.getProdutorDashboard = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "Acesso negado.");
+  }
 
-/**
- * Função para obter o resumo de um lote.
- * O Front-end apenas passa o ID do lote, e o Back-end faz os cálculos.
- */
-exports.getLotePerformance = onCall(async (request) => {
+  const uid = request.auth.uid;
 
-    // 1. Verificação de Autenticação (DESATIVADA TEMPORARIAMENTE PARA TESTE)
-    /*
-    if (!request.auth) {
-        throw new HttpsError("unauthenticated", "Você precisa estar logado.");
-    }
-    */
+  try {
+    const avicultorDoc = await admin.firestore().collection("avicultores").doc(uid).get();
+    const avicultorData = avicultorDoc.exists ? avicultorDoc.data() : null;
 
-    const { loteId } = request.data;
-    if (!loteId) {
-        throw new HttpsError("invalid-argument", "O ID do lote é obrigatório.");
-    }
+    const lotesSnapshot = await admin.firestore()
+      .collection("avicultores")
+      .doc(uid)
+      .collection("lotes")
+      .get();
 
-    try {
-        // 2. Busca os dados brutos no Firestore
-        const loteDoc = await admin.firestore().collection("lotes").doc(loteId).get();
+    const lotesPromessas = lotesSnapshot.docs.map(async (loteDoc) => {
+      const data = loteDoc.data();
 
-        if (!loteDoc.exists) {
-            throw new HttpsError("not-found", `O lote com ID '${loteId}' não existe na coleção 'lotes'.`);
-        }
+      // Busca os registros deste lote para calcular os totais
+      const registrosSnapshot = await loteDoc.ref.collection("registros").get();
 
-        const data = loteDoc.data();
+      let totalMortes = 0;
+      let totalConsumo = 0;
+      let ultimoPeso = data.pesoInicial || 0;
 
-        // 3. REGRA DE NEGÓCIO (Calculada aqui no Back-end)
-        const qtdInicial = data.quantidadeInicial || 0;
-        const mortes = data.mortalidadeAcumulada || 0;
+      registrosSnapshot.forEach(regDoc => {
+        const reg = regDoc.data();
+        totalMortes += (reg.avesMortasPeriodo || 0);
+        totalConsumo += (reg.consumoRacaoPeriodo || 0);
+        if (reg.pesoAtualMedio > 0) ultimoPeso = reg.pesoAtualMedio;
+      });
 
-        // Cálculo da taxa de mortalidade
-        const taxaMortalidade = qtdInicial > 0 ? (mortes / qtdInicial) * 100 : 0;
+      const qtdInicial = data.quantidadeAvesInicial || 0;
+      const avesVivas = qtdInicial - totalMortes;
+      const taxaMortalidade = qtdInicial > 0 ? (totalMortes / qtdInicial) * 100 : 0;
 
-        // Status do lote (Lógica de decisão centralizada)
-        let statusDesempenho = "Bom";
-        if (taxaMortalidade > 5) statusDesempenho = "Crítico";
-        else if (taxaMortalidade > 3) statusDesempenho = "Alerta";
+      return {
+        id: loteDoc.id,
+        identificacao: data.numeroLote || "Sem número",
+        galpao: data.galpao,
+        linhagem: data.linhagem,
+        avesIniciais: qtdInicial,
+        avesAtuais: avesVivas,
+        mortalidadeAcumulada: totalMortes,
+        mortalidadePercentual: taxaMortalidade.toFixed(2) + "%",
+        consumoTotal: totalConsumo.toFixed(2),
+        pesoAtual: ultimoPeso.toFixed(3),
+        status: data.status || "ATIVO",
+        alerta: taxaMortalidade > 3 ? "Alerta" : "Normal",
+        dataInicio: data.dataInicio
+      };
+    });
 
-        // 4. Retorna apenas o que o site precisa exibir
-        return {
-            identificacao: data.identificacao || "Lote sem nome",
-            totalAves: qtdInicial,
-            mortalidadePercentual: taxaMortalidade.toFixed(2) + "%",
-            alertaStatus: statusDesempenho,
-            dataInicio: data.dataInicio
-        };
+    const lotesProcessados = await Promise.all(lotesPromessas);
 
-    } catch (error) {
-        console.error("Erro ao processar performance:", error);
-        // Retorna o erro real para sabermos o que aconteceu
-        throw new HttpsError("internal", error.message || "Erro desconhecido");
-    }
+    return {
+      nomeProdutor: avicultorData ? avicultorData.nome : "Produtor",
+      propriedade: avicultorData ? avicultorData.nomePropriedade : "Fazenda",
+      estatisticasGerais: {
+        totalLotes: lotesProcessados.length,
+        avesEmCampo: lotesProcessados.reduce((acc, l) => acc + (l.status === "ATIVO" ? l.avesAtuais : 0), 0),
+        mortalidadeMedia: (lotesProcessados.reduce((acc, l) => acc + parseFloat(l.mortalidadePercentual), 0) / (lotesProcessados.length || 1)).toFixed(2) + "%"
+      },
+      lotes: lotesProcessados
+    };
+  } catch (error) {
+    console.error("Erro no Dashboard:", error);
+    throw new HttpsError("internal", error.message);
+  }
 });
