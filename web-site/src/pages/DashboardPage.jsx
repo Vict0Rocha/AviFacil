@@ -3,7 +3,7 @@ import { functions } from '../firebase';
 import { httpsCallable } from 'firebase/functions';
 import Sidebar from '../components/Sidebar';
 import IndicatorCard from '../components/IndicatorCard';
-import { RefreshCw } from 'lucide-react';
+import { RefreshCw, AlertCircle } from 'lucide-react';
 
 const DashboardPage = () => {
   const [data, setData] = useState(null);
@@ -42,47 +42,65 @@ const DashboardPage = () => {
         <div className="top-bar-scientific">
           <div>
             <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>
-              {data?.propriedade || "Carregando Propriedade..."}
+              {data?.propriedade || "Propriedade em Análise"}
             </h1>
             <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Produtor: {data?.nomeProdutor}</p>
           </div>
-
         </div>
 
         {error && (
-          <div style={{ padding: '16px', background: '#FED7D7', color: '#C53030', borderRadius: '12px', marginBottom: '24px', fontWeight: '600' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', background: '#FED7D7', color: '#C53030', borderRadius: '12px', marginBottom: '24px', fontWeight: '600' }}>
+            <AlertCircle size={20} />
             {error}
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
           <IndicatorCard
-            title="Mortalidade Média"
+            title="Mortalidade Acumulada"
             value={data?.estatisticasGerais?.mortalidadeMedia || "0%"}
             valueColor="#D64545"
           />
           <IndicatorCard
-            title="Total de aves vivas"
-            value={data?.estatisticasGerais?.avesEmCampo || 0}
+            title="Viabilidade"
+            value={data?.estatisticasGerais?.viabilidadeMedia || "0%"}
             valueColor="#2D8A4E"
+          />
+          <IndicatorCard
+            title="Total de aves vivas"
+            value={data?.estatisticasGerais?.avesVivas || 0}
+            valueColor="#2D8A4E"
+          />
+          <IndicatorCard
+            title="GMP Médio"
+            value={data?.estatisticasGerais?.gmpMedio || 0}
+            unit="g"
+          />
+          <IndicatorCard
+            title="C.A. Média"
+            value={data?.estatisticasGerais?.caMedia || 0}
           />
           <IndicatorCard
             title="Lotes Ativos"
             value={data?.estatisticasGerais?.totalLotes || 0}
+            valueColor="var(--primary-navy)"
           />
         </div>
 
         <div className="card-scientific">
-          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Desempenho por Lote</h3>
+          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Análise Técnica Detalhada por Lote</h3>
           <div className="table-responsive">
             <table className="info-table" style={{ marginTop: 0 }}>
               <thead>
                 <tr>
                   <th>Lote</th>
                   <th>Galpão</th>
-                  <th>Aves Atuais</th>
-                  <th>Mortalidade</th>
-                  <th>Peso Médio</th>
+                  <th>Aves Vivas</th>
+                  <th>Mort. (%)</th>
+                  <th>Viab. (%)</th>
+                  <th>GMP (g)</th>
+                  <th>C.A.</th>
+                  <th>Peso (kg)</th>
                   <th>Status</th>
                 </tr>
               </thead>
@@ -92,18 +110,20 @@ const DashboardPage = () => {
                     <td><strong>{lote.identificacao}</strong></td>
                     <td>{lote.galpao}</td>
                     <td>{lote.avesAtuais}</td>
-                    <td style={{ color: lote.alerta === 'Alerta' ? '#E53E3E' : 'inherit', fontWeight: '600' }}>
-                      {lote.mortalidadePercentual}
-                    </td>
-                    <td>{lote.pesoAtual} kg</td>
+                    <td style={{ color: '#D64545', fontWeight: '700' }}>{lote.mortalidade}</td>
+                    <td style={{ color: '#2D8A4E', fontWeight: '700' }}>{lote.viabilidade}</td>
+                    <td>{lote.gmp}</td>
+                    <td>{lote.ca}</td>
+                    <td>{lote.pesoAtual}</td>
                     <td>
                       <span style={{
                         padding: '4px 12px',
                         borderRadius: '20px',
-                        fontSize: '12px',
-                        fontWeight: '700',
+                        fontSize: '11px',
+                        fontWeight: '800',
                         background: lote.status === 'ATIVO' ? '#C6F6D5' : '#EDF2F7',
-                        color: lote.status === 'ATIVO' ? '#22543D' : '#4A5568'
+                        color: lote.status === 'ATIVO' ? '#22543D' : '#4A5568',
+                        textTransform: 'uppercase'
                       }}>
                         {lote.status}
                       </span>
