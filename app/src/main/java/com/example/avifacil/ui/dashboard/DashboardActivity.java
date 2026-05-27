@@ -38,7 +38,7 @@ public class DashboardActivity extends AppCompatActivity {
     private AvicultorViewModel avicultorViewModel;
     private LoteResumoAdapter adapter;
 
-    private TextView txtBoasVindas, txtPropriedade, txtTotalLotes, txtAvesAlojadas, txtMortalidade, txtAtivosEncerrados;
+    private TextView txtBoasVindas, txtPropriedade, txtViabilidade, txtAvesAlojadas, txtMortalidade, txtAtivosEncerrados;
     private RecyclerView recyclerLotes;
     private TextView btnVerTodos, txtSyncStatus;
     private ImageView imgSyncStatus, btnSair;
@@ -65,7 +65,7 @@ public class DashboardActivity extends AppCompatActivity {
     private void initViews() {
         txtBoasVindas = findViewById(R.id.txtBoasVindasDash);
         txtPropriedade = findViewById(R.id.txtPropriedadeDash);
-        txtTotalLotes = findViewById(R.id.txtTotalLotesDash);
+        txtViabilidade = findViewById(R.id.txtViabilidadeDash);
         txtAvesAlojadas = findViewById(R.id.txtAvesAlojadasDash);
         txtMortalidade = findViewById(R.id.txtMortalidadeDash);
         txtAtivosEncerrados = findViewById(R.id.txtAtivosEncerradosDash);
@@ -191,7 +191,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         dashboardViewModel.getDashboardData().observe(this, data -> {
             if (data != null) {
-                txtTotalLotes.setText(String.valueOf(data.totalLotes));
+                txtViabilidade.setText(String.format(Locale.getDefault(), "%.2f%%", (100.0 - data.mortalidadeGeral)));
                 txtAvesAlojadas.setText(String.valueOf(data.avesAlojadas));
                 txtMortalidade.setText(String.format(Locale.getDefault(), "%.2f%%", data.mortalidadeGeral));
                 txtAtivosEncerrados.setText(String.format(Locale.getDefault(), "%d / %d", data.ativos, data.encerrados));
