@@ -92,7 +92,7 @@ public class DashboardActivity extends AppCompatActivity {
         btnSair.setOnClickListener(v -> confirmarSaida());
         
         // Observar status do WorkManager se necessário ou apenas atualizar UI
-        txtSyncStatus.setText("Sincronização configurada");
+        txtSyncStatus.setText("Salve os dados");
     }
 
     private void confirmarSaida() {

@@ -235,43 +235,13 @@
                 </com.google.android.material.card.MaterialCardView>
             </GridLayout>
 
-            <!-- Seção de Lotes Recentes -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="12dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Lotes Recentes"
-                    android:textColor="@color/main_text"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btnVerTodosLotes"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Ver todos"
-                    android:textColor="@color/primary_dark_blue"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:padding="8dp" />
-            </LinearLayout>
-
             <!-- Status de Sincronização -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/cardSyncStatus"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="12dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/white"
@@ -298,7 +268,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="Verificando Sincronização..."
+                        android:text="Salve os dados"
                         android:textColor="@color/primary_dark_blue"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -317,6 +287,36 @@
                         app:cornerRadius="8dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Seção de Lotes Recentes -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Lotes Recentes"
+                    android:textColor="@color/main_text"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/btnVerTodosLotes"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Ver todos"
+                    android:textColor="@color/primary_dark_blue"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="8dp" />
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerLotesDash"
