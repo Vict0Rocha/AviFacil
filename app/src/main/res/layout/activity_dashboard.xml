@@ -217,9 +217,9 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Lotes Ativos"
-                            android:textSize="12sp"
+                            android:text="Ativos / Encerrados"
                             android:textColor="@color/secondary_text"
+                            android:textSize="12sp"
                             android:textStyle="bold" />
 
                         <TextView
