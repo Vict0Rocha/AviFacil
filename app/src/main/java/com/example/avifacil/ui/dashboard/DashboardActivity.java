@@ -2,10 +2,14 @@ package com.example.avifacil.ui.dashboard;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.PopupMenu;
+import com.example.avifacil.ui.avicultor.PerfilActivity;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -41,7 +45,8 @@ public class DashboardActivity extends AppCompatActivity {
     private TextView txtBoasVindas, txtPropriedade, txtViabilidade, txtAvesAlojadas, txtMortalidade, txtAtivosEncerrados;
     private RecyclerView recyclerLotes;
     private TextView btnVerTodos, txtSyncStatus;
-    private ImageView imgSyncStatus, btnSair;
+    private ImageView imgSyncStatus;
+    private ImageButton btnMenu;
     private Button btnSyncNow;
     private GoogleSignInClient mGoogleSignInClient;
 
@@ -74,7 +79,9 @@ public class DashboardActivity extends AppCompatActivity {
         txtSyncStatus = findViewById(R.id.txtSyncStatus);
         imgSyncStatus = findViewById(R.id.imgSyncStatus);
         btnSyncNow = findViewById(R.id.btnSyncNow);
-        btnSair = findViewById(R.id.btnSair);
+        btnMenu = findViewById(R.id.btnMenu);
+
+        btnMenu.setOnClickListener(this::showPopupMenu);
 
         // Configurar Google Sign-In para possibilitar o logout completo
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -89,8 +96,6 @@ public class DashboardActivity extends AppCompatActivity {
 
         btnSyncNow.setOnClickListener(v -> iniciarSincronizacao());
 
-        btnSair.setOnClickListener(v -> confirmarSaida());
-        
         // Observar status do WorkManager se necessário ou apenas atualizar UI
         txtSyncStatus.setText("Salve os dados");
     }
@@ -197,9 +202,9 @@ public class DashboardActivity extends AppCompatActivity {
                 txtAtivosEncerrados.setText(String.format(Locale.getDefault(), "%d / %d", data.ativos, data.encerrados));
                 
                 if (data.lotes != null) {
-                    // Exibe apenas os 5 lotes mais recentes no dashboard
-                    if (data.lotes.size() > 5) {
-                        adapter.setLotes(data.lotes.subList(0, 5));
+                    // Exibe apenas os 3 lotes mais recentes/alterados no dashboard
+                    if (data.lotes.size() > 3) {
+                        adapter.setLotes(data.lotes.subList(0, 3));
                     } else {
                         adapter.setLotes(data.lotes);
                     }
@@ -224,5 +229,22 @@ public class DashboardActivity extends AppCompatActivity {
         if (currentUid != null) {
             avicultorViewModel.carregarAvicultorPorUuid(currentUid);
         }
+    }
+
+    private void showPopupMenu(View v) {
+        PopupMenu popup = new PopupMenu(this, v);
+        popup.getMenuInflater().inflate(R.menu.dashboard_menu, popup.getMenu());
+        popup.setOnMenuItemClickListener(item -> {
+            int id = item.getItemId();
+            if (id == R.id.menu_perfil) {
+                startActivity(new Intent(this, PerfilActivity.class));
+                return true;
+            } else if (id == R.id.menu_sair) {
+                confirmarSaida();
+                return true;
+            }
+            return false;
+        });
+        popup.show();
     }
 }

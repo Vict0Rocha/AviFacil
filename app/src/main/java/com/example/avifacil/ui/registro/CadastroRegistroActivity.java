@@ -210,6 +210,19 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         double consumo = Double.parseDouble(consumoStr);
         double peso = Double.parseDouble(pesoStr);
 
+        if (mortas < 0) {
+            layoutMortas.setError("A quantidade de mortes não pode ser negativa");
+            return;
+        }
+        if (consumo < 0) {
+            layoutConsumo.setError("O consumo não pode ser negativo");
+            return;
+        }
+        if (peso <= 0) {
+            layoutPeso.setError("O peso deve ser maior que zero");
+            return;
+        }
+
         if (registroId == -1) {
             viewModel.adicionarRegistro(loteId, loteUuid, data, mortas, consumo, peso, obs);
         } else {

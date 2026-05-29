@@ -88,15 +88,46 @@ public class AvicultorViewModel extends AndroidViewModel {
         }
         executorService.execute(() -> {
             try {
-                AvicultorEntity avicultor = new AvicultorEntity(nome, email, propriedade);
-                if (uuid != null) {
-                    avicultor.setUuid(uuid);
+                AvicultorEntity existente = repository.getByUuid(uuid);
+                if (existente != null) {
+                    existente.setNome(nome);
+                    existente.setNomePropriedade(propriedade);
+                    existente.setSincronizado(false);
+                    existente.setUpdatedAt(System.currentTimeMillis());
+                    repository.update(existente);
+                } else {
+                    AvicultorEntity avicultor = new AvicultorEntity(nome, email, propriedade);
+                    if (uuid != null) {
+                        avicultor.setUuid(uuid);
+                    }
+                    repository.insert(avicultor);
                 }
-                repository.insert(avicultor);
                 successMessage.postValue(true);
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao salvar: " + e.getMessage());
             }
         });
+    }
+
+    public void atualizarSenha(String novaSenha, String confirmarSenha) {
+        if (novaSenha.isEmpty() || novaSenha.length() < 6) {
+            errorMessage.setValue(getApplication().getString(R.string.msg_erro_senha_curta));
+            return;
+        }
+        if (!novaSenha.equals(confirmarSenha)) {
+            errorMessage.setValue(getApplication().getString(R.string.msg_erro_senhas_diferentes));
+            return;
+        }
+
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            user.updatePassword(novaSenha).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    successMessage.setValue(true);
+                } else {
+                    errorMessage.setValue("Erro ao alterar senha: " + task.getException().getMessage());
+                }
+            });
+        }
     }
 }

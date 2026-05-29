@@ -75,6 +75,28 @@ public class RegistroViewModel extends AndroidViewModel {
                     errorMessage.postValue("Já existe um registro para esta data");
                     return;
                 }
+
+                RegistroEntity ultimo = repository.getUltimoRegistro(loteId);
+                if (ultimo != null && !data.after(ultimo.getDataRegistro())) {
+                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                    errorMessage.postValue("A data do novo registro deve ser posterior ao último registro (" + sdf.format(ultimo.getDataRegistro()) + ")");
+                    return;
+                }
+
+                com.example.avifacil.data.local.entity.LoteEntity lote = db.loteDao().getByIdSemFiltro(loteId);
+                if (lote != null) {
+                    if (data.before(lote.getDataInicio())) {
+                        errorMessage.postValue("A data do registro não pode ser anterior ao alojamento");
+                        return;
+                    }
+
+                    int totalMortasAtual = repository.getTotalAvesMortas(loteId);
+                    if (totalMortasAtual + mortas > lote.getQuantidadeAvesInicial()) {
+                        errorMessage.postValue("A mortalidade total não pode exceder a quantidade inicial de aves (" + lote.getQuantidadeAvesInicial() + ")");
+                        return;
+                    }
+                }
+
                 RegistroEntity registro = new RegistroEntity(loteId, loteUuid, data, mortas, racao, peso);
                 registro.setObservacoes(observacoes);
                 repository.insert(registro);
@@ -98,6 +120,16 @@ public class RegistroViewModel extends AndroidViewModel {
                         errorMessage.postValue("Já existe um registro para esta nova data");
                         return;
                     }
+
+                    com.example.avifacil.data.local.entity.LoteEntity lote = db.loteDao().getByIdSemFiltro(registro.getLoteId());
+                    if (lote != null) {
+                        int totalMortasOutros = repository.getTotalAvesMortas(lote.getId()) - registro.getAvesMortasPeriodo();
+                        if (totalMortasOutros + mortas > lote.getQuantidadeAvesInicial()) {
+                            errorMessage.postValue("A mortalidade total não pode exceder a quantidade inicial de aves (" + lote.getQuantidadeAvesInicial() + ")");
+                            return;
+                        }
+                    }
+
                     registro.setDataRegistro(data);
                     registro.setAvesMortasPeriodo(mortas);
                     registro.setConsumoRacaoPeriodo(racao);
@@ -146,6 +178,8 @@ public class RegistroViewModel extends AndroidViewModel {
         
         lote.setPesoAtualMedio(pesoMedio);
         lote.setConversaoAlimentar(ca);
+        lote.setUpdatedAt(System.currentTimeMillis());
+        lote.setSincronizado(false);
 
         db.loteDao().update(lote);
     }

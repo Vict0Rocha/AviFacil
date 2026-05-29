@@ -45,6 +45,20 @@
     <string name="status_ativo">ATIVO</string>
     <string name="status_encerrado">ENCERRADO</string>
 
+    <!-- Menu -->
+    <string name="menu_perfil">Perfil</string>
+    <string name="menu_sair">Sair</string>
+
+    <!-- Perfil -->
+    <string name="title_perfil">Meu Perfil</string>
+    <string name="label_alterar_senha">Alterar Senha</string>
+    <string name="hint_nova_senha">Nova Senha</string>
+    <string name="hint_confirmar_senha">Confirmar Nova Senha</string>
+    <string name="msg_erro_senhas_diferentes">As senhas não coincidem</string>
+    <string name="msg_erro_senha_curta">A senha deve ter pelo menos 6 caracteres</string>
+    <string name="msg_sucesso_perfil">Perfil atualizado com sucesso</string>
+    <string name="msg_sucesso_senha">Senha alterada com sucesso</string>
+
     <!-- Auth -->
     <string name="title_login">AviFácil Login</string>
     <string name="hint_email">E-mail</string>
@@ -82,6 +96,7 @@
     <string name="label_peso_inicial_unidade">Peso Inicial (g)</string>
     <string name="label_peso_medio">Peso Médio Atual</string>
     <string name="label_total_consumo">Total Ração Consumida</string>
+    <string name="label_gmp">G.M.P. (Ganho Médio)</string>
     <string name="btn_gerenciar_registros">GERENCIAR REGISTROS</string>
     <string name="hint_peso_atual">Peso Médio Atual (g) *</string>
     <string name="msg_erro_peso_atual">Informe o peso médio atual</string>

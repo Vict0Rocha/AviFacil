@@ -45,7 +45,7 @@ public interface LoteDao {
     @Query("SELECT COALESCE(SUM(quantidadeAvesInicial), 0) FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0")
     int sumAvesAlojadas(long avicultorId);
 
-    @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0 ORDER BY dataInicio DESC")
+    @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND deleted = 0 ORDER BY updatedAt DESC")
     List<LoteEntity> getAllLotesDashboard(long avicultorId);
 
     @Query("SELECT * FROM lotes WHERE sincronizado = 0")

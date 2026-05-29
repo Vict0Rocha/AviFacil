@@ -31,26 +31,17 @@ public class ZootecniaCalculator {
         return 100.0 - calcularMortalidade(lote, registros);
     }
 
-    public static int calcularIdadeDias(LoteEntity lote) {
-        if (lote == null || lote.getDataInicio() == null) return 0;
-        long diffInMs = new Date().getTime() - lote.getDataInicio().getTime();
-        if (diffInMs < 0) return 1; // Caso a data seja futura, assume dia 1
+    public static int calcularIdadeDias(LoteEntity lote, Date dataReferencia) {
+        if (lote == null || lote.getDataInicio() == null || dataReferencia == null) return 1;
+        long diffInMs = dataReferencia.getTime() - lote.getDataInicio().getTime();
+        if (diffInMs < 0) return 1; // Caso a data seja anterior ao início, assume dia 1
         return (int) TimeUnit.DAYS.convert(diffInMs, TimeUnit.MILLISECONDS) + 1;
     }
 
     public static double calcularPesoMedioAtual(List<RegistroEntity> registros) {
         if (registros == null || registros.isEmpty()) return 0;
-        // Assume que a lista está ordenada por data ou pega o último registro adicionado
+        // Pega o último registro adicionado (assumindo que estão ordenados ou é o mais recente)
         return registros.get(registros.size() - 1).getPesoAtualMedio();
-    }
-
-    public static double calcularGanhoMedioDiario(LoteEntity lote, List<RegistroEntity> registros) {
-        int idade = calcularIdadeDias(lote);
-        double pesoAtual = calcularPesoMedioAtual(registros);
-        if (lote == null || idade <= 0) return 0;
-        
-        // GANHO MÉDIO DE PESO = (PESO ATUAL (g) – PESO INICIAL) / IDADES DAS AVES (dia)
-        return (pesoAtual - lote.getPesoInicial()) / idade;
     }
 
     public static double calcularTotalConsumoRacao(List<RegistroEntity> registros) {
@@ -69,16 +60,27 @@ public class ZootecniaCalculator {
         int vivas = calcularAvesVivas(lote, registros);
         double pesoAtual = calcularPesoMedioAtual(registros);
 
-        if (consumoTotal <= 0) return 0;
+        if (consumoTotal <= 0 || vivas <= 0) return 0;
 
-        // GANHO DE PESO TOTAL DAS AVES (em kg para a fórmula de CA)
-        double pesoTotalInicialKg = (lote.getQuantidadeAvesInicial() * lote.getPesoInicial()) / 1000.0;
-        double pesoTotalVivoAtualKg = (vivas * pesoAtual) / 1000.0;
-        double ganhoPesoTotalKg = pesoTotalVivoAtualKg - pesoTotalInicialKg;
+        // Conforme fórmula: CA = consumoTotal / ((pesoAtualMedio - lote.getPesoInicial()) * avesVivas / 1000)
+        double ganhoPesoMedioKg = (pesoAtual - lote.getPesoInicial()) / 1000.0;
+        double ganhoPesoTotalLoteKg = ganhoPesoMedioKg * vivas;
 
-        if (ganhoPesoTotalKg <= 0) return 0;
+        if (ganhoPesoTotalLoteKg <= 0) return 0;
 
-        // CONVERSÃO ALIMENTAR = CONSUMO TOTAL / GANHO DE PESO TOTAL
-        return consumoTotal / ganhoPesoTotalKg;
+        return consumoTotal / ganhoPesoTotalLoteKg;
+    }
+
+    public static double calcularGanhoMedioPeso(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
+        if (lote == null || registros == null || registros.isEmpty()) return 0;
+
+        double pesoAtual = calcularPesoMedioAtual(registros);
+        double pesoInicial = lote.getPesoInicial();
+        int idadeDias = calcularIdadeDias(lote, dataReferencia);
+
+        if (idadeDias <= 0) return 0;
+
+        // GANHO MÉDIO DE PESO = PESO ATUAL (g) – PESO INICIAL / IDADES DAS AVES (dia)
+        return (pesoAtual - pesoInicial) / idadeDias;
     }
 }

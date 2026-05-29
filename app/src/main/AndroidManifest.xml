@@ -59,6 +59,10 @@
             android:name=".ui.lote.DetalheLoteActivity"
             android:label="@string/title_detalhe_lote" />
 
+        <activity
+            android:name=".ui.avicultor.PerfilActivity"
+            android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

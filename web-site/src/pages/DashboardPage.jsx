@@ -72,11 +72,6 @@ const DashboardPage = () => {
             valueColor="#2D8A4E"
           />
           <IndicatorCard
-            title="GMP Médio"
-            value={data?.estatisticasGerais?.gmpMedio || 0}
-            unit="g"
-          />
-          <IndicatorCard
             title="C.A. Média"
             value={data?.estatisticasGerais?.caMedia || 0}
           />
@@ -98,7 +93,6 @@ const DashboardPage = () => {
                   <th>Aves Vivas</th>
                   <th>Mort. (%)</th>
                   <th>Viab. (%)</th>
-                  <th>GMP (g)</th>
                   <th>C.A.</th>
                   <th>Peso (kg)</th>
                   <th>Status</th>
@@ -112,7 +106,6 @@ const DashboardPage = () => {
                     <td>{lote.avesAtuais}</td>
                     <td style={{ color: '#D64545', fontWeight: '700' }}>{lote.mortalidade}</td>
                     <td style={{ color: '#2D8A4E', fontWeight: '700' }}>{lote.viabilidade}</td>
-                    <td>{lote.gmp}</td>
                     <td>{lote.ca}</td>
                     <td>{lote.pesoAtual}</td>
                     <td>

@@ -22,11 +22,6 @@ public class ZootecniaCalculator {
         return racaoTotalKg / massaTotal;
     }
 
-    public static double calcularGMD(double pesoAtualG, double pesoInicialG, int idadeDias) {
-        if (idadeDias <= 0) return 0;
-        return (pesoAtualG - pesoInicialG) / idadeDias;
-    }
-
     public static double calcularPesoTotalEstimado(int inicial, int mortasAcumuladas, double pesoMedioKg) {
         return calcularAvesVivas(inicial, mortasAcumuladas) * pesoMedioKg;
     }

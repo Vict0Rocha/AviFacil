@@ -1,7 +1,6 @@
 export const mockStats = [
   { label: 'Sobrevivência', value: '97.2%', sub: '+0.5% vs semana anterior', color: 'var(--accent-green)' },
   { label: 'Conversão Alimentar', value: '1.42', sub: 'Meta: 1.45', color: 'var(--accent-blue)' },
-  { label: 'GMD (Ganho Médio)', value: '62g', sub: 'Peso médio: 2.450kg', color: 'var(--primary-navy)' },
   { label: 'Ração Consumida', value: '4.250 kg', sub: 'Estoque: 1.200 kg', color: 'var(--text-secondary)' },
 ];
 

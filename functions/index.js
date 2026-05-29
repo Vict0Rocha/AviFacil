@@ -25,7 +25,6 @@ exports.getProdutorDashboard = onCall(async (request) => {
     let geralAlojadas = 0;
     let geralMortas = 0;
     let geralVivas = 0;
-    let somaGMP = 0;
     let somaCA = 0;
     let lotesAtivosCount = 0;
 
@@ -60,12 +59,10 @@ exports.getProdutorDashboard = onCall(async (request) => {
       const hoje = new Date();
       const idadeDias = Math.max(1, Math.ceil((hoje - dataInicio) / (1000 * 60 * 60 * 24)));
 
-      const gmp = ((pesoAtualKg - pesoInicialKg) * 1000) / idadeDias;
       const ganhoPesoTotalDasAves = (pesoAtualKg - pesoInicialKg) * avesVivas;
       const ca = ganhoPesoTotalDasAves > 0 ? (totalConsumoRacao / ganhoPesoTotalDasAves) : 0;
 
       if (data.status === "ATIVO") {
-        somaGMP += gmp;
         somaCA += ca;
         lotesAtivosCount++;
       }
@@ -77,7 +74,6 @@ exports.getProdutorDashboard = onCall(async (request) => {
         avesAtuais: avesVivas,
         mortalidade: taxaMortalidade.toFixed(2) + "%",
         viabilidade: viabilidade.toFixed(2) + "%",
-        gmp: gmp.toFixed(2),
         ca: ca.toFixed(2),
         pesoAtual: pesoAtualKg.toFixed(3),
         status: data.status || "ATIVO"
@@ -88,7 +84,6 @@ exports.getProdutorDashboard = onCall(async (request) => {
 
     const mortalidadeGeral = geralAlojadas > 0 ? (geralMortas / geralAlojadas) * 100 : 0;
     const viabilidadeGeral = 100 - mortalidadeGeral;
-    const gmpMedioGeral = lotesAtivosCount > 0 ? (somaGMP / lotesAtivosCount) : 0;
     const caMediaGeral = lotesAtivosCount > 0 ? (somaCA / lotesAtivosCount) : 0;
 
     return {
@@ -99,7 +94,6 @@ exports.getProdutorDashboard = onCall(async (request) => {
         avesVivas: geralVivas,
         mortalidadeMedia: mortalidadeGeral.toFixed(2) + "%",
         viabilidadeMedia: viabilidadeGeral.toFixed(2) + "%",
-        gmpMedio: gmpMedioGeral.toFixed(2),
         caMedia: caMediaGeral.toFixed(2)
       },
       lotes: lotesResult
