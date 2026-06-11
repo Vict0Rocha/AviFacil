@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Regras para a coleção de Avicultores e suas subcoleções
+    // O usuário autenticado só pode ler e escrever seus próprios dados
+    match /avicultores/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      // Regras para Lotes dentro de um Avicultor
+      match /lotes/{loteId} {
+        allow read, write: if request.auth != null && request.auth.uid == uid;
+
+        // Regras para Registros dentro de um Lote
+        match /registros/{regId} {
+          allow read, write: if request.auth != null && request.auth.uid == uid;
+        }
+      }
+    }
+
+    // Caso existam outras coleções globais futuramente, adicione aqui.
+    // Por padrão, nega qualquer outro acesso.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

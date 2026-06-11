@@ -2,9 +2,9 @@ package com.example.avifacil.ui.registro;
 
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -22,7 +22,9 @@ import java.util.Locale;
 public class CadastroRegistroActivity extends AppCompatActivity {
 
     private TextInputEditText editData, editMortas, editConsumo, editPeso, editObs;
+    private TextInputEditText editPrecoInsumo;
     private com.google.android.material.textfield.TextInputLayout layoutData, layoutMortas, layoutConsumo, layoutPeso;
+    private com.google.android.material.textfield.TextInputLayout layoutPrecoInsumo;
     private MaterialButton btnSalvar;
     private RegistroViewModel viewModel;
     private com.example.avifacil.ui.viewmodel.LoteViewModel loteViewModel;
@@ -33,13 +35,13 @@ public class CadastroRegistroActivity extends AppCompatActivity {
     private String loteUuid = null;
     private long registroId = -1;
     private Date dataAlojamento;
+    private int lastCheckedId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_cadastro_registro);
 
-        // Ajuste para bordas infinitas (Edge-to-Edge)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(android.R.id.content), (v, windowInsets) -> {
             Insets systemBars = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -61,14 +63,12 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         loteViewModel = new ViewModelProvider(this).get(com.example.avifacil.ui.viewmodel.LoteViewModel.class);
         avicultorViewModel = new ViewModelProvider(this).get(AvicultorViewModel.class);
 
-        // Observa o avicultor para carregar o lote com segurança
         avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
             if (avicultor != null) {
                 loteViewModel.carregarLote(loteId, avicultor.getId());
             }
         });
 
-        // Busca data de alojamento do lote para validação
         loteViewModel.getLoteAtual().observe(this, lote -> {
             if (lote != null) {
                 dataAlojamento = lote.getDataInicio();
@@ -84,7 +84,6 @@ public class CadastroRegistroActivity extends AppCompatActivity {
             viewModel.carregarRegistro(registroId);
         }
 
-        // Se tivermos o loteId, carregamos o avicultor para disparar o fluxo
         if (loteId != -1) {
             String currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().getUid();
             if (currentUid != null) {
@@ -104,12 +103,21 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         editConsumo = findViewById(R.id.editConsumo);
         editPeso = findViewById(R.id.editPesoAtual);
         editObs = findViewById(R.id.editObs);
+        
+        editPrecoInsumo = findViewById(R.id.editPrecoInsumo);
+
+        findViewById(R.id.radioMilho).setOnClickListener(v -> toggleRadio(R.id.radioMilho));
+        findViewById(R.id.radioSoja).setOnClickListener(v -> toggleRadio(R.id.radioSoja));
+        findViewById(R.id.radioNucleo).setOnClickListener(v -> toggleRadio(R.id.radioNucleo));
+        findViewById(R.id.radioOutro).setOnClickListener(v -> toggleRadio(R.id.radioOutro));
+
         btnSalvar = findViewById(R.id.btnSalvarRegistro);
 
         layoutData = findViewById(R.id.inputLayoutDataRegistro);
         layoutMortas = findViewById(R.id.inputLayoutMortas);
         layoutConsumo = findViewById(R.id.inputLayoutConsumo);
         layoutPeso = findViewById(R.id.inputLayoutPesoAtual);
+        layoutPrecoInsumo = findViewById(R.id.inputLayoutPrecoInsumo);
         
         atualizarLabelData();
     }
@@ -130,6 +138,10 @@ public class CadastroRegistroActivity extends AppCompatActivity {
                 editMortas.setText(String.valueOf(registro.getAvesMortasPeriodo()));
                 editConsumo.setText(String.valueOf(registro.getConsumoRacaoPeriodo()));
                 editPeso.setText(String.valueOf(registro.getPesoAtualMedio()));
+                
+                editPrecoInsumo.setText(String.valueOf(registro.getPrecoKgInsumo()));
+                setTipoInsumoRadio(registro.getTipoInsumo());
+                
                 editObs.setText(registro.getObservacoes());
             }
         });
@@ -146,6 +158,57 @@ public class CadastroRegistroActivity extends AppCompatActivity {
                 Toast.makeText(this, error, Toast.LENGTH_LONG).show();
             }
         });
+    }
+
+    private void setTipoInsumoRadio(String tipo) {
+        uncheckAllRadios();
+        lastCheckedId = -1;
+        
+        if (tipo == null) return;
+        
+        switch (tipo.toLowerCase()) {
+            case "milho": lastCheckedId = R.id.radioMilho; break;
+            case "soja": lastCheckedId = R.id.radioSoja; break;
+            case "núcleo": lastCheckedId = R.id.radioNucleo; break;
+            case "outro": lastCheckedId = R.id.radioOutro; break;
+        }
+        
+        if (lastCheckedId != -1) {
+            android.widget.RadioButton rb = findViewById(lastCheckedId);
+            if (rb != null) rb.setChecked(true);
+        }
+    }
+
+    private void uncheckAllRadios() {
+        int[] ids = {R.id.radioMilho, R.id.radioSoja, R.id.radioNucleo, R.id.radioOutro};
+        for (int id : ids) {
+            android.widget.RadioButton rb = findViewById(id);
+            if (rb != null) rb.setChecked(false);
+        }
+    }
+
+    private void toggleRadio(int id) {
+        android.widget.RadioButton rb = findViewById(id);
+        if (rb == null) return;
+
+        if (lastCheckedId == id) {
+            // Se já estava marcado, desmarca tudo
+            uncheckAllRadios();
+            lastCheckedId = -1;
+        } else {
+            // Se era outro ou nenhum, desmarca os outros e marca o atual
+            uncheckAllRadios();
+            rb.setChecked(true);
+            lastCheckedId = id;
+        }
+    }
+
+    private String getTipoInsumoSelecionado() {
+        if (lastCheckedId == R.id.radioMilho) return "milho";
+        if (lastCheckedId == R.id.radioSoja) return "soja";
+        if (lastCheckedId == R.id.radioNucleo) return "núcleo";
+        if (lastCheckedId == R.id.radioOutro) return "outro";
+        return null;
     }
 
     private void showDatePicker() {
@@ -167,66 +230,48 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         editConsumo.setEnabled(false);
         editPeso.setEnabled(false);
         editObs.setEnabled(false);
+        editPrecoInsumo.setEnabled(false);
+        
+        findViewById(R.id.radioMilho).setEnabled(false);
+        findViewById(R.id.radioSoja).setEnabled(false);
+        findViewById(R.id.radioNucleo).setEnabled(false);
+        findViewById(R.id.radioOutro).setEnabled(false);
+
         btnSalvar.setVisibility(android.view.View.GONE);
-        Toast.makeText(this, "Lote encerrado. Não é possível alterar registros.", Toast.LENGTH_SHORT).show();
     }
 
     private void salvarRegistro() {
         String mortasStr = editMortas.getText().toString().trim();
         String consumoStr = editConsumo.getText().toString().trim();
         String pesoStr = editPeso.getText().toString().trim();
+        String precoInsumoStr = editPrecoInsumo.getText().toString().trim();
         String obs = editObs.getText().toString().trim();
         Date data = calendar.getTime();
 
         if (dataAlojamento != null && data.before(dataAlojamento)) {
             layoutData.setError(getString(R.string.msg_erro_data_lote, dateFormat.format(dataAlojamento)));
             return;
-        } else {
-            layoutData.setError(null);
         }
 
-        if (mortasStr.isEmpty()) {
-            layoutMortas.setError(getString(R.string.msg_erro_mortas));
-            return;
-        } else {
-            layoutMortas.setError(null);
-        }
-
-        if (pesoStr.isEmpty()) {
-            layoutPeso.setError(getString(R.string.msg_erro_peso_atual));
-            return;
-        } else {
-            layoutPeso.setError(null);
-        }
-
-        if (consumoStr.isEmpty()) {
-            layoutConsumo.setError(getString(R.string.msg_erro_consumo));
-            return;
-        } else {
-            layoutConsumo.setError(null);
-        }
+        if (mortasStr.isEmpty()) { layoutMortas.setError(getString(R.string.msg_erro_mortas)); return; }
+        if (pesoStr.isEmpty()) { layoutPeso.setError(getString(R.string.msg_erro_peso_atual)); return; }
+        if (consumoStr.isEmpty()) { layoutConsumo.setError(getString(R.string.msg_erro_consumo)); return; }
+        if (precoInsumoStr.isEmpty()) precoInsumoStr = "0";
 
         int mortas = Integer.parseInt(mortasStr);
         double consumo = Double.parseDouble(consumoStr);
         double peso = Double.parseDouble(pesoStr);
+        double precoInsumo = Double.parseDouble(precoInsumoStr);
+        String tipoInsumo = getTipoInsumoSelecionado();
 
-        if (mortas < 0) {
-            layoutMortas.setError("A quantidade de mortes não pode ser negativa");
-            return;
-        }
-        if (consumo < 0) {
-            layoutConsumo.setError("O consumo não pode ser negativo");
-            return;
-        }
-        if (peso <= 0) {
-            layoutPeso.setError("O peso deve ser maior que zero");
-            return;
-        }
+        if (mortas < 0) { layoutMortas.setError("Mortalidade inválida"); return; }
+        if (consumo < 0) { layoutConsumo.setError("Consumo inválido"); return; }
+        if (peso <= 0) { layoutPeso.setError("Peso inválido"); return; }
 
         if (registroId == -1) {
-            viewModel.adicionarRegistro(loteId, loteUuid, data, mortas, consumo, peso, obs);
+            viewModel.adicionarRegistro(loteId, loteUuid, data, mortas, consumo, peso, precoInsumo, tipoInsumo, obs);
         } else {
-            viewModel.editarRegistro(registroId, data, mortas, consumo, peso, obs);
+            viewModel.editarRegistro(registroId, data, mortas, consumo, peso, precoInsumo, tipoInsumo, obs);
         }
     }
 }

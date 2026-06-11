@@ -35,6 +35,7 @@ public class LoteEntity {
     private double pesoAtualMedio; // Calculado
     private double conversaoAlimentar; // Calculada
     private String observacoes;
+
     private StatusLote status = StatusLote.ATIVO;
     private boolean deleted = false;
     private boolean sincronizado = false;
@@ -85,6 +86,7 @@ public class LoteEntity {
     public void setConversaoAlimentar(double conversaoAlimentar) { this.conversaoAlimentar = conversaoAlimentar; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
+
     public StatusLote getStatus() { return status; }
     public void setStatus(StatusLote status) { this.status = status; }
     public boolean isDeleted() { return deleted; }

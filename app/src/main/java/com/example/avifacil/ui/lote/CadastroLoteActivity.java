@@ -95,6 +95,7 @@ public class CadastroLoteActivity extends AppCompatActivity {
         String qtdStr = editQtd.getText().toString().trim();
         String pesoStr = editPeso.getText().toString().trim();
         String obs = editObs.getText().toString().trim();
+
         Date dataInicio = calendar.getTime();
 
         boolean isValid = true;
@@ -130,6 +131,7 @@ public class CadastroLoteActivity extends AppCompatActivity {
         if (isValid) {
             int qtd = Integer.parseInt(qtdStr);
             double peso = Double.parseDouble(pesoStr);
+            
             viewModel.criarLote(avicultorId, avicultorUuid, numero, linhagem, galpao, dataInicio, qtd, peso, obs);
         }
     }

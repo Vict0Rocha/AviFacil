@@ -29,6 +29,8 @@ public class RegistroEntity {
     private int avesMortasPeriodo;
     private double consumoRacaoPeriodo;
     private double pesoAtualMedio;
+    private double precoKgInsumo;
+    private String tipoInsumo; // "milho", "soja", "núcleo", "outro"
     private String observacoes;
     private boolean deleted = false;
     private boolean sincronizado = false;
@@ -38,7 +40,7 @@ public class RegistroEntity {
         // Necessário para o Firebase
     }
 
-    public RegistroEntity(long loteId, String loteUuid, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo, double pesoAtualMedio) {
+    public RegistroEntity(long loteId, String loteUuid, Date dataRegistro, int avesMortasPeriodo, double consumoRacaoPeriodo, double pesoAtualMedio, double precoKgInsumo, String tipoInsumo) {
         this.uuid = java.util.UUID.randomUUID().toString();
         this.loteId = loteId;
         this.loteUuid = loteUuid;
@@ -46,6 +48,8 @@ public class RegistroEntity {
         this.avesMortasPeriodo = avesMortasPeriodo;
         this.consumoRacaoPeriodo = consumoRacaoPeriodo;
         this.pesoAtualMedio = pesoAtualMedio;
+        this.precoKgInsumo = precoKgInsumo;
+        this.tipoInsumo = tipoInsumo;
         this.updatedAt = System.currentTimeMillis();
     }
 
@@ -66,6 +70,13 @@ public class RegistroEntity {
     public void setConsumoRacaoPeriodo(double consumoRacaoPeriodo) { this.consumoRacaoPeriodo = consumoRacaoPeriodo; }
     public double getPesoAtualMedio() { return pesoAtualMedio; }
     public void setPesoAtualMedio(double pesoAtualMedio) { this.pesoAtualMedio = pesoAtualMedio; }
+    
+    public double getPrecoKgInsumo() { return precoKgInsumo; }
+    public void setPrecoKgInsumo(double precoKgInsumo) { this.precoKgInsumo = precoKgInsumo; }
+    
+    public String getTipoInsumo() { return tipoInsumo; }
+    public void setTipoInsumo(String tipoInsumo) { this.tipoInsumo = tipoInsumo; }
+
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
     public boolean isDeleted() { return deleted; }

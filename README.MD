@@ -6,16 +6,15 @@ O **AviFácil** é uma plataforma completa para o acompanhamento técnico de lot
 
 O projeto é dividido em três componentes principais:
 
-1.  **📱 Android App (`/app`)**: Aplicativo nativo em Java/Kotlin focado na coleta de dados em campo, com suporte a modo offline e sincronização via WorkManager.
-2.  **⚙️ Cloud Functions (`/functions`)**: Back-end em Node.js rodando em Firebase Functions. Centraliza toda a **lógica de negócio** e cálculos complexos para garantir segurança e consistência.
-3.  **💻 Web Dashboard (`/web-site`)**: Painel administrativo em React para análise de dados e visualização de indicadores de desempenho (BI).
+1.  **📱 Android App (`/app`)**: Aplicativo nativo em Java focado na coleta de dados em campo, com suporte a modo offline e sincronização via WorkManager. Realiza cálculos zootécnicos localmente.
+2.  **💻 Web Dashboard (`/web-site`)**: Painel administrativo em React para análise de dados e visualização de indicadores de desempenho (BI). Consome dados diretamente do Firestore e processa métricas no lado do cliente.
 
 ## 🛠️ Tecnologias Utilizadas
 
 *   **Android**: Java, Room Database, ViewModel, WorkManager.
-*   **Back-end**: Node.js, Firebase Cloud Functions, Firebase Admin SDK.
-*   **Front-end**: React + Vite, Firebase Auth.
+*   **Front-end**: React + Vite, Firebase Auth, Firestore SDK.
 *   **Banco de Dados**: Cloud Firestore (NoSQL).
+*   **Plano**: Firebase Spark (100% gratuito).
 
 ## 🚀 Como Iniciar
 
@@ -34,8 +33,7 @@ Para testar o ecossistema completo localmente:
 
 ### Configuração do Web Dashboard
 1.  Entre na pasta: `cd web-site`
-2.  Crie um arquivo `.env` baseado nas suas credenciais do Firebase.
-3.  Instale dependências e rode:
+2.  Instale dependências e rode:
     ```bash
     npm install
     npm run dev
@@ -44,7 +42,7 @@ Para testar o ecossistema completo localmente:
 ## 🔒 Segurança
 Este repositório segue boas práticas de segurança:
 *   Arquivos `google-services.json` e chaves de API estão no `.gitignore`.
-*   Toda a regra de negócio está protegida no lado do servidor (Functions).
+*   Regras de segurança do Firestore garantem que produtores acessem apenas seus próprios dados.
 
 ---
 *AviFácil - Otimizando a produção avícola de ponta a ponta.*

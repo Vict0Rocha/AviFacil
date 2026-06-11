@@ -18,15 +18,26 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Card para o formulário -->
+            <!-- Card para o formulário de Identificação -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/bg_card"
                 android:elevation="2dp"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="24dp"
+                android:layout_marginBottom="16dp">
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Identificação do Lote"
+                    android:textColor="@color/primary_dark_blue"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="24dp"/>
+
+                <!-- Número do Lote -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -35,7 +46,6 @@
                     android:textColor="@color/main_text"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutNumeroLote"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -45,17 +55,18 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editNumeroLote"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
+                        android:gravity="center_vertical"
                         android:hint="@string/hint_ex_lote"
-                        android:inputType="text"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:textColor="@color/main_text" />
+                        android:textColor="@color/main_text"
+                        android:textColorHint="@color/placeholder_light"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Linhagem -->
@@ -67,7 +78,6 @@
                     android:textColor="@color/main_text"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutLinhagem"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -77,17 +87,18 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editLinhagem"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
-                        android:hint="Ex: Cobb, Ross"
-                        android:inputType="text"
+                        android:gravity="center_vertical"
+                        android:hint="Ex: Cobb 500"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:textColor="@color/main_text" />
+                        android:textColor="@color/main_text"
+                        android:textColorHint="@color/placeholder_light"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Galpão -->
@@ -99,7 +110,6 @@
                     android:textColor="@color/main_text"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutGalpao"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -109,19 +119,21 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editGalpao"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
+                        android:gravity="center_vertical"
                         android:hint="Ex: Galpão 01"
-                        android:inputType="text"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:textColor="@color/main_text" />
+                        android:textColor="@color/main_text"
+                        android:textColorHint="@color/placeholder_light"
+                        android:inputType="text" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Data de Alojamento -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -130,7 +142,6 @@
                     android:textColor="@color/main_text"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutDataInicio"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -140,21 +151,23 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editDataInicio"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
                         android:clickable="true"
                         android:focusable="false"
+                        android:gravity="center_vertical"
                         android:hint="@string/hint_formato_data"
-                        android:inputType="none"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:textColor="@color/main_text" />
+                        android:textColor="@color/main_text"
+                        android:textColorHint="@color/placeholder_light"
+                        android:inputType="none" />
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <!-- Quantidade Aves -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -163,7 +176,6 @@
                     android:textColor="@color/main_text"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutQtdAves"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -173,17 +185,18 @@
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editQtdAves"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
+                        android:gravity="center_vertical"
                         android:hint="@string/hint_zero"
-                        android:inputType="number"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:textColor="@color/main_text" />
+                        android:textColor="@color/main_text"
+                        android:textColorHint="@color/placeholder_light"
+                        android:inputType="number" />
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <!-- Peso Inicial -->
@@ -195,74 +208,72 @@
                     android:textColor="@color/main_text"
                     android:textSize="14sp"
                     android:textStyle="bold" />
-
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/inputLayoutPesoInicial"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="12dp"
                     app:boxStrokeWidth="0dp"
                     app:boxStrokeWidthFocused="0dp"
                     app:hintEnabled="false">
-
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/editPesoInicial"
                         android:layout_width="match_parent"
-                        android:layout_height="56dp"
+                        android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
-                        android:hint="0.00"
-                        android:inputType="numberDecimal"
+                        android:gravity="center_vertical"
+                        android:hint="0"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:textColor="@color/main_text" />
+                        android:textColor="@color/main_text"
+                        android:textColorHint="@color/placeholder_light"
+                        android:inputType="numberDecimal" />
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Observações -->
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="8dp"
-                    android:text="@string/label_observacoes"
-                    android:textColor="@color/main_text"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/inputLayoutObservacoes"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="32dp"
-                    app:boxStrokeWidth="0dp"
-                    app:boxStrokeWidthFocused="0dp"
-                    app:hintEnabled="false">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/editObservacoes"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/bg_edit_text"
-                        android:gravity="top"
-                        android:hint="..."
-                        android:inputType="textMultiLine"
-                        android:minLines="3"
-                        android:padding="16dp"
-                        android:textColor="@color/main_text" />
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <Button
-                    android:id="@+id/btnCriarLote"
-                    android:layout_width="match_parent"
-                    android:layout_height="60dp"
-                    android:background="@drawable/bg_button_primary"
-                    android:text="@string/btn_criar_lote"
-                    android:textColor="@color/white"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    app:backgroundTint="@null" />
-
             </LinearLayout>
+
+            <!-- Observações -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="@string/label_observacoes"
+                android:textColor="@color/main_text"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/inputLayoutObservacoes"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="32dp"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:hintEnabled="false">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/editObservacoes"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_edit_text"
+                    android:gravity="top"
+                    android:hint="..."
+                    android:padding="16dp"
+                    android:textColor="@color/main_text"
+                    android:textColorHint="@color/placeholder_light"
+                    android:inputType="textMultiLine"
+                    android:minLines="3" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <Button
+                android:id="@+id/btnCriarLote"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:background="@drawable/bg_button_primary"
+                android:text="@string/btn_criar_lote"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@null" />
 
             <View
                 android:layout_width="match_parent"

@@ -68,7 +68,7 @@ public class RegistroViewModel extends AndroidViewModel {
         });
     }
 
-    public void adicionarRegistro(long loteId, String loteUuid, Date data, int mortas, double racao, double peso, String observacoes) {
+    public void adicionarRegistro(long loteId, String loteUuid, Date data, int mortas, double racao, double peso, double precoInsumo, String tipoInsumo, String observacoes) {
         executorService.execute(() -> {
             try {
                 if (repository.existeRegistroNaData(loteId, data)) {
@@ -97,7 +97,7 @@ public class RegistroViewModel extends AndroidViewModel {
                     }
                 }
 
-                RegistroEntity registro = new RegistroEntity(loteId, loteUuid, data, mortas, racao, peso);
+                RegistroEntity registro = new RegistroEntity(loteId, loteUuid, data, mortas, racao, peso, precoInsumo, tipoInsumo);
                 registro.setObservacoes(observacoes);
                 repository.insert(registro);
                 
@@ -111,7 +111,7 @@ public class RegistroViewModel extends AndroidViewModel {
         });
     }
 
-    public void editarRegistro(long id, Date data, int mortas, double racao, double peso, String observacoes) {
+    public void editarRegistro(long id, Date data, int mortas, double racao, double peso, double precoInsumo, String tipoInsumo, String observacoes) {
         executorService.execute(() -> {
             try {
                 RegistroEntity registro = repository.getById(id);
@@ -134,6 +134,8 @@ public class RegistroViewModel extends AndroidViewModel {
                     registro.setAvesMortasPeriodo(mortas);
                     registro.setConsumoRacaoPeriodo(racao);
                     registro.setPesoAtualMedio(peso);
+                    registro.setPrecoKgInsumo(precoInsumo);
+                    registro.setTipoInsumo(tipoInsumo);
                     registro.setObservacoes(observacoes);
                     repository.update(registro);
                     
@@ -173,7 +175,7 @@ public class RegistroViewModel extends AndroidViewModel {
 
         List<RegistroEntity> registros = repository.getRegistrosPorLote(loteId);
         
-        double pesoMedio = com.example.avifacil.util.ZootecniaCalculator.calcularPesoMedioAtual(registros);
+        double pesoMedio = com.example.avifacil.util.ZootecniaCalculator.calcularPesoMedioAtualKg(registros);
         double ca = com.example.avifacil.util.ZootecniaCalculator.calcularConversaoAlimentar(lote, registros);
         
         lote.setPesoAtualMedio(pesoMedio);

@@ -9,6 +9,7 @@
     <color name="secondary_text">#6B7A90</color>
     <color name="soft_border">#D9DEE7</color>
     <color name="placeholder">#98A4B5</color>
+    <color name="placeholder_light">#A5C0D6</color>
     <color name="error_red">#D64545</color>
     <color name="success_green">#2D8A4E</color>
     <color name="black">#000000</color>

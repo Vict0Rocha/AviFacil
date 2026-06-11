@@ -78,6 +78,7 @@ public class LoteViewModel extends AndroidViewModel {
                     return;
                 }
                 LoteEntity lote = new LoteEntity(avicultorId, avicultorUuid, numero, linhagem, galpao, inicio, qtdInicial, pesoInicial, observacoes);
+
                 repository.insert(lote);
                 successMessage.postValue(true);
                 carregarLotes(avicultorId);

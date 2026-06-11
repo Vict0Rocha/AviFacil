@@ -1,9 +1,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
-import { getFunctions, connectFunctionsEmulator } from "firebase/functions";
 
-// Configuração usando variáveis de ambiente do Vite
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -16,13 +14,15 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const functions = getFunctions(app);
 
-// Conectar aos emuladores se estiver rodando localmente
-if (import.meta.env.DEV) {
+// Use a variável VITE_USE_EMULATOR no seu .env se quiser testar localmente
+// Se não houver essa variável, ele usará os dados reais do Firebase
+if (import.meta.env.VITE_USE_EMULATOR === 'true') {
   connectAuthEmulator(auth, "http://127.0.0.1:9099");
   connectFirestoreEmulator(db, "127.0.0.1", 8080);
-  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  console.log("Conectado aos Emuladores Firebase");
+} else {
+  console.log("Conectado ao Firebase Produção (Dados Reais)");
 }
 
-export { auth, db, functions };
+export { auth, db };
