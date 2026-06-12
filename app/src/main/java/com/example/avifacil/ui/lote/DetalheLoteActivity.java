@@ -118,17 +118,17 @@ public class DetalheLoteActivity extends AppCompatActivity {
     }
 
     private void atualizarIndicadores(List<RegistroEntity> registros) {
-        int vivas = ZootecniaCalculator.calcularAvesVivas(currentLote, registros);
-        int mortas = ZootecniaCalculator.calcularTotalMortas(registros);
+        int vivas = ZootecniaCalculator.calcularAvesVivasAtual(currentLote, registros);
+        int mortas = ZootecniaCalculator.calcularAvesPerdidasAcumuladas(registros);
         int idade = ZootecniaCalculator.calcularIdadeDias(currentLote, new java.util.Date());
-        double mortalidade = ZootecniaCalculator.calcularMortalidade(currentLote, registros);
+        double mortalidade = ZootecniaCalculator.calcularMortalidadeAcumuladaPercentual(currentLote, registros);
         double pesoMedioG = registros.isEmpty() ? 0 : registros.get(registros.size() - 1).getPesoAtualMedio();
-        double viabilidade = ZootecniaCalculator.calcularViabilidade(currentLote, registros);
-        double consumoTotalKg = ZootecniaCalculator.calcularTotalConsumoRacao(registros);
+        double viabilidade = ZootecniaCalculator.calcularViabilidadePercentual(currentLote, registros);
+        double consumoTotalKg = ZootecniaCalculator.calcularConsumoTotalRacaoKg(registros);
         double ca = ZootecniaCalculator.calcularConversaoAlimentar(currentLote, registros);
         double gpdG = ZootecniaCalculator.calcularGPD(currentLote, registros, new java.util.Date());
         double fatorProducao = ZootecniaCalculator.calcularFatorProducao(currentLote, registros, new java.util.Date());
-        double custoTotal = ZootecniaCalculator.calcularCustoTotalInsumos(registros);
+        double custoTotal = ZootecniaCalculator.calcularCustoTotalRacao(registros);
 
         txtAvesVivas.setText(String.valueOf(vivas));
         txtAvesMortas.setText(String.valueOf(mortas));

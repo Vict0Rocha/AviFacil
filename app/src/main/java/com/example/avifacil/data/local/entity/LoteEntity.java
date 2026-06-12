@@ -34,6 +34,10 @@ public class LoteEntity {
     private double pesoInicial;
     private double pesoAtualMedio; // Calculado
     private double conversaoAlimentar; // Calculada
+    private double mortalidadeAcumulada; // Calculada
+    private double viabilidade; // Calculada
+    private double gpd; // Calculado
+    private double iep; // Calculado
     private String observacoes;
 
     private StatusLote status = StatusLote.ATIVO;
@@ -84,6 +88,14 @@ public class LoteEntity {
     public void setPesoAtualMedio(double pesoAtualMedio) { this.pesoAtualMedio = pesoAtualMedio; }
     public double getConversaoAlimentar() { return conversaoAlimentar; }
     public void setConversaoAlimentar(double conversaoAlimentar) { this.conversaoAlimentar = conversaoAlimentar; }
+    public double getMortalidadeAcumulada() { return mortalidadeAcumulada; }
+    public void setMortalidadeAcumulada(double mortalidadeAcumulada) { this.mortalidadeAcumulada = mortalidadeAcumulada; }
+    public double getViabilidade() { return viabilidade; }
+    public void setViabilidade(double viabilidade) { this.viabilidade = viabilidade; }
+    public double getGpd() { return gpd; }
+    public void setGpd(double gpd) { this.gpd = gpd; }
+    public double getIep() { return iep; }
+    public void setIep(double iep) { this.iep = iep; }
     public String getObservacoes() { return observacoes; }
     public void setObservacoes(String observacoes) { this.observacoes = observacoes; }
 

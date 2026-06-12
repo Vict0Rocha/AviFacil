@@ -174,12 +174,24 @@ public class RegistroViewModel extends AndroidViewModel {
         if (lote == null) return;
 
         List<RegistroEntity> registros = repository.getRegistrosPorLote(loteId);
-        
-        double pesoMedio = com.example.avifacil.util.ZootecniaCalculator.calcularPesoMedioAtualKg(registros);
-        double ca = com.example.avifacil.util.ZootecniaCalculator.calcularConversaoAlimentar(lote, registros);
-        
-        lote.setPesoAtualMedio(pesoMedio);
-        lote.setConversaoAlimentar(ca);
+        if (registros == null || registros.isEmpty()) {
+            lote.setPesoAtualMedio(0);
+            lote.setConversaoAlimentar(0);
+            lote.setMortalidadeAcumulada(0);
+            lote.setViabilidade(100.0);
+            lote.setGpd(0);
+            lote.setIep(0);
+        } else {
+            Date dataUltimoRegistro = registros.get(registros.size() - 1).getDataRegistro();
+            
+            lote.setPesoAtualMedio(com.example.avifacil.util.ZootecniaCalculator.calcularPesoMedioAtualKg(registros));
+            lote.setConversaoAlimentar(com.example.avifacil.util.ZootecniaCalculator.calcularConversaoAlimentar(lote, registros));
+            lote.setMortalidadeAcumulada(com.example.avifacil.util.ZootecniaCalculator.calcularMortalidadeAcumuladaPercentual(lote, registros));
+            lote.setViabilidade(com.example.avifacil.util.ZootecniaCalculator.calcularViabilidadePercentual(lote, registros));
+            lote.setGpd(com.example.avifacil.util.ZootecniaCalculator.calcularGPD(lote, registros, dataUltimoRegistro));
+            lote.setIep(com.example.avifacil.util.ZootecniaCalculator.calcularFatorProducao(lote, registros, dataUltimoRegistro));
+        }
+
         lote.setUpdatedAt(System.currentTimeMillis());
         lote.setSincronizado(false);
 

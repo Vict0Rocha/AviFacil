@@ -2,115 +2,136 @@ package com.example.avifacil.util;
 
 import com.example.avifacil.data.local.entity.LoteEntity;
 import com.example.avifacil.data.local.entity.RegistroEntity;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class ZootecniaCalculator {
 
-    public static int calcularTotalMortas(List<RegistroEntity> registros) {
-        int total = 0;
+    private static double round(double value, int places) {
+        if (Double.isNaN(value) || Double.isInfinite(value)) return 0;
+        BigDecimal bd = new BigDecimal(Double.toString(value));
+        bd = bd.setScale(places, RoundingMode.HALF_UP);
+        return bd.doubleValue();
+    }
+
+    public static int calcularIdadeDias(LoteEntity lote, Date dataReferencia) {
+        if (lote == null || lote.getDataInicio() == null || dataReferencia == null) return 0;
+        long diffInMs = dataReferencia.getTime() - lote.getDataInicio().getTime();
+        if (diffInMs < 0) return 0;
+        return (int) TimeUnit.DAYS.convert(diffInMs, TimeUnit.MILLISECONDS);
+    }
+
+    public static int calcularAvesPerdidasAcumuladas(List<RegistroEntity> registros) {
         if (registros == null) return 0;
+        int total = 0;
         for (RegistroEntity r : registros) {
             total += r.getAvesMortasPeriodo();
         }
         return total;
     }
 
-    public static int calcularAvesVivas(LoteEntity lote, List<RegistroEntity> registros) {
+    public static int calcularAvesVivasAtual(LoteEntity lote, List<RegistroEntity> registros) {
         if (lote == null) return 0;
-        return lote.getQuantidadeAvesInicial() - calcularTotalMortas(registros);
+        int perdas = calcularAvesPerdidasAcumuladas(registros);
+        return Math.max(0, lote.getQuantidadeAvesInicial() - perdas);
     }
 
-    public static double calcularMortalidade(LoteEntity lote, List<RegistroEntity> registros) {
-        if (lote == null || lote.getQuantidadeAvesInicial() == 0) return 0;
-        return (calcularTotalMortas(registros) * 100.0) / lote.getQuantidadeAvesInicial();
+    public static double calcularConsumoTotalRacaoKg(List<RegistroEntity> registros) {
+        if (registros == null) return 0;
+        double total = 0;
+        for (RegistroEntity r : registros) {
+            total += Math.max(0, r.getConsumoRacaoPeriodo());
+        }
+        return total;
     }
 
-    public static double calcularViabilidade(LoteEntity lote, List<RegistroEntity> registros) {
-        return 100.0 - calcularMortalidade(lote, registros);
+    public static double calcularMortalidadeAcumuladaPercentual(LoteEntity lote, List<RegistroEntity> registros) {
+        if (lote == null || lote.getQuantidadeAvesInicial() <= 0) return 0;
+        int perdas = calcularAvesPerdidasAcumuladas(registros);
+        return round(((double) perdas / lote.getQuantidadeAvesInicial()) * 100.0, 2);
     }
 
-    public static int calcularIdadeDias(LoteEntity lote, Date dataReferencia) {
-        if (lote == null || lote.getDataInicio() == null || dataReferencia == null) return 1;
-        long diffInMs = dataReferencia.getTime() - lote.getDataInicio().getTime();
-        if (diffInMs < 0) return 1;
-        return (int) TimeUnit.DAYS.convert(diffInMs, TimeUnit.MILLISECONDS) + 1;
+    public static double calcularViabilidadePercentual(LoteEntity lote, List<RegistroEntity> registros) {
+        if (lote == null || lote.getQuantidadeAvesInicial() <= 0) return 100.0;
+        int vivas = calcularAvesVivasAtual(lote, registros);
+        return round(((double) vivas / lote.getQuantidadeAvesInicial()) * 100.0, 2);
     }
 
     public static double calcularPesoMedioAtualKg(List<RegistroEntity> registros) {
         if (registros == null || registros.isEmpty()) return 0;
-        // O peso no registro agora é em GRAMAS
-        return registros.get(registros.size() - 1).getPesoAtualMedio() / 1000.0;
-    }
-
-    public static double calcularTotalConsumoRacao(List<RegistroEntity> registros) {
-        double total = 0;
-        if (registros == null) return 0;
-        for (RegistroEntity r : registros) {
-            total += r.getConsumoRacaoPeriodo();
-        }
-        return total;
+        double pesoG = registros.get(registros.size() - 1).getPesoAtualMedio();
+        return round(pesoG / 1000.0, 3);
     }
 
     public static double calcularConversaoAlimentar(LoteEntity lote, List<RegistroEntity> registros) {
         if (lote == null || registros == null || registros.isEmpty()) return 0;
         
-        double consumoTotalKg = calcularTotalConsumoRacao(registros);
-        int vivas = calcularAvesVivas(lote, registros);
+        double consumoTotalKg = calcularConsumoTotalRacaoKg(registros);
+        int vivas = calcularAvesVivasAtual(lote, registros);
+        
+        // Peso médio do último registro em gramas
         double pesoMedioG = registros.get(registros.size() - 1).getPesoAtualMedio();
+        double pesoMedioKg = pesoMedioG / 1000.0;
 
-        if (consumoTotalKg <= 0 || vivas <= 0 || pesoMedioG <= 0) return 0;
+        if (consumoTotalKg <= 0 || vivas <= 0 || pesoMedioKg <= 0) return 0;
 
-        // Ganho de Peso Total (kg) = (Peso Final Total(g) - Peso Inicial Total(g)) / 1000
-        double pesoFinalTotalKg = (pesoMedioG * vivas) / 1000.0;
-        double pesoInicialTotalKg = (lote.getPesoInicial() * lote.getQuantidadeAvesInicial()) / 1000.0;
+        // Biomassa total (peso vivo total no galpão)
+        double pesoTotalLoteKg = pesoMedioKg * vivas;
         
-        double ganhoPesoTotalKg = pesoFinalTotalKg - pesoInicialTotalKg;
-        
-        if (ganhoPesoTotalKg <= 0) return 0;
-
-        // CA = Consumo Total (kg) / Ganho de Peso Total (kg)
-        return consumoTotalKg / ganhoPesoTotalKg;
+        // Padrão de mercado: CA com 3 casas decimais
+        return round(consumoTotalKg / pesoTotalLoteKg, 3);
     }
 
     public static double calcularGPD(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
         if (lote == null || registros == null || registros.isEmpty()) return 0;
 
         double pesoMedioG = registros.get(registros.size() - 1).getPesoAtualMedio();
-        double pesoInicialPintoG = lote.getPesoInicial();
+        double pesoInicialG = lote.getPesoInicial();
         int idadeDias = calcularIdadeDias(lote, dataReferencia);
 
-        if (idadeDias <= 0) return 0;
+        if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
 
-        // GPD (g/dia) = (Peso Médio Atual (g) - Peso Inicial (g)) / Idade (dias)
-        return (pesoMedioG - pesoInicialPintoG) / idadeDias;
+        return round((pesoMedioG - pesoInicialG) / idadeDias, 2);
     }
 
     public static double calcularFatorProducao(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
-        double gpdG = calcularGPD(lote, registros, dataReferencia);
-        double viabilidade = calcularViabilidade(lote, registros);
+        if (lote == null || registros == null || registros.isEmpty()) return 0;
+
+        double pesoMedioKg = calcularPesoMedioAtualKg(registros);
+        double viabilidade = calcularViabilidadePercentual(lote, registros);
+        int idadeDias = calcularIdadeDias(lote, dataReferencia);
         double ca = calcularConversaoAlimentar(lote, registros);
 
-        if (ca <= 0) return 0;
+        if (idadeDias <= 0 || ca <= 0) return 0;
 
-        // FP = (Viabilidade(%) * GPD(kg)) / (CA * 10)
-        // Convertendo GPD de g para kg: gpdG / 1000.0
-        return (viabilidade * (gpdG / 1000.0)) / (ca * 10.0);
+        // FP = ((Peso Médio Kg * Viabilidade %) / (Idade * CA)) * 100
+        return round(((pesoMedioKg * viabilidade) / (idadeDias * ca)) * 100.0, 2);
     }
 
-    public static double calcularCustoTotalInsumos(List<RegistroEntity> registros) {
+    public static double calcularCustoTotalRacao(List<RegistroEntity> registros) {
         if (registros == null) return 0;
         double custoTotal = 0;
         for (RegistroEntity r : registros) {
             custoTotal += r.getConsumoRacaoPeriodo() * r.getPrecoKgInsumo();
         }
-        return custoTotal;
+        return round(custoTotal, 2);
     }
 
-    public static double calcularPrecoMedioInsumo(List<RegistroEntity> registros) {
-        double consumoTotal = calcularTotalConsumoRacao(registros);
-        if (consumoTotal <= 0) return 0;
-        return calcularCustoTotalInsumos(registros) / consumoTotal;
+    public static double calcularCustoRacaoPorAve(LoteEntity lote, List<RegistroEntity> registros) {
+        int vivas = calcularAvesVivasAtual(lote, registros);
+        if (vivas <= 0) return 0;
+        return round(calcularCustoTotalRacao(registros) / vivas, 2);
+    }
+
+    public static double calcularCustoRacaoPorKgFrango(LoteEntity lote, List<RegistroEntity> registros) {
+        double ca = calcularConversaoAlimentar(lote, registros);
+        double consumoTotal = calcularConsumoTotalRacaoKg(registros);
+        if (consumoTotal <= 0 || ca <= 0) return 0;
+        
+        double precoMedioKg = calcularCustoTotalRacao(registros) / consumoTotal;
+        return round(ca * precoMedioKg, 2);
     }
 }
