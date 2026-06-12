@@ -1,4 +1,4 @@
-# 🐥 AviFácil - Gestão Avícola Inteligente
+# 🐥 AviFácil - Gestão Avícola 
 
 O **AviFácil** é uma plataforma completa para o acompanhamento técnico de lotes de frangos de corte. O sistema foi projetado para funcionar em ambientes com conectividade limitada, garantindo a integridade dos dados e auxiliando o produtor na tomada de decisão.
 
