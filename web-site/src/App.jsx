@@ -1,6 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
+import RegistrosPage from './pages/RegistrosPage';
+import GuiasPage from './pages/GuiasPage';
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 function App() {
@@ -8,7 +11,30 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LoginPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/registros"
+          element={
+            <ProtectedRoute>
+              <RegistrosPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/guias"
+          element={
+            <ProtectedRoute>
+              <GuiasPage />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );

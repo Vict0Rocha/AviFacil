@@ -2,9 +2,11 @@ import { LayoutDashboard, Users, Database, ClipboardList, LogOut, CheckCircle2 }
 import { useNavigate, NavLink } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
+import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const { userData } = useAuth();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -25,8 +27,12 @@ const Sidebar = () => {
 
       <div className="sidebar-label">Propriedade em Análise</div>
       <div className="card-scientific" style={{ padding: '16px', marginBottom: '24px', borderRadius: '12px' }}>
-        <p className="text-bold" style={{ fontSize: '13px', color: 'var(--primary-navy)' }}>Granja Central - UNEMAT</p>
-        <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>Galpão: <span style={{ color: 'var(--primary-green)', fontWeight: '800' }}>Climatizado 03 ●</span></p>
+        <p className="text-bold" style={{ fontSize: '13px', color: 'var(--primary-navy)' }}>
+          {userData?.nomePropriedade || "Carregando..."}
+        </p>
+        <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+          Produtor: <span style={{ color: 'var(--primary-green)', fontWeight: '800' }}>{userData?.nome || "---"}</span>
+        </p>
       </div>
 
       <div className="sidebar-label">Painel Analítico</div>
@@ -35,7 +41,7 @@ const Sidebar = () => {
           <LayoutDashboard size={18} />
           <span>Dashboard Decisório</span>
         </NavLink>
-        <NavLink to="/registros" className="nav-link">
+        <NavLink to="/registros" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
           <Database size={18} />
           <span>Consulta de Registros</span>
         </NavLink>

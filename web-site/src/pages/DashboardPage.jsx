@@ -1,54 +1,26 @@
-import { useState, useEffect } from 'react';
-import { db, auth } from '../firebase';
-import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { db } from '../firebase';
+import { collection, getDocs } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
 import IndicatorCard from '../components/IndicatorCard';
-import { RefreshCw, AlertCircle } from 'lucide-react';
+import RecommendationPanel from '../components/RecommendationPanel';
+import { RefreshCw, AlertCircle, TrendingUp, BarChart3 } from 'lucide-react';
 import * as Zootecnia from '../utils/zootecnia';
+import { useAuth } from '../context/AuthContext';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const DashboardPage = () => {
+  const { user, userData } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [insight, setInsight] = useState("Analisando performance dos lotes...");
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        fetchDashboardData(user.uid);
-      } else {
-        setLoading(false);
-        setError("Usuário não autenticado. Redirecionando...");
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const fetchDashboardData = async (uid) => {
-    // Garantia absoluta de que o UID é uma string
-    const safeUid = uid ? String(uid) : null;
-
-    if (!safeUid || safeUid === "undefined" || safeUid === "null") {
-      console.error("[Firebase] UID inválido detectado:", uid);
-      setError("Erro: Usuário não identificado corretamente.");
-      setLoading(false);
-      return;
-    }
-
+  const fetchDashboardData = useCallback(async (uid) => {
     setLoading(true);
-    console.log("[Firebase] Iniciando busca para UID:", safeUid);
-
     try {
-      // 1. Buscar dados do avicultor
-      console.log("[Firebase] Buscando avicultor no Firestore...");
-      const avicultorRef = doc(db, "avicultores", safeUid);
-      const avicultorDoc = await getDoc(avicultorRef);
-      const avicultorData = avicultorDoc.exists() ? avicultorDoc.data() : null;
-
-      // 2. Buscar lotes - Usando template string para garantir o caminho
-      console.log("[Firebase] Buscando lotes...");
-      const lotesRef = collection(db, `avicultores/${safeUid}/lotes`);
+      const lotesRef = collection(db, `avicultores/${uid}/lotes`);
       const lotesSnapshot = await getDocs(lotesRef);
-      console.log(`[Firebase] Lotes encontrados: ${lotesSnapshot.size}`);
 
       let geralAlojadas = 0;
       let geralMortas = 0;
@@ -58,19 +30,13 @@ const DashboardPage = () => {
 
       const lotesResultPromises = lotesSnapshot.docs.map(async (loteDoc) => {
         try {
-          // Garante que o ID do lote é string
-          const loteId = String(loteDoc.id);
+          const loteId = loteDoc.id;
           const loteData = loteDoc.data();
           const lote = { id: loteId, ...loteData };
 
-          // 3. Buscar registros - Usando template string para o caminho completo
-          const registrosPath = `avicultores/${safeUid}/lotes/${loteId}/registros`;
-          const registrosRef = collection(db, registrosPath);
+          const registrosRef = collection(db, `avicultores/${uid}/lotes/${loteId}/registros`);
           const registrosSnapshot = await getDocs(registrosRef);
-          const registros = registrosSnapshot.docs.map(rDoc => ({
-            id: String(rDoc.id),
-            ...rDoc.data()
-          }));
+          const registros = registrosSnapshot.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
 
           const vivas = Zootecnia.calcularAvesVivas(lote, registros);
           const mortas = Zootecnia.calcularTotalMortas(registros);
@@ -93,14 +59,15 @@ const DashboardPage = () => {
             identificacao: lote.numeroLote || "Lote",
             galpao: lote.galpao || "---",
             avesAtuais: vivas,
+            mortalidadeVal: mortalidade,
             mortalidade: mortalidade.toFixed(2) + "%",
             viabilidade: viabilidade.toFixed(2) + "%",
+            caVal: ca,
             ca: ca > 0 ? ca.toFixed(2) : "---",
             pesoAtual: peso > 0 ? (peso / 1000).toFixed(3) : "---",
             status: lote.status || "ATIVO"
           };
         } catch (e) {
-          console.error(`[Firebase] Erro no lote ${loteDoc.id}:`, e);
           return null;
         }
       });
@@ -113,8 +80,6 @@ const DashboardPage = () => {
       const caMediaGeral = lotesAtivosCount > 0 ? (somaCA / lotesAtivosCount) : 0;
 
       setData({
-        nomeProdutor: avicultorData ? avicultorData.nome : "Produtor",
-        propriedade: avicultorData ? avicultorData.nomePropriedade : "Fazenda",
         estatisticasGerais: {
           totalLotes: lotesResult.length,
           avesVivas: geralVivas,
@@ -125,15 +90,21 @@ const DashboardPage = () => {
         lotes: lotesResult
       });
 
+      if (mortalidadeGeral > 5) setInsight("Alerta crítico: A mortalidade geral está acima de 5%. Recomenda-se auditoria sanitária imediata.");
+      else if (caMediaGeral > 1.75) setInsight("Atenção: A Conversão Alimentar média pode ser otimizada. Verifique o manejo de cortinas e temperatura.");
+      else setInsight("Excelente: Todos os indicadores de produtividade estão dentro das metas de excelência.");
+
       setError(null);
     } catch (err) {
-      console.error("Erro ao buscar dados:", err);
-      // Exibe a mensagem técnica do erro para facilitar o diagnóstico
-      setError(`Erro ao carregar dados: ${err.message || "Erro desconhecido"}`);
+      setError("Falha na sincronização com a nuvem.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [userData]);
+
+  useEffect(() => {
+    if (user) fetchDashboardData(user.uid);
+  }, [user, fetchDashboardData]);
 
   if (loading) return (
     <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#F8FAFB' }}>
@@ -147,58 +118,62 @@ const DashboardPage = () => {
       <main className="main-content">
         <div className="top-bar-scientific">
           <div>
-            <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>
-              {data?.propriedade || "Propriedade em Análise"}
-            </h1>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Produtor: {data?.nomeProdutor}</p>
+            <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>Dashboard Decisório</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Visão analítica de performance zootécnica</p>
+          </div>
+          <div style={{ background: 'white', padding: '8px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#48BB78' }}></div>
+            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--primary-navy)' }}>SISTEMA ONLINE</span>
           </div>
         </div>
 
         {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', background: '#FED7D7', color: '#C53030', borderRadius: '12px', marginBottom: '24px', fontWeight: '600' }}>
-            <AlertCircle size={20} />
-            {error}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', background: '#FED7D7', color: '#C53030', borderRadius: '12px', marginBottom: '24px' }}>
+            <AlertCircle size={20} /> {error}
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-          <IndicatorCard
-            title="Mortalidade Acumulada"
-            value={data?.estatisticasGerais?.mortalidadeMedia || "0%"}
-            valueColor="#D64545"
-          />
-          <IndicatorCard
-            title="Viabilidade"
-            value={data?.estatisticasGerais?.viabilidadeMedia || "0%"}
-            valueColor="#2D8A4E"
-          />
-          <IndicatorCard
-            title="Total de aves vivas"
-            value={data?.estatisticasGerais?.avesVivas || 0}
-            valueColor="#2D8A4E"
-          />
-          <IndicatorCard
-            title="C.A. Média"
-            value={data?.estatisticasGerais?.caMedia || 0}
-          />
-          <IndicatorCard
-            title="Lotes Ativos"
-            value={data?.estatisticasGerais?.totalLotes || 0}
-            valueColor="var(--primary-navy)"
-          />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          <IndicatorCard title="Mortalidade Média" value={data?.estatisticasGerais?.mortalidadeMedia} valueColor="#D64545" />
+          <IndicatorCard title="Viabilidade" value={data?.estatisticasGerais?.viabilidadeMedia} valueColor="#2D8A4E" />
+          <IndicatorCard title="Aves Totais" value={data?.estatisticasGerais?.avesVivas} valueColor="var(--primary-navy)" />
+          <IndicatorCard title="C.A. Média" value={data?.estatisticasGerais?.caMedia} valueColor="var(--primary-blue)" />
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '32px' }}>
+          <div className="card-scientific">
+            <h4 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <BarChart3 size={18} /> Comparativo de Mortalidade por Lote (%)
+            </h4>
+            <div style={{ width: '100%', height: '250px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data?.lotes}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                  <XAxis dataKey="identificacao" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                  <Tooltip cursor={{fill: '#F7FAFC'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
+                  <Bar dataKey="mortalidadeVal" name="Mortalidade">
+                    {data?.lotes.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.mortalidadeVal > 5 ? '#E53E3E' : '#3182CE'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <RecommendationPanel text={insight} />
         </div>
 
         <div className="card-scientific">
-          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Análise Técnica Detalhada por Lote</h3>
+          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Monitoramento de Lotes Ativos</h3>
           <div className="table-responsive">
-            <table className="info-table" style={{ marginTop: 0 }}>
+            <table className="info-table">
               <thead>
                 <tr>
-                  <th>Lote</th>
+                  <th>Identificação</th>
                   <th>Galpão</th>
-                  <th>Aves Vivas</th>
+                  <th>Vivas</th>
                   <th>Mort. (%)</th>
-                  <th>Viab. (%)</th>
                   <th>C.A.</th>
                   <th>Peso (kg)</th>
                   <th>Status</th>
@@ -210,22 +185,15 @@ const DashboardPage = () => {
                     <td><strong>{lote.identificacao}</strong></td>
                     <td>{lote.galpao}</td>
                     <td>{lote.avesAtuais}</td>
-                    <td style={{ color: '#D64545', fontWeight: '700' }}>{lote.mortalidade}</td>
-                    <td style={{ color: '#2D8A4E', fontWeight: '700' }}>{lote.viabilidade}</td>
+                    <td style={{ color: lote.mortalidadeVal > 5 ? '#E53E3E' : 'inherit', fontWeight: '700' }}>{lote.mortalidade}</td>
                     <td>{lote.ca}</td>
                     <td>{lote.pesoAtual}</td>
                     <td>
                       <span style={{
-                        padding: '4px 12px',
-                        borderRadius: '20px',
-                        fontSize: '11px',
-                        fontWeight: '800',
+                        padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '800',
                         background: lote.status === 'ATIVO' ? '#C6F6D5' : '#EDF2F7',
-                        color: lote.status === 'ATIVO' ? '#22543D' : '#4A5568',
-                        textTransform: 'uppercase'
-                      }}>
-                        {lote.status}
-                      </span>
+                        color: lote.status === 'ATIVO' ? '#22543D' : '#4A5568'
+                      }}>{lote.status}</span>
                     </td>
                   </tr>
                 ))}
