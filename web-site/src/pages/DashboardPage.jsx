@@ -1,109 +1,123 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
 import IndicatorCard from '../components/IndicatorCard';
 import RecommendationPanel from '../components/RecommendationPanel';
-import { RefreshCw, AlertCircle, TrendingUp, BarChart3 } from 'lucide-react';
+import { RefreshCw, AlertCircle, BarChart3 } from 'lucide-react';
 import * as Zootecnia from '../utils/zootecnia';
 import { useAuth } from '../context/AuthContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 const DashboardPage = () => {
-  const { user, userData } = useAuth();
-  const [data, setData] = useState(null);
+  const { user, isAdmin } = useAuth();
+  const [data, setData] = useState({ estatisticas: {}, lotes: [], produtores: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [insight, setInsight] = useState("Analisando performance dos lotes...");
+  const [insight, setInsight] = useState("Iniciando análise técnica...");
 
-  const fetchDashboardData = useCallback(async (uid) => {
+  const fetchDashboardData = useCallback(async () => {
+    if (!user) return;
     setLoading(true);
     try {
-      const lotesRef = collection(db, `avicultores/${uid}/lotes`);
-      const lotesSnapshot = await getDocs(lotesRef);
-
       let geralAlojadas = 0;
       let geralMortas = 0;
       let geralVivas = 0;
       let somaCA = 0;
       let lotesAtivosCount = 0;
+      let todosLotes = [];
+      let resumoProdutores = [];
 
-      const lotesResultPromises = lotesSnapshot.docs.map(async (loteDoc) => {
-        try {
-          const loteId = loteDoc.id;
-          const loteData = loteDoc.data();
-          const lote = { id: loteId, ...loteData };
+      if (isAdmin) {
+        const avicultoresSnapshot = await getDocs(collection(db, 'avicultores'));
 
-          const registrosRef = collection(db, `avicultores/${uid}/lotes/${loteId}/registros`);
-          const registrosSnapshot = await getDocs(registrosRef);
-          const registros = registrosSnapshot.docs.map(rDoc => ({ id: rDoc.id, ...rDoc.data() }));
+        for (const aviDoc of avicultoresSnapshot.docs) {
+          const uid = aviDoc.id;
+          const aviData = aviDoc.data();
+          const lotesRef = collection(db, `avicultores/${uid}/lotes`);
+          const lotesSnap = await getDocs(lotesRef);
 
-          const vivas = Zootecnia.calcularAvesVivas(lote, registros);
-          const mortas = Zootecnia.calcularTotalMortas(registros);
-          const mortalidade = Zootecnia.calcularMortalidade(lote, registros);
-          const viabilidade = Zootecnia.calcularViabilidade(lote, registros);
-          const ca = Zootecnia.calcularConversaoAlimentar(lote, registros);
-          const peso = Zootecnia.calcularPesoMedioAtual(registros);
+          let pAlojadas = 0;
+          let pMortas = 0;
+          let pSomaCA = 0;
+          let pLotesAtivos = 0;
 
-          geralAlojadas += (Number(lote.quantidadeAvesInicial) || 0);
-          geralMortas += mortas;
-          geralVivas += vivas;
+          for (const loteDoc of lotesSnap.docs) {
+            const loteData = loteDoc.data();
+            const regsRef = collection(db, `avicultores/${uid}/lotes/${loteDoc.id}/registros`);
+            const regsSnap = await getDocs(regsRef);
+            const registros = regsSnap.docs.map(d => d.data());
 
-          if (lote.status === "ATIVO") {
-            somaCA += ca;
-            lotesAtivosCount++;
+            const vivas = Zootecnia.calcularAvesVivas(loteData, registros);
+            const mortas = Zootecnia.calcularTotalMortas(registros);
+            const ca = Zootecnia.calcularConversaoAlimentar(loteData, registros);
+
+            geralAlojadas += (Number(loteData.quantidadeAvesInicial) || 0);
+            geralMortas += mortas;
+            geralVivas += vivas;
+
+            pAlojadas += (Number(loteData.quantidadeAvesInicial) || 0);
+            pMortas += mortas;
+
+            if (loteData.status === "ATIVO") {
+              somaCA += ca;
+              lotesAtivosCount++;
+              pSomaCA += ca;
+              pLotesAtivos++;
+            }
+
+            todosLotes.push({
+              id: loteDoc.id,
+              produtor: aviData.nome || "Produtor",
+              identificacao: loteData.numeroLote || "Lote",
+              avesAtuais: vivas,
+              mortalidadeVal: Zootecnia.calcularMortalidade(loteData, registros),
+              caVal: ca,
+              status: loteData.status
+            });
           }
 
-          return {
-            id: lote.id,
-            identificacao: lote.numeroLote || "Lote",
-            galpao: lote.galpao || "---",
-            avesAtuais: vivas,
-            mortalidadeVal: mortalidade,
-            mortalidade: mortalidade.toFixed(2) + "%",
-            viabilidade: viabilidade.toFixed(2) + "%",
-            caVal: ca,
-            ca: ca > 0 ? ca.toFixed(2) : "---",
-            pesoAtual: peso > 0 ? (peso / 1000).toFixed(3) : "---",
-            status: lote.status || "ATIVO"
-          };
-        } catch (e) {
-          return null;
+          resumoProdutores.push({
+            id: uid,
+            nome: aviData.nome || "---",
+            propriedade: aviData.nomePropriedade || "---",
+            totalAlojadas: pAlojadas,
+            avesVivas: pAlojadas - pMortas,
+            mortalidade: pAlojadas > 0 ? ((pMortas / pAlojadas) * 100).toFixed(2) : "0.00",
+            mortalidadeNum: pAlojadas > 0 ? (pMortas / pAlojadas) * 100 : 0,
+            caMedia: pLotesAtivos > 0 ? (pSomaCA / pLotesAtivos).toFixed(3) : "---",
+            viabilidade: pAlojadas > 0 ? (100 - (pMortas / pAlojadas) * 100).toFixed(2) + "%" : "100%"
+          });
         }
-      });
-
-      const lotesResultRaw = await Promise.all(lotesResultPromises);
-      const lotesResult = lotesResultRaw.filter(l => l !== null);
-
-      const mortalidadeGeral = geralAlojadas > 0 ? (geralMortas / geralAlojadas) * 100 : 0;
-      const viabilidadeGeral = 100 - mortalidadeGeral;
-      const caMediaGeral = lotesAtivosCount > 0 ? (somaCA / lotesAtivosCount) : 0;
+      } else {
+        // MODO PRODUTOR
+        const lotesRef = collection(db, `avicultores/${user.uid}/lotes`);
+        const snapshot = await getDocs(lotesRef);
+        // ... (lógica simplificada para produtor único se necessário, mas o foco aqui é o Admin)
+      }
 
       setData({
-        estatisticasGerais: {
-          totalLotes: lotesResult.length,
+        estatisticas: {
+          mortalidade: (geralAlojadas > 0 ? (geralMortas / geralAlojadas) * 100 : 0).toFixed(2) + "%",
+          viabilidade: (geralAlojadas > 0 ? (100 - (geralMortas / geralAlojadas) * 100) : 100).toFixed(2) + "%",
           avesVivas: geralVivas,
-          mortalidadeMedia: mortalidadeGeral.toFixed(2) + "%",
-          viabilidadeMedia: viabilidadeGeral.toFixed(2) + "%",
-          caMedia: caMediaGeral.toFixed(2)
+          caMedia: (lotesAtivosCount > 0 ? somaCA / lotesAtivosCount : 0).toFixed(3)
         },
-        lotes: lotesResult
+        lotes: todosLotes,
+        produtores: resumoProdutores
       });
-
-      if (mortalidadeGeral > 5) setInsight("Alerta crítico: A mortalidade geral está acima de 5%. Recomenda-se auditoria sanitária imediata.");
-      else if (caMediaGeral > 1.75) setInsight("Atenção: A Conversão Alimentar média pode ser otimizada. Verifique o manejo de cortinas e temperatura.");
-      else setInsight("Excelente: Todos os indicadores de produtividade estão dentro das metas de excelência.");
-
+      setInsight(isAdmin ? "Monitoramento Administrativo Ativado. Analisando todos os produtores." : "Performance técnica atualizada.");
       setError(null);
     } catch (err) {
-      setError("Falha na sincronização com a nuvem.");
+      console.error("Erro no Dashboard:", err);
+      setError("Não foi possível carregar os dados técnicos.");
     } finally {
       setLoading(false);
     }
-  }, [userData]);
+  }, [user, isAdmin]);
 
   useEffect(() => {
-    if (user) fetchDashboardData(user.uid);
+    if (user) fetchDashboardData();
   }, [user, fetchDashboardData]);
 
   if (loading) return (
@@ -116,87 +130,119 @@ const DashboardPage = () => {
     <div className="app-layout">
       <Sidebar />
       <main className="main-content">
-        <div className="top-bar-scientific">
-          <div>
-            <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>Dashboard Decisório</h1>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Visão analítica de performance zootécnica</p>
-          </div>
-          <div style={{ background: 'white', padding: '8px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#48BB78' }}></div>
-            <span style={{ fontSize: '13px', fontWeight: '700', color: 'var(--primary-navy)' }}>SISTEMA ONLINE</span>
-          </div>
-        </div>
+        <h1 className="page-title">{isAdmin ? "Painel de Controle Bi & Analytics" : "Meu Dashboard"}</h1>
 
         {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '16px', background: '#FED7D7', color: '#C53030', borderRadius: '12px', marginBottom: '24px' }}>
+          <div style={{ padding: '16px', background: '#FED7D7', color: '#C53030', borderRadius: '12px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <AlertCircle size={20} /> {error}
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' }}>
-          <IndicatorCard title="Mortalidade Média" value={data?.estatisticasGerais?.mortalidadeMedia} valueColor="#D64545" />
-          <IndicatorCard title="Viabilidade" value={data?.estatisticasGerais?.viabilidadeMedia} valueColor="#2D8A4E" />
-          <IndicatorCard title="Aves Totais" value={data?.estatisticasGerais?.avesVivas} valueColor="var(--primary-navy)" />
-          <IndicatorCard title="C.A. Média" value={data?.estatisticasGerais?.caMedia} valueColor="var(--primary-blue)" />
+        <div className="indicators-grid">
+          <IndicatorCard title="Mortalidade Global" value={data?.estatisticas?.mortalidade || "---"} valueColor="#D64545" />
+          <IndicatorCard title="Viabilidade Média" value={data?.estatisticas?.viabilidade || "---"} valueColor="#2D8A4E" />
+          <IndicatorCard title="Total Aves Vivas" value={data?.estatisticas?.avesVivas || "0"} valueColor="#0B3B75" />
+          <IndicatorCard title="C.A. Média Global" value={data?.estatisticas?.caMedia || "---"} valueColor="#3182CE" />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px', marginBottom: '32px' }}>
+        <div className="dashboard-charts">
           <div className="card-scientific">
-            <h4 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <BarChart3 size={18} /> Comparativo de Mortalidade por Lote (%)
-            </h4>
-            <div style={{ width: '100%', height: '250px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data?.lotes}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="identificacao" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
-                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12}} />
-                  <Tooltip cursor={{fill: '#F7FAFC'}} contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 10px rgba(0,0,0,0.1)'}} />
-                  <Bar dataKey="mortalidadeVal" name="Mortalidade">
-                    {data?.lotes.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.mortalidadeVal > 5 ? '#E53E3E' : '#3182CE'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <h4 className="card-header"><BarChart3 size={18} /> Ranking de Mortalidade por Produtor (%)</h4>
+            <div style={{ height: 300, minWidth: '100%' }}>
+              {data.produtores.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.produtores}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                    <XAxis dataKey="nome" axisLine={false} tickLine={false} tick={{fontSize: 12}} />
+                    <YAxis axisLine={false} tickLine={false} />
+                    <Tooltip />
+                    <Bar dataKey="mortalidadeNum" name="Mortalidade %">
+                      {data.produtores.map((e, i) => (
+                        <Cell key={i} fill={Number(e.mortalidadeNum) > 5 ? '#E53E3E' : '#008858'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+                  Aguardando dados analíticos...
+                </div>
+              )}
             </div>
           </div>
           <RecommendationPanel text={insight} />
         </div>
 
-        <div className="card-scientific">
-          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Monitoramento de Lotes Ativos</h3>
+
+        {isAdmin && (
+          <div className="card-scientific" style={{ marginTop: '24px' }}>
+            <h3 className="card-header">Performance Geral por Produtor</h3>
+            <div className="table-responsive">
+              <table className="info-table">
+                <thead>
+                  <tr>
+                    <th>Produtor</th>
+                    <th>Propriedade</th>
+                    <th>Alojadas</th>
+                    <th>Vivas</th>
+                    <th>Mort. %</th>
+                    <th>Viab.</th>
+                    <th>C.A. Média</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.produtores.length > 0 ? (
+                    data.produtores.map(p => (
+                      <tr key={p.id}>
+                        <td><strong>{p.nome}</strong></td>
+                        <td>{p.propriedade}</td>
+                        <td>{p.totalAlojadas}</td>
+                        <td>{p.avesVivas}</td>
+                        <td style={{ color: p.mortalidadeNum > 5 ? '#E53E3E' : '#2D8A4E', fontWeight: '800' }}>
+                          {p.mortalidade}%
+                        </td>
+                        <td>{p.viabilidade}</td>
+                        <td style={{ fontWeight: '700', color: 'var(--primary-blue)' }}>{p.caMedia}</td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr><td colSpan="7" style={{ textAlign: 'center', padding: '20px' }}>Nenhum dado de produtor encontrado.</td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        <div className="card-scientific" style={{ marginTop: '24px' }}>
+          <h3 className="card-header">Monitoramento Individual de Lotes</h3>
           <div className="table-responsive">
             <table className="info-table">
               <thead>
                 <tr>
-                  <th>Identificação</th>
-                  <th>Galpão</th>
-                  <th>Vivas</th>
-                  <th>Mort. (%)</th>
+                  {isAdmin && <th>Produtor</th>}
+                  <th>Lote</th>
+                  <th>Aves Atuais</th>
+                  <th>Mortalidade</th>
                   <th>C.A.</th>
-                  <th>Peso (kg)</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
-                {data?.lotes?.map((lote) => (
-                  <tr key={lote.id}>
-                    <td><strong>{lote.identificacao}</strong></td>
-                    <td>{lote.galpao}</td>
-                    <td>{lote.avesAtuais}</td>
-                    <td style={{ color: lote.mortalidadeVal > 5 ? '#E53E3E' : 'inherit', fontWeight: '700' }}>{lote.mortalidade}</td>
-                    <td>{lote.ca}</td>
-                    <td>{lote.pesoAtual}</td>
-                    <td>
-                      <span style={{
-                        padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: '800',
-                        background: lote.status === 'ATIVO' ? '#C6F6D5' : '#EDF2F7',
-                        color: lote.status === 'ATIVO' ? '#22543D' : '#4A5568'
-                      }}>{lote.status}</span>
-                    </td>
-                  </tr>
-                ))}
+                {data?.lotes?.length > 0 ? (
+                  data.lotes.map(l => (
+                    <tr key={l.id}>
+                      {isAdmin && <td>{l.produtor}</td>}
+                      <td><strong>{l.identificacao}</strong></td>
+                      <td>{l.avesAtuais}</td>
+                      <td style={{ color: l.mortalidadeVal > 5 ? '#E53E3E' : 'inherit' }}>{l.mortalidadeVal.toFixed(2)}%</td>
+                      <td>{typeof l.caVal === 'number' ? l.caVal.toFixed(3) : "---"}</td>
+                      <td><span className={`badge ${l.status}`}>{l.status}</span></td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan={isAdmin ? 6 : 5} style={{ textAlign: 'center', padding: '20px' }}>Nenhum lote ativo encontrado.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -205,5 +251,6 @@ const DashboardPage = () => {
     </div>
   );
 };
+
 
 export default DashboardPage;

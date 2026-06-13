@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Eye, EyeOff, Lock, User } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -10,19 +11,19 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { user, loading } = useAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) navigate('/dashboard');
-    });
-    return () => unsubscribe();
-  }, [navigate]);
+    if (!loading && user) {
+      navigate('/dashboard');
+    }
+  }, [user, loading, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
     try {
       await signInWithEmailAndPassword(auth, email, senha);
-      navigate('/dashboard');
     } catch (err) {
       setError('E-mail ou senha incorretos.');
     }

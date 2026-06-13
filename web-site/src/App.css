@@ -1,9 +1,12 @@
 :root {
   --primary-blue: #0B3B75;
+  --primary-navy: #0B3B75;
+  --primary-green: #008858;
   --bg-scientific: #F8FAFB;
   --border-color: #E2E8F0;
   --text-main: #1A202C;
   --text-muted: #718096;
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }

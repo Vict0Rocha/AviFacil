@@ -2,28 +2,42 @@ import { useState, useEffect, useMemo } from 'react';
 import { db } from '../firebase';
 import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
+import IndicatorCard from '../components/IndicatorCard';
+import * as Zootecnia from '../utils/zootecnia';
 import {
-  RefreshCw, Search, Calendar, Weight, Wheat, Skull, Info, TrendingUp, Download
+  RefreshCw, Search, Info, TrendingUp, Calendar, Hash, Activity, Download
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
 
 const RegistrosPage = () => {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
+  const [avicultores, setAvicultores] = useState([]);
+  const [selectedAvicultorId, setSelectedAvicultorId] = useState('');
   const [lotes, setLotes] = useState([]);
   const [selectedLoteId, setSelectedLoteId] = useState('');
   const [registros, setRegistros] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadingRegs, setLoadingRegs] = useState(false);
   const [error, setError] = useState(null);
 
   const selectedLoteData = useMemo(() =>
     lotes.find(l => l.id === selectedLoteId),
   [lotes, selectedLoteId]);
 
-  // Prepara os dados para o gráfico (invertendo a ordem para cronológica)
+  // Estatísticas calculadas em tempo real para o lote selecionado
+  const loteStats = useMemo(() => {
+    if (!selectedLoteData || registros.length === 0) return null;
+    return {
+      mortalidade: Zootecnia.calcularMortalidade(selectedLoteData, registros).toFixed(2) + "%",
+      viabilidade: Zootecnia.calcularViabilidade(selectedLoteData, registros).toFixed(2) + "%",
+      ca: Zootecnia.calcularConversaoAlimentar(selectedLoteData, registros).toFixed(3),
+      gpd: Zootecnia.calcularGanhoMedioPeso(selectedLoteData, registros).toFixed(2) + "g",
+      vivas: Zootecnia.calcularAvesVivas(selectedLoteData, registros)
+    };
+  }, [selectedLoteData, registros]);
+
   const chartData = useMemo(() => {
     return [...registros].reverse().map(reg => ({
       dia: `Dia ${reg.idadeLote}`,
@@ -32,11 +46,36 @@ const RegistrosPage = () => {
     }));
   }, [registros]);
 
+  // Busca lista de avicultores se for ADMIN
   useEffect(() => {
-    if (user) fetchLotes(user.uid);
-  }, [user]);
+    const fetchAvicultores = async () => {
+      if (isAdmin) {
+        try {
+          const snapshot = await getDocs(collection(db, 'avicultores'));
+          const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setAvicultores(list);
+          if (list.length > 0) {
+            setSelectedAvicultorId(list[0].id);
+          }
+        } catch (err) {
+          console.error("Erro ao buscar avicultores", err);
+        }
+      } else if (user) {
+        setSelectedAvicultorId(user.uid);
+      }
+    };
+    fetchAvicultores();
+  }, [isAdmin, user]);
+
+  // Busca lotes sempre que o avicultor selecionado mudar
+  useEffect(() => {
+    if (selectedAvicultorId) {
+      fetchLotes(selectedAvicultorId);
+    }
+  }, [selectedAvicultorId]);
 
   const fetchLotes = async (uid) => {
+    setLoading(true);
     try {
       const lotesRef = collection(db, `avicultores/${uid}/lotes`);
       const snapshot = await getDocs(lotesRef);
@@ -45,6 +84,9 @@ const RegistrosPage = () => {
       if (lotesList.length > 0) {
         setSelectedLoteId(lotesList[0].id);
         fetchRegistros(uid, lotesList[0].id);
+      } else {
+        setSelectedLoteId('');
+        setRegistros([]);
       }
     } catch (err) {
       setError("Erro ao carregar lotes.");
@@ -54,7 +96,6 @@ const RegistrosPage = () => {
   };
 
   const fetchRegistros = async (uid, loteId) => {
-    setLoadingRegs(true);
     try {
       const regsRef = collection(db, `avicultores/${uid}/lotes/${loteId}/registros`);
       const q = query(regsRef, orderBy("dataRegistro", "desc"));
@@ -62,8 +103,6 @@ const RegistrosPage = () => {
       setRegistros(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
     } catch (err) {
       setError("Erro ao carregar registros.");
-    } finally {
-      setLoadingRegs(false);
     }
   };
 
@@ -73,7 +112,7 @@ const RegistrosPage = () => {
     return date.toLocaleDateString('pt-BR');
   };
 
-  if (loading) return (
+  if (loading && !selectedAvicultorId) return (
     <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#F8FAFB' }}>
       <RefreshCw className="animate-spin" size={48} color="#008858" />
     </div>
@@ -85,41 +124,65 @@ const RegistrosPage = () => {
       <main className="main-content">
         <div className="top-bar-scientific">
           <div>
-            <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>Análise de Registros</h1>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Rastreabilidade e indicadores por lote</p>
+            <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>Rastreabilidade Analítica</h1>
+            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Análise profunda por produtor e lote individual</p>
           </div>
 
           <div style={{ display: 'flex', gap: '12px' }}>
+            {isAdmin && (
+              <div style={{ position: 'relative' }}>
+                <span style={{ fontSize: '10px', fontWeight: '800', position: 'absolute', top: '-18px', left: '0', color: 'var(--primary-green)' }}>SELECIONAR PRODUTOR</span>
+                <select
+                  value={selectedAvicultorId}
+                  onChange={(e) => setSelectedAvicultorId(e.target.value)}
+                  className="input-field-login"
+                  style={{ width: '220px', padding: '8px 8px 8px 35px', height: '40px', fontSize: '13px', margin: 0 }}
+                >
+                  {avicultores.map(avi => (
+                    <option key={avi.id} value={avi.id}>{avi.nome || "Produtor"}</option>
+                  ))}
+                </select>
+                <Search size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--primary-navy)' }} />
+              </div>
+            )}
+
             <div style={{ position: 'relative' }}>
+              <span style={{ fontSize: '10px', fontWeight: '800', position: 'absolute', top: '-18px', left: '0', color: 'var(--primary-blue)' }}>SELECIONAR LOTE</span>
               <select
                 value={selectedLoteId}
                 onChange={(e) => {
                   setSelectedLoteId(e.target.value);
-                  fetchRegistros(user.uid, e.target.value);
+                  fetchRegistros(selectedAvicultorId, e.target.value);
                 }}
                 className="input-field-login"
                 style={{ width: '220px', padding: '8px 8px 8px 35px', height: '40px', fontSize: '13px', margin: 0 }}
               >
+                {lotes.length === 0 && <option value="">Nenhum lote encontrado</option>}
                 {lotes.map(lote => <option key={lote.id} value={lote.id}>Lote {lote.numeroLote || lote.id}</option>)}
               </select>
               <Search size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--primary-blue)' }} />
             </div>
-            <button className="btn-login-action" style={{ width: 'auto', padding: '0 16px', height: '40px', margin: 0, fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Download size={16} /> Exportar
-            </button>
           </div>
         </div>
 
+        {loteStats && (
+          <div className="indicators-grid" style={{ marginBottom: '32px' }}>
+            <IndicatorCard title="Mortalidade Lote" value={loteStats.mortalidade} valueColor="#D64545" />
+            <IndicatorCard title="C.A. Atual" value={loteStats.ca} valueColor="#3182CE" />
+            <IndicatorCard title="G.P.D. (Médio)" value={loteStats.gpd} valueColor="#2D8A4E" />
+            <IndicatorCard title="Aves Vivas" value={loteStats.vivas} valueColor="#0B3B75" />
+          </div>
+        )}
+
         {selectedLoteData && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-            {/* Seção de Gráfico */}
-            <div className="card-scientific" style={{ gridColumn: 'span 2', minHeight: '350px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+            <div className="card-scientific" style={{ gridColumn: 'span 2', minHeight: '380px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
                 <h4 style={{ color: 'var(--primary-navy)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <TrendingUp size={18} color="var(--primary-green)"/> Evolução do Peso (g)
+                  <TrendingUp size={18} color="var(--primary-green)"/> Curva de Crescimento (Peso em Gramas)
                 </h4>
               </div>
-              <div style={{ width: '100%', height: '280px' }}>
+              <div style={{ width: '100%', height: '300px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={chartData}>
                     <defs>
@@ -140,31 +203,31 @@ const RegistrosPage = () => {
               </div>
             </div>
 
-            {/* Sidebar de Info do Lote */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="card-scientific" style={{ padding: '20px' }}>
-                <h4 style={{ fontSize: '14px', marginBottom: '15px', color: 'var(--primary-navy)', fontWeight: '800' }}>Detalhes do Alojamento</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Data Início</span>
-                    <span style={{ fontWeight: '700' }}>{formatDate(selectedLoteData.dataInicio)}</span>
+              <div className="card-scientific" style={{ padding: '24px' }}>
+                <h4 style={{ fontSize: '15px', marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>Ficha Técnica do Lote</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Calendar size={18} color="var(--text-muted)" />
+                    <div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700' }}>DATA DE ALOJAMENTO</p>
+                      <p style={{ fontWeight: '700' }}>{formatDate(selectedLoteData.dataInicio)}</p>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Qtd. Inicial</span>
-                    <span style={{ fontWeight: '700' }}>{selectedLoteData.quantidadeAvesInicial}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Hash size={18} color="var(--text-muted)" />
+                    <div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700' }}>QUANTIDADE INICIAL</p>
+                      <p style={{ fontWeight: '700' }}>{selectedLoteData.quantidadeAvesInicial} aves</p>
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <span style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Galpão</span>
-                    <span style={{ fontWeight: '700', color: 'var(--primary-green)' }}>{selectedLoteData.galpao}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <Activity size={18} color="var(--text-muted)" />
+                    <div>
+                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700' }}>LINHAGEM / GALPÃO</p>
+                      <p style={{ fontWeight: '700', color: 'var(--primary-green)' }}>{selectedLoteData.linhagem || "Cobb"} - {selectedLoteData.galpao}</p>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="card-scientific" style={{ padding: '20px', background: 'var(--primary-navy)', color: 'white' }}>
-                <p style={{ fontSize: '11px', opacity: 0.8, textTransform: 'uppercase', fontWeight: '800' }}>Status Operacional</p>
-                <p style={{ fontSize: '18px', fontWeight: '800', marginTop: '4px' }}>Lote em Conformidade</p>
-                <div style={{ marginTop: '15px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px' }}>
-                  <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#48BB78' }}></div>
-                  Sincronizado com App Mobile
                 </div>
               </div>
             </div>
@@ -172,33 +235,34 @@ const RegistrosPage = () => {
         )}
 
         <div className="card-scientific">
-          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Linha do Tempo de Campo</h3>
+          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Histórico Detalhado de Registros</h3>
           <div className="table-responsive">
             <table className="info-table">
               <thead>
                 <tr>
-                  <th>Data</th>
+                  <th>Data do Registro</th>
                   <th>Idade</th>
                   <th>Mortes</th>
-                  <th>Ração (kg)</th>
+                  <th>Consumo (kg)</th>
                   <th>Peso Médio (g)</th>
-                  <th>Ambiência</th>
+                  <th>Status Ambiência</th>
                 </tr>
               </thead>
               <tbody>
                 {registros.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum dado registrado.</td></tr>
+                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum dado registrado para este lote.</td></tr>
                 ) : (
                   registros.map((reg) => (
                     <tr key={reg.id}>
                       <td><strong>{formatDate(reg.dataRegistro)}</strong></td>
-                      <td><span style={{ background: '#EBF4FF', color: '#3182CE', padding: '4px 10px', borderRadius: '6px', fontWeight: '800', fontSize: '12px' }}>{reg.idadeLote} dias</span></td>
-                      <td style={{ color: '#E53E3E', fontWeight: '800' }}>{reg.avesMortasPeriodo || 0}</td>
+                      <td><span style={{ background: '#E6F4EF', color: '#008858', padding: '4px 10px', borderRadius: '6px', fontWeight: '800', fontSize: '12px' }}>{reg.idadeLote} dias</span></td>
+                      <td style={{ color: (reg.avesMortasPeriodo > 5) ? '#E53E3E' : 'inherit', fontWeight: '800' }}>{reg.avesMortasPeriodo || 0}</td>
                       <td>{reg.consumoRacaoPeriodo || 0} kg</td>
                       <td><strong>{reg.pesoAtualMedio || 0} g</strong></td>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2D8A4E', fontWeight: '700', fontSize: '12px' }}>
-                          <Info size={14}/> Estável
+                          <div style={{ width: '8px', height: '8px', background: '#2D8A4E', borderRadius: '50%' }}></div>
+                          Conforme
                         </div>
                       </td>
                     </tr>

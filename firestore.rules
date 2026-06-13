@@ -3,9 +3,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Função auxiliar para verificar se o usuário é o dono do dado
-    function isOwner(uid) {
-      return request.auth != null && request.auth.uid == uid;
+    // Função para verificar se o e-mail logado é de um administrador
+    function isAdmin() {
+      return request.auth != null &&
+             (request.auth.token.email == "cristianoadm@gmail.com" ||
+              request.auth.token.email == "cristiano@gmail.com");
     }
 
     // Bloqueia qualquer leitura/escrita global por padrão
@@ -13,22 +15,16 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
-    // Proteção da coleção de Avicultores
+    // Proteção da coleção de Avicultores e subcoleções
     match /avicultores/{uid} {
-      // O usuário só pode ver e editar seu próprio perfil
-      allow get: if isOwner(uid);
-      allow create, update: if isOwner(uid);
-      // Impede que um usuário liste todos os outros avicultores do sistema
-      allow list: if false;
+      // Admin lê tudo. Usuário lê apenas seu próprio documento.
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow write: if request.auth != null && request.auth.uid == uid;
 
-      // Proteção de Lotes
-      match /lotes/{loteId} {
-        allow read, write: if isOwner(uid);
-
-        // Proteção de Registros
-        match /registros/{regId} {
-          allow read, write: if isOwner(uid);
-        }
+      // Regra recursiva para Lotes e Registros
+      match /{allChildren=**} {
+        allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+        allow write: if request.auth != null && request.auth.uid == uid;
       }
     }
   }

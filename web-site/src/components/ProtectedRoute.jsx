@@ -1,20 +1,9 @@
 import { Navigate } from 'react-router-dom';
-import { auth } from '../firebase';
-import { useState, useEffect } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
 import { RefreshCw } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ children }) => {
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
+  const { user, loading } = useAuth();
 
   if (loading) {
     return (
@@ -25,7 +14,6 @@ const ProtectedRoute = ({ children }) => {
   }
 
   if (!user) {
-    // Redireciona para o login se não houver usuário autenticado
     return <Navigate to="/" replace />;
   }
 

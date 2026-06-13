@@ -6,7 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const { userData } = useAuth();
+  const { userData, isAdmin } = useAuth();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -25,14 +25,27 @@ const Sidebar = () => {
         </div>
       </div>
 
-      <div className="sidebar-label">Propriedade em Análise</div>
+      <div className="sidebar-label">{isAdmin ? "Visão Administrativa" : "Propriedade em Análise"}</div>
       <div className="card-scientific" style={{ padding: '16px', marginBottom: '24px', borderRadius: '12px' }}>
-        <p className="text-bold" style={{ fontSize: '13px', color: 'var(--primary-navy)' }}>
-          {userData?.nomePropriedade || "Carregando..."}
-        </p>
-        <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
-          Produtor: <span style={{ color: 'var(--primary-green)', fontWeight: '800' }}>{userData?.nome || "---"}</span>
-        </p>
+        {isAdmin ? (
+          <>
+            <p className="text-bold" style={{ fontSize: '13px', color: 'var(--primary-navy)' }}>
+              Painel Global de Controle
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+              Status: <span style={{ color: 'var(--primary-green)', fontWeight: '800' }}>Administrador</span>
+            </p>
+          </>
+        ) : (
+          <>
+            <p className="text-bold" style={{ fontSize: '13px', color: 'var(--primary-navy)' }}>
+              {userData?.nomePropriedade || "Carregando..."}
+            </p>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>
+              Produtor: <span style={{ color: 'var(--primary-green)', fontWeight: '800' }}>{userData?.nome || "---"}</span>
+            </p>
+          </>
+        )}
       </div>
 
       <div className="sidebar-label">Painel Analítico</div>
@@ -47,13 +60,15 @@ const Sidebar = () => {
         </NavLink>
       </nav>
 
-      <div className="sidebar-label">Segurança e Campo</div>
+      <div className="sidebar-label">{isAdmin ? "Gestão e Segurança" : "Segurança e Campo"}</div>
       <nav>
-        <NavLink to="/acessos" className="nav-link">
-          <Users size={18} />
-          <span>Acessos App Mobile</span>
-        </NavLink>
-        <NavLink to="/guias" className="nav-link">
+        {isAdmin && (
+          <NavLink to="/acessos" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
+            <Users size={18} />
+            <span>Acessos App Mobile</span>
+          </NavLink>
+        )}
+        <NavLink to="/guias" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
           <ClipboardList size={18} />
           <span>Guias de Decisão</span>
         </NavLink>

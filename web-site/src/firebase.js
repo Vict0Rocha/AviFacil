@@ -1,28 +1,26 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { getFirestore, connectFirestoreEmulator } from "firebase/firestore";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+
+// Acesso seguro ao ambiente Vite
+const env = import.meta.env || {};
 
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
+  apiKey: env.VITE_FIREBASE_API_KEY || "AIzaSyDalpnzo3k3lLjCwkTU_hupwkdfOay9vyE",
+  authDomain: env.VITE_FIREBASE_AUTH_DOMAIN || "avifacil.firebaseapp.com",
+  projectId: env.VITE_FIREBASE_PROJECT_ID || "avifacil",
+  storageBucket: env.VITE_FIREBASE_STORAGE_BUCKET || "avifacil.firebasestorage.app",
+  messagingSenderId: env.VITE_FIREBASE_MESSAGING_SENDER_ID || "890428953647",
+  appId: env.VITE_FIREBASE_APP_ID || "1:890428953647:web:411728ecc990f86aa2a2da"
 };
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-// Use a variável VITE_USE_EMULATOR no seu .env se quiser testar localmente
-// Se não houver essa variável, ele usará os dados reais do Firebase
-if (import.meta.env.VITE_USE_EMULATOR === 'true') {
-  connectAuthEmulator(auth, "http://127.0.0.1:9099");
-  connectFirestoreEmulator(db, "127.0.0.1", 8080);
-  console.log("Conectado aos Emuladores Firebase");
-} else {
-  console.log("Conectado ao Firebase Produção (Dados Reais)");
+let app;
+try {
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+} catch (error) {
+  console.error("Erro ao inicializar Firebase:", error);
+  app = getApps()[0]; // Tenta recuperar app já inicializado se houver erro
 }
 
-export { auth, db };
+export const auth = getAuth(app);
+export const db = getFirestore(app);
