@@ -13,6 +13,48 @@
 
 body { background-color: var(--bg-scientific); color: var(--text-main); width: 100%; min-height: 100vh; }
 
+.btn-primary {
+  background: var(--primary-green);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary:hover {
+  background: #006b45;
+  transform: translateY(-1px);
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.badge {
+  display: inline-block;
+  font-weight: 800;
+  text-transform: uppercase;
+  border-radius: 4px;
+}
+
+.badge.ATIVO {
+  background: #E6F4EF;
+  color: #008858;
+}
+
+.badge.FINALIZADO {
+  background: #EDF2F7;
+  color: #4A5568;
+}
+
 /* --- Dashboard Styles --- */
 .app-layout {
   display: flex;

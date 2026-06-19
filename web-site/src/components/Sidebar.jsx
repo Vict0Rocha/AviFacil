@@ -50,10 +50,12 @@ const Sidebar = () => {
 
       <div className="sidebar-label">Painel Analítico</div>
       <nav>
-        <NavLink to="/dashboard" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
-          <LayoutDashboard size={18} />
-          <span>Dashboard Decisório</span>
-        </NavLink>
+        {isAdmin && (
+          <NavLink to="/dashboard" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
+            <LayoutDashboard size={18} />
+            <span>Dashboard Decisório</span>
+          </NavLink>
+        )}
         <NavLink to="/registros" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
           <Database size={18} />
           <span>Consulta de Registros</span>

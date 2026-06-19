@@ -1,280 +1,234 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { db } from '../firebase';
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 import Sidebar from '../components/Sidebar';
-import IndicatorCard from '../components/IndicatorCard';
 import * as Zootecnia from '../utils/zootecnia';
 import {
-  RefreshCw, Search, Info, TrendingUp, Calendar, Hash, Activity, Download
+  RefreshCw, AlertTriangle, User, Database, Activity, TrendingUp, Calendar, Hash,
+  ArrowUpRight, Users, HeartPulse, Scale, DollarSign
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import {
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area
-} from 'recharts';
 
 const RegistrosPage = () => {
   const { user, isAdmin } = useAuth();
   const [avicultores, setAvicultores] = useState([]);
-  const [selectedAvicultorId, setSelectedAvicultorId] = useState('');
-  const [lotes, setLotes] = useState([]);
-  const [selectedLoteId, setSelectedLoteId] = useState('');
-  const [registros, setRegistros] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedUid, setSelectedUid] = useState('');
+  const [processedData, setProcessedData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const selectedLoteData = useMemo(() =>
-    lotes.find(l => l.id === selectedLoteId),
-  [lotes, selectedLoteId]);
-
-  // Estatísticas calculadas em tempo real para o lote selecionado
-  const loteStats = useMemo(() => {
-    if (!selectedLoteData || registros.length === 0) return null;
-    return {
-      mortalidade: Zootecnia.calcularMortalidade(selectedLoteData, registros).toFixed(2) + "%",
-      viabilidade: Zootecnia.calcularViabilidade(selectedLoteData, registros).toFixed(2) + "%",
-      ca: Zootecnia.calcularConversaoAlimentar(selectedLoteData, registros).toFixed(3),
-      gpd: Zootecnia.calcularGanhoMedioPeso(selectedLoteData, registros).toFixed(2) + "g",
-      vivas: Zootecnia.calcularAvesVivas(selectedLoteData, registros)
-    };
-  }, [selectedLoteData, registros]);
-
-  const chartData = useMemo(() => {
-    return [...registros].reverse().map(reg => ({
-      dia: `Dia ${reg.idadeLote}`,
-      peso: reg.pesoAtualMedio || 0,
-      consumo: reg.consumoRacaoPeriodo || 0,
-    }));
-  }, [registros]);
-
-  // Busca lista de avicultores se for ADMIN
-  useEffect(() => {
-    const fetchAvicultores = async () => {
-      if (isAdmin) {
-        try {
-          const snapshot = await getDocs(collection(db, 'avicultores'));
-          const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setAvicultores(list);
-          if (list.length > 0) {
-            setSelectedAvicultorId(list[0].id);
-          }
-        } catch (err) {
-          console.error("Erro ao buscar avicultores", err);
-        }
-      } else if (user) {
-        setSelectedAvicultorId(user.uid);
-      }
-    };
-    fetchAvicultores();
-  }, [isAdmin, user]);
-
-  // Busca lotes sempre que o avicultor selecionado mudar
-  useEffect(() => {
-    if (selectedAvicultorId) {
-      fetchLotes(selectedAvicultorId);
-    }
-  }, [selectedAvicultorId]);
-
-  const fetchLotes = async (uid) => {
-    setLoading(true);
+  const loadProducers = useCallback(async () => {
+    if (!user) return;
     try {
-      const lotesRef = collection(db, `avicultores/${uid}/lotes`);
-      const snapshot = await getDocs(lotesRef);
-      const lotesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setLotes(lotesList);
-      if (lotesList.length > 0) {
-        setSelectedLoteId(lotesList[0].id);
-        fetchRegistros(uid, lotesList[0].id);
-      } else {
-        setSelectedLoteId('');
-        setRegistros([]);
+      const snapshot = await getDocs(collection(db, 'avicultores'));
+      const list = snapshot.docs.map(doc => ({
+        ...doc.data(),
+        uid_oficial: String(doc.id),
+        nome_exibicao: doc.data().nome || doc.data().email || `ID: ${doc.id}`
+      }));
+      setAvicultores(list);
+      if (list.length > 0) {
+        const realUID = list.find(a => a.uid_oficial.length > 15);
+        setSelectedUid(realUID ? realUID.uid_oficial : list[0].uid_oficial);
       }
     } catch (err) {
-      setError("Erro ao carregar lotes.");
+      setError("Erro ao carregar lista de produtores.");
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (isAdmin) loadProducers();
+    else if (user) setSelectedUid(String(user.uid));
+  }, [isAdmin, user, loadProducers]);
+
+  const fetchAnalytics = useCallback(async (uid) => {
+    if (!uid) return;
+    setLoading(true);
+    setProcessedData([]);
+    try {
+      const path = `avicultores/${uid}/lotes`;
+      const lotesSnap = await getDocs(collection(db, path));
+      if (lotesSnap.empty) {
+        setLoading(false);
+        return;
+      }
+
+      const results = await Promise.all(lotesSnap.docs.map(async (loteDoc) => {
+        try {
+          const loteData = { ...loteDoc.data(), id: loteDoc.id };
+          const regsSnap = await getDocs(collection(db, `${path}/${loteDoc.id}/registros`));
+          const registros = regsSnap.docs.map(d => d.data());
+
+          // Executa cálculos usando a biblioteca sincronizada com o Mobile
+          return {
+            ...loteData,
+            vivas: Zootecnia.calcularAvesVivas(loteData, registros),
+            mortas: Zootecnia.calcularTotalMortas(registros),
+            viabilidade: Zootecnia.calcularViabilidade(loteData, registros),
+            ca: Zootecnia.calcularConversaoAlimentar(loteData, registros),
+            gpd: Zootecnia.calcularGanhoMedioPeso(loteData, registros),
+            mortalidade: Zootecnia.calcularMortalidade(loteData, registros),
+            pesoAtual: Zootecnia.calcularPesoMedioAtual(registros),
+            fatorProducao: Zootecnia.calcularFatorProducao(loteData, registros),
+            idade: Zootecnia.calcularIdadeDias(loteData),
+            consumoTotal: Zootecnia.calcularTotalConsumoRacao(registros),
+            custoTotal: Zootecnia.calcularCustoTotalRacao(registros)
+          };
+        } catch (e) { return null; }
+      }));
+
+      setProcessedData(results.filter(r => r !== null).sort((a, b) => a.status === 'ATIVO' ? -1 : 1));
+    } catch (err) {
+      setError("Falha ao processar dados de performance.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchRegistros = async (uid, loteId) => {
-    try {
-      const regsRef = collection(db, `avicultores/${uid}/lotes/${loteId}/registros`);
-      const q = query(regsRef, orderBy("dataRegistro", "desc"));
-      const snapshot = await getDocs(q);
-      setRegistros(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-    } catch (err) {
-      setError("Erro ao carregar registros.");
-    }
-  };
+  useEffect(() => {
+    if (selectedUid) fetchAnalytics(selectedUid);
+  }, [selectedUid, fetchAnalytics]);
 
-  const formatDate = (dateVal) => {
-    if (!dateVal) return "---";
-    const date = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
-    return date.toLocaleDateString('pt-BR');
-  };
-
-  if (loading && !selectedAvicultorId) return (
-    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', background: '#F8FAFB' }}>
-      <RefreshCw className="animate-spin" size={48} color="#008858" />
-    </div>
-  );
+  const stats = useMemo(() => {
+    if (processedData.length === 0) return null;
+    const ativos = processedData.filter(l => l.status === 'ATIVO');
+    return {
+      totalVivas: ativos.reduce((acc, curr) => acc + curr.vivas, 0),
+      mortalidadeMedia: processedData.reduce((acc, curr) => acc + curr.mortalidade, 0) / processedData.length,
+      fatorProducaoMedio: processedData.reduce((acc, curr) => acc + curr.fatorProducao, 0) / processedData.length,
+      pesoMedio: ativos.length > 0 ? ativos.reduce((acc, curr) => acc + curr.pesoAtual, 0) / ativos.length : 0
+    };
+  }, [processedData]);
 
   return (
-    <div className="app-layout">
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#F0F2F5' }}>
       <Sidebar />
-      <main className="main-content">
-        <div className="top-bar-scientific">
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+
+        <header style={{
+          padding: '12px 32px', background: '#fff', borderBottom: '1px solid #E2E8F0',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', zIndex: 10
+        }}>
           <div>
-            <h1 style={{ color: 'var(--primary-navy)', fontSize: '24px', fontWeight: '800' }}>Rastreabilidade Analítica</h1>
-            <p style={{ color: 'var(--text-muted)', fontWeight: '600' }}>Análise profunda por produtor e lote individual</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Activity size={20} color="#008858" />
+              <h1 style={{ color: '#0B3B75', fontSize: '20px', fontWeight: '800', margin: 0 }}>BI Administrativo</h1>
+            </div>
+            <p style={{ color: '#718096', fontSize: '11px', margin: 0, fontWeight: '600' }}>Sincronizado com App Mobile v1.0</p>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
             {isAdmin && (
               <div style={{ position: 'relative' }}>
-                <span style={{ fontSize: '10px', fontWeight: '800', position: 'absolute', top: '-18px', left: '0', color: 'var(--primary-green)' }}>SELECIONAR PRODUTOR</span>
                 <select
-                  value={selectedAvicultorId}
-                  onChange={(e) => setSelectedAvicultorId(e.target.value)}
-                  className="input-field-login"
-                  style={{ width: '220px', padding: '8px 8px 8px 35px', height: '40px', fontSize: '13px', margin: 0 }}
+                  value={selectedUid}
+                  onChange={(e) => setSelectedUid(e.target.value)}
+                  style={{
+                    width: '350px', height: '42px', padding: '0 12px 0 40px', borderRadius: '8px',
+                    border: '1.5px solid #E2E8F0', fontSize: '13px', fontWeight: '700', color: '#2D3748', background: '#F8FAFB'
+                  }}
                 >
                   {avicultores.map(avi => (
-                    <option key={avi.id} value={avi.id}>{avi.nome || "Produtor"}</option>
+                    <option key={avi.uid_oficial} value={avi.uid_oficial}>{avi.nome_exibicao}</option>
                   ))}
                 </select>
-                <Search size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--primary-navy)' }} />
+                <User size={16} style={{ position: 'absolute', left: '14px', top: '13px', color: '#0B3B75' }} />
               </div>
             )}
+            <button onClick={() => fetchAnalytics(selectedUid)} className="btn-primary" disabled={loading} style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+              <span>Sincronizar</span>
+            </button>
+          </div>
+        </header>
 
-            <div style={{ position: 'relative' }}>
-              <span style={{ fontSize: '10px', fontWeight: '800', position: 'absolute', top: '-18px', left: '0', color: 'var(--primary-blue)' }}>SELECIONAR LOTE</span>
-              <select
-                value={selectedLoteId}
-                onChange={(e) => {
-                  setSelectedLoteId(e.target.value);
-                  fetchRegistros(selectedAvicultorId, e.target.value);
-                }}
-                className="input-field-login"
-                style={{ width: '220px', padding: '8px 8px 8px 35px', height: '40px', fontSize: '13px', margin: 0 }}
-              >
-                {lotes.length === 0 && <option value="">Nenhum lote encontrado</option>}
-                {lotes.map(lote => <option key={lote.id} value={lote.id}>Lote {lote.numeroLote || lote.id}</option>)}
-              </select>
-              <Search size={16} style={{ position: 'absolute', left: '10px', top: '12px', color: 'var(--primary-blue)' }} />
+        <main style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
+          {stats && !loading && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
+              <SummaryCard icon={<Users color="#0B3B75"/>} bg="#EBF4FF" label="Aves no Campo" value={stats.totalVivas.toLocaleString()} border="#0B3B75" />
+              <SummaryCard icon={<HeartPulse color="#E53E3E"/>} bg="#FFF5F5" label="Mortalidade Média" value={`${stats.mortalidadeMedia.toFixed(2)}%`} border="#E53E3E" />
+              <SummaryCard icon={<TrendingUp color="#008858"/>} bg="#E6F4EF" label="Fator de Prod. Médio" value={stats.fatorProducaoMedio.toFixed(2)} border="#008858" />
+              <SummaryCard icon={<Scale color="#3182CE"/>} bg="#EBF8FF" label="Peso Médio Ativos" value={`${Math.round(stats.pesoMedio)}g`} border="#3182CE" />
             </div>
-          </div>
-        </div>
+          )}
 
-        {loteStats && (
-          <div className="indicators-grid" style={{ marginBottom: '32px' }}>
-            <IndicatorCard title="Mortalidade Lote" value={loteStats.mortalidade} valueColor="#D64545" />
-            <IndicatorCard title="C.A. Atual" value={loteStats.ca} valueColor="#3182CE" />
-            <IndicatorCard title="G.P.D. (Médio)" value={loteStats.gpd} valueColor="#2D8A4E" />
-            <IndicatorCard title="Aves Vivas" value={loteStats.vivas} valueColor="#0B3B75" />
-          </div>
-        )}
-
-        {selectedLoteData && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-            <div className="card-scientific" style={{ gridColumn: 'span 2', minHeight: '380px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                <h4 style={{ color: 'var(--primary-navy)', fontWeight: '800', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <TrendingUp size={18} color="var(--primary-green)"/> Curva de Crescimento (Peso em Gramas)
-                </h4>
-              </div>
-              <div style={{ width: '100%', height: '300px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <defs>
-                      <linearGradient id="colorPeso" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#008858" stopOpacity={0.1}/>
-                        <stop offset="95%" stopColor="#008858" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="dia" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#718096'}} />
-                    <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#718096'}} />
-                    <Tooltip
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                    />
-                    <Area type="monotone" dataKey="peso" stroke="#008858" strokeWidth={3} fillOpacity={1} fill="url(#colorPeso)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+          <div className="card-scientific" style={{ padding: 0, overflow: 'hidden', border: '1px solid #E2E8F0' }}>
+            <div style={{ padding: '16px 24px', borderBottom: '1px solid #EDF2F7', display: 'flex', justifyContent: 'space-between', background: '#fff' }}>
+              <h2 style={{ fontSize: '15px', color: '#0B3B75', margin: 0, fontWeight: '800' }}>Rastreabilidade de Lotes</h2>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div className="card-scientific" style={{ padding: '24px' }}>
-                <h4 style={{ fontSize: '15px', marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800', borderBottom: '1px solid var(--border-color)', paddingBottom: '10px' }}>Ficha Técnica do Lote</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <Calendar size={18} color="var(--text-muted)" />
-                    <div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700' }}>DATA DE ALOJAMENTO</p>
-                      <p style={{ fontWeight: '700' }}>{formatDate(selectedLoteData.dataInicio)}</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <Hash size={18} color="var(--text-muted)" />
-                    <div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700' }}>QUANTIDADE INICIAL</p>
-                      <p style={{ fontWeight: '700' }}>{selectedLoteData.quantidadeAvesInicial} aves</p>
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <Activity size={18} color="var(--text-muted)" />
-                    <div>
-                      <p style={{ color: 'var(--text-muted)', fontSize: '11px', fontWeight: '700' }}>LINHAGEM / GALPÃO</p>
-                      <p style={{ fontWeight: '700', color: 'var(--primary-green)' }}>{selectedLoteData.linhagem || "Cobb"} - {selectedLoteData.galpao}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div className="card-scientific">
-          <h3 style={{ marginBottom: '20px', color: 'var(--primary-navy)', fontWeight: '800' }}>Histórico Detalhado de Registros</h3>
-          <div className="table-responsive">
-            <table className="info-table">
-              <thead>
-                <tr>
-                  <th>Data do Registro</th>
-                  <th>Idade</th>
-                  <th>Mortes</th>
-                  <th>Consumo (kg)</th>
-                  <th>Peso Médio (g)</th>
-                  <th>Status Ambiência</th>
-                </tr>
-              </thead>
-              <tbody>
-                {registros.length === 0 ? (
-                  <tr><td colSpan="6" style={{ textAlign: 'center', padding: '40px', color: 'var(--text-muted)' }}>Nenhum dado registrado para este lote.</td></tr>
-                ) : (
-                  registros.map((reg) => (
-                    <tr key={reg.id}>
-                      <td><strong>{formatDate(reg.dataRegistro)}</strong></td>
-                      <td><span style={{ background: '#E6F4EF', color: '#008858', padding: '4px 10px', borderRadius: '6px', fontWeight: '800', fontSize: '12px' }}>{reg.idadeLote} dias</span></td>
-                      <td style={{ color: (reg.avesMortasPeriodo > 5) ? '#E53E3E' : 'inherit', fontWeight: '800' }}>{reg.avesMortasPeriodo || 0}</td>
-                      <td>{reg.consumoRacaoPeriodo || 0} kg</td>
-                      <td><strong>{reg.pesoAtualMedio || 0} g</strong></td>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#2D8A4E', fontWeight: '700', fontSize: '12px' }}>
-                          <div style={{ width: '8px', height: '8px', background: '#2D8A4E', borderRadius: '50%' }}></div>
-                          Conforme
-                        </div>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#F8FAFB' }}>
+                    <th style={thStyle}>Lote / Linhagem</th>
+                    <th style={thCenter}>Idade</th>
+                    <th style={thCenter}>Inicial</th>
+                    <th style={thCenter}>Vivas</th>
+                    <th style={thCenter}>Mortas</th>
+                    <th style={thCenter}>Mortal. %</th>
+                    <th style={thCenter}>Viab. %</th>
+                    <th style={thCenter}>Peso</th>
+                    <th style={thCenter}>G.P.D.</th>
+                    <th style={thCenter}>Consumo (kg)</th>
+                    <th style={thCenter}>C.A.</th>
+                    <th style={thCenter}>Custo Ração</th>
+                    <th style={{ ...thCenter, background: '#E6F4EF', color: '#008858' }}>Fator Prod.</th>
+                    <th style={thCenter}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {processedData.map((lote) => (
+                    <tr key={lote.id} style={{ borderBottom: '1px solid #EDF2F7', background: '#fff' }} className="table-row-hover">
+                      <td style={tdStyle}>
+                        <div style={{ fontWeight: '800', color: '#0B3B75' }}>Lote {lote.numeroLote}</div>
+                        <div style={{ fontSize: '11px', color: '#718096' }}>{lote.linhagem || 'Cobb-500'}</div>
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.idade}d</td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.quantidadeAvesInicial}</td>
+                      <td style={{ ...tdStyle, textAlign: 'center', color: '#0B3B75', fontWeight: '800' }}>{lote.vivas}</td>
+                      <td style={{ ...tdStyle, textAlign: 'center', color: '#E53E3E' }}>{lote.mortas}</td>
+                      <td style={{ ...tdStyle, textAlign: 'center', fontWeight: '700', color: lote.mortalidade > 5 ? '#E53E3E' : '#2D3748' }}>
+                        {lote.mortalidade.toFixed(2)}%
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.viabilidade.toFixed(2)}%</td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.pesoAtual}g</td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.gpd.toFixed(2)}</td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.consumoTotal.toLocaleString()} kg</td>
+                      <td style={{ ...tdStyle, textAlign: 'center', color: '#3182CE', fontWeight: '800' }}>{lote.ca.toFixed(3)}</td>
+                      <td style={{ ...tdStyle, textAlign: 'center', color: '#008858', fontWeight: '700' }}>
+                        R$ {lote.custoTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: 'center', background: '#F0FFF4', fontWeight: '900', color: '#008858' }}>
+                        {lote.fatorProducao.toFixed(2)}
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>
+                        <span className={`badge ${lote.status}`}>{lote.status}</span>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };
+
+const SummaryCard = ({ icon, bg, label, value, border }) => (
+  <div className="card-scientific" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', borderLeft: `4px solid ${border}` }}>
+    <div style={{ background: bg, padding: '12px', borderRadius: '12px' }}>{icon}</div>
+    <div>
+      <p style={{ margin: 0, fontSize: '11px', fontWeight: '700', color: '#718096', textTransform: 'uppercase' }}>{label}</p>
+      <h3 style={{ margin: 0, color: border, fontSize: '22px' }}>{value}</h3>
+    </div>
+  </div>
+);
+
+const thStyle = { padding: '16px 15px', fontSize: '11px', fontWeight: '800', color: '#4A5568', textTransform: 'uppercase', borderBottom: '2px solid #E2E8F0' };
+const thCenter = { ...thStyle, textAlign: 'center' };
+const tdStyle = { padding: '14px 15px', fontSize: '13px', color: '#2D3748' };
 
 export default RegistrosPage;

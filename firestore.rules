@@ -3,28 +3,23 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Função para verificar se o e-mail logado é de um administrador
+    // Função centralizada para administradores
     function isAdmin() {
       return request.auth != null &&
-             (request.auth.token.email == "cristianoadm@gmail.com" ||
-              request.auth.token.email == "cristiano@gmail.com");
+             (request.auth.token.email.lower() == "cristiano@gmail.com" ||
+              request.auth.token.email.lower() == "cristianoadm@gmail.com");
     }
 
-    // Bloqueia qualquer leitura/escrita global por padrão
     match /{document=**} {
       allow read, write: if false;
     }
 
-    // Proteção da coleção de Avicultores e subcoleções
     match /avicultores/{uid} {
-      // Admin lê tudo. Usuário lê apenas seu próprio documento.
-      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
-      allow write: if request.auth != null && request.auth.uid == uid;
+      // Admin tem acesso total à coleção. Usuário tem acesso apenas ao seu UID.
+      allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
 
-      // Regra recursiva para Lotes e Registros
       match /{allChildren=**} {
-        allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
-        allow write: if request.auth != null && request.auth.uid == uid;
+        allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
       }
     }
   }

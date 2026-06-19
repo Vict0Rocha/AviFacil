@@ -1,8 +1,14 @@
-const safeDate = (dateVal) => {
+export const safeDate = (dateVal) => {
     if (!dateVal) return new Date();
     if (dateVal.toDate) return dateVal.toDate();
     const d = new Date(dateVal);
     return isNaN(d.getTime()) ? new Date() : d;
+};
+
+// Funções de Arredondamento para bater com o Mobile (RoundingMode.HALF_UP)
+const round = (value, places) => {
+    if (!value || isNaN(value)) return 0;
+    return Number(Math.round(value + "e" + places) + "e-" + places);
 };
 
 export const calcularTotalMortas = (registros) => {
@@ -13,28 +19,34 @@ export const calcularTotalMortas = (registros) => {
 export const calcularAvesVivas = (lote, registros) => {
     if (!lote) return 0;
     const inicial = Number(lote.quantidadeAvesInicial) || 0;
-    return Math.max(0, inicial - calcularTotalMortas(registros));
+    const perdas = calcularTotalMortas(registros);
+    return Math.max(0, inicial - perdas);
 };
 
 export const calcularMortalidade = (lote, registros) => {
     if (!lote || !lote.quantidadeAvesInicial || lote.quantidadeAvesInicial === 0) return 0;
-    return (calcularTotalMortas(registros) * 100.0) / lote.quantidadeAvesInicial;
+    const perdas = calcularTotalMortas(registros);
+    return round((perdas / lote.quantidadeAvesInicial) * 100.0, 2);
 };
 
 export const calcularViabilidade = (lote, registros) => {
-    return 100.0 - calcularMortalidade(lote, registros);
+    if (!lote || !lote.quantidadeAvesInicial || lote.quantidadeAvesInicial === 0) return 100.0;
+    const vivas = calcularAvesVivas(lote, registros);
+    return round((vivas / lote.quantidadeAvesInicial) * 100.0, 2);
 };
 
 export const calcularIdadeDias = (lote, dataReferencia = new Date()) => {
-    if (!lote || !lote.dataInicio) return 1;
+    if (!lote || !lote.dataInicio) return 0;
     const dataInicio = safeDate(lote.dataInicio);
-    const diffInMs = dataReferencia.getTime() - dataInicio.getTime();
-    if (diffInMs < 0) return 1;
-    return Math.floor(diffInMs / (1000 * 60 * 60 * 24)) + 1;
+    const dataRef = safeDate(dataReferencia);
+    const diffInMs = dataRef.getTime() - dataInicio.getTime();
+    if (diffInMs < 0) return 0;
+    return Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 };
 
 export const calcularPesoMedioAtual = (registros) => {
     if (!registros || registros.length === 0) return 0;
+    // Ordena para garantir que pegamos o registro mais recente (maior data)
     const sorted = [...registros].sort((a, b) => {
         const da = safeDate(a.dataRegistro);
         const db = safeDate(b.dataRegistro);
@@ -45,28 +57,52 @@ export const calcularPesoMedioAtual = (registros) => {
 
 export const calcularTotalConsumoRacao = (registros) => {
     if (!registros) return 0;
-    return registros.reduce((total, r) => total + (Number(r.consumoRacaoPeriodo) || 0), 0);
+    return registros.reduce((total, r) => total + Math.max(0, Number(r.consumoRacaoPeriodo) || 0), 0);
+};
+
+export const calcularCustoTotalRacao = (registros) => {
+    if (!registros) return 0;
+    const custoTotal = registros.reduce((total, r) => {
+        const consumo = Math.max(0, Number(r.consumoRacaoPeriodo) || 0);
+        const preco = Number(r.precoKgInsumo) || 0;
+        return total + (consumo * preco);
+    }, 0);
+    return round(custoTotal, 2);
 };
 
 export const calcularGanhoMedioPeso = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
-    const pesoAtual = calcularPesoMedioAtual(registros);
-    const pesoInicial = Number(lote.pesoInicial) || 0;
+    const pesoMedioG = calcularPesoMedioAtual(registros);
+    const pesoInicialG = Number(lote.pesoInicial) || 0;
     const idadeDias = calcularIdadeDias(lote);
-    if (idadeDias <= 0) return 0;
-    return (pesoAtual - pesoInicial) / idadeDias;
+    if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
+    return round((pesoMedioG - pesoInicialG) / idadeDias, 2);
 };
 
 export const calcularConversaoAlimentar = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
-    const consumoTotal = calcularTotalConsumoRacao(registros);
+    const consumoTotalKg = calcularTotalConsumoRacao(registros);
     const vivas = calcularAvesVivas(lote, registros);
-    const pesoAtual = calcularPesoMedioAtual(registros);
-    const pesoInicial = Number(lote.pesoInicial) || 0;
+    const pesoMedioG = calcularPesoMedioAtual(registros);
+    const pesoMedioKg = pesoMedioG / 1000.0;
 
-    if (consumoTotal <= 0 || vivas <= 0) return 0;
-    const ganhoPesoMedioKg = (pesoAtual - pesoInicial) / 1000.0;
-    const ganhoPesoTotalLoteKg = ganhoPesoMedioKg * vivas;
-    if (ganhoPesoTotalLoteKg <= 0) return 0;
-    return consumoTotal / ganhoPesoTotalLoteKg;
+    if (consumoTotalKg <= 0 || vivas <= 0 || pesoMedioKg <= 0) return 0;
+
+    // Biomassa total (igual ao mobile)
+    const pesoTotalLoteKg = pesoMedioKg * vivas;
+    return round(consumoTotalKg / pesoTotalLoteKg, 3);
+};
+
+export const calcularFatorProducao = (lote, registros) => {
+    if (!lote || !registros || registros.length === 0) return 0;
+
+    const pesoMedioKg = calcularPesoMedioAtual(registros) / 1000.0;
+    const viabilidade = calcularViabilidade(lote, registros);
+    const idade = calcularIdadeDias(lote);
+    const ca = calcularConversaoAlimentar(lote, registros);
+
+    if (idade <= 0 || ca <= 0) return 0;
+
+    // Fórmula: ((Peso Médio Kg * Viabilidade %) / (Idade * CA)) * 100
+    return round(((pesoMedioKg * viabilidade) / (idade * ca)) * 100.0, 2);
 };

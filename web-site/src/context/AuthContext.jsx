@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { auth, db } from '../firebase';
-import { onAuthStateChanged } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 
 const AuthContext = createContext();
@@ -10,6 +10,37 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Monitor de Inatividade (20 minutos)
+  useEffect(() => {
+    let inactivityTimer;
+    const INACTIVITY_LIMIT = 20 * 60 * 1000; // 20 min em milissegundos
+
+    const resetTimer = () => {
+      if (inactivityTimer) clearTimeout(inactivityTimer);
+
+      if (user) {
+        inactivityTimer = setTimeout(() => {
+          console.warn("Sessão expirada por inatividade (20 min).");
+          signOut(auth);
+          alert("Sua sessão expirou por inatividade. Por favor, faça login novamente.");
+        }, INACTIVITY_LIMIT);
+      }
+    };
+
+    if (user) {
+      // Eventos que reiniciam o timer de inatividade
+      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+
+      events.forEach(event => window.addEventListener(event, resetTimer));
+      resetTimer(); // Inicia o timer pela primeira vez ao logar
+
+      return () => {
+        if (inactivityTimer) clearTimeout(inactivityTimer);
+        events.forEach(event => window.removeEventListener(event, resetTimer));
+      };
+    }
+  }, [user]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
