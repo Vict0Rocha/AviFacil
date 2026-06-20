@@ -5,7 +5,7 @@ import Sidebar from '../components/Sidebar';
 import * as Zootecnia from '../utils/zootecnia';
 import {
   RefreshCw, AlertTriangle, User, Database, Activity, TrendingUp, Calendar, Hash,
-  ArrowUpRight, Users, HeartPulse, Scale, DollarSign
+  ArrowUpRight, Users, HeartPulse, Scale, DollarSign, Eye, X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +16,7 @@ const RegistrosPage = () => {
   const [processedData, setProcessedData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedLote, setSelectedLote] = useState(null);
 
   const loadProducers = useCallback(async () => {
     if (!user) return;
@@ -72,7 +73,8 @@ const RegistrosPage = () => {
             fatorProducao: Zootecnia.calcularFatorProducao(loteData, registros),
             idade: Zootecnia.calcularIdadeDias(loteData),
             consumoTotal: Zootecnia.calcularTotalConsumoRacao(registros),
-            custoTotal: Zootecnia.calcularCustoTotalRacao(registros)
+            custoTotal: Zootecnia.calcularCustoTotalRacao(registros),
+            registros: registros.sort((a, b) => Zootecnia.safeDate(b.dataRegistro) - Zootecnia.safeDate(a.dataRegistro))
           };
         } catch (e) { return null; }
       }));
@@ -175,6 +177,7 @@ const RegistrosPage = () => {
                     <th style={thCenter}>Custo Ração</th>
                     <th style={{ ...thCenter, background: '#E6F4EF', color: '#008858' }}>Fator Prod.</th>
                     <th style={thCenter}>Status</th>
+                    <th style={thCenter}>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -205,6 +208,21 @@ const RegistrosPage = () => {
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
                         <span className={`badge ${lote.status}`}>{lote.status}</span>
                       </td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>
+                        <button
+                          onClick={() => setSelectedLote(lote)}
+                          style={{
+                            background: '#F1F5F9', border: 'none', borderRadius: '6px', padding: '6px',
+                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            color: '#64748B', transition: 'all 0.2s'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = '#E2E8F0'}
+                          onMouseLeave={e => e.currentTarget.style.background = '#F1F5F9'}
+                          title="Ver Registros"
+                        >
+                          <Eye size={16} />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -212,10 +230,80 @@ const RegistrosPage = () => {
             </div>
           </div>
         </main>
+
+        {/* Modal de Registros Detalhados */}
+        {selectedLote && (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1000, padding: '20px'
+          }}>
+            <div style={{
+              background: '#fff', borderRadius: '16px', width: '100%', maxWidth: '900px',
+              maxHeight: '85vh', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
+            }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid #E2E8F0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={{ margin: 0, color: '#0B3B75', fontSize: '18px', fontWeight: '800' }}>
+                    Registros Diários - Lote {selectedLote.numeroLote}
+                  </h3>
+                  <p style={{ margin: 0, fontSize: '12px', color: '#718096' }}>{selectedLote.linhagem || 'Cobb-500'} • {selectedLote.quantidadeAvesInicial} aves iniciais</p>
+                </div>
+                <button onClick={() => setSelectedLote(null)} style={{ background: '#F7FAFC', border: 'none', borderRadius: '50%', padding: '8px', cursor: 'pointer' }}>
+                  <X size={20} color="#4A5568" />
+                </button>
+              </div>
+
+              <div style={{ flex: 1, overflowY: 'auto', padding: '0' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead style={{ position: 'sticky', top: 0, background: '#F8FAFB', zIndex: 1 }}>
+                    <tr>
+                      <th style={modalTh}>Data</th>
+                      <th style={modalTh}>Idade</th>
+                      <th style={modalTh}>Peso Médio</th>
+                      <th style={modalTh}>Mortalidade</th>
+                      <th style={modalTh}>Consumo Ração</th>
+                      <th style={modalTh}>Preço Kg Insumo</th>
+                      <th style={modalTh}>Tipo Insumo</th>
+                      <th style={modalTh}>Observações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {selectedLote.registros.length > 0 ? (
+                      selectedLote.registros.map((reg, idx) => (
+                        <tr key={idx} style={{ borderBottom: '1px solid #EDF2F7' }}>
+                          <td style={modalTd}>{Zootecnia.safeDate(reg.dataRegistro).toLocaleDateString('pt-BR')}</td>
+                          <td style={modalTd}>{Zootecnia.calcularIdadeDias(selectedLote, reg.dataRegistro)} dias</td>
+                          <td style={{ ...modalTd, fontWeight: '700', color: '#3182CE' }}>{reg.pesoAtualMedio}g</td>
+                          <td style={{ ...modalTd, color: '#E53E3E', fontWeight: '700' }}>{reg.avesMortasPeriodo} aves</td>
+                          <td style={{ ...modalTd, fontWeight: '600' }}>{reg.consumoRacaoPeriodo} kg</td>
+                          <td style={modalTd}>R$ {Number(reg.precoKgInsumo || 0).toFixed(2)}</td>
+                          <td style={modalTd}><span style={{ textTransform: 'capitalize' }}>{reg.tipoInsumo || '---'}</span></td>
+                          <td style={{ ...modalTd, fontSize: '11px', color: '#718096', maxWidth: '200px', whiteSpace: 'normal' }}>
+                            {reg.observacoes || '---'}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr><td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#718096' }}>Nenhum registro encontrado para este lote.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ padding: '16px 24px', borderTop: '1px solid #E2E8F0', background: '#F8FAFB', borderRadius: '0 0 16px 16px', textAlign: 'right' }}>
+                <button onClick={() => setSelectedLote(null)} className="btn-secondary" style={{ padding: '8px 20px' }}>Fechar Janela</button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 };
+
+const modalTh = { padding: '14px 20px', fontSize: '11px', fontWeight: '800', color: '#718096', textTransform: 'uppercase', textAlign: 'left', borderBottom: '1px solid #E2E8F0' };
+const modalTd = { padding: '12px 20px', fontSize: '13px', color: '#2D3748' };
 
 const SummaryCard = ({ icon, bg, label, value, border }) => (
   <div className="card-scientific" style={{ padding: '20px', display: 'flex', alignItems: 'center', gap: '16px', borderLeft: `4px solid ${border}` }}>
