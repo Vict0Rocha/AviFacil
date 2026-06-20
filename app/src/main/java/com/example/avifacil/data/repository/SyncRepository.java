@@ -1,6 +1,7 @@
 package com.example.avifacil.data.repository;
 
 import android.util.Log;
+import com.google.firebase.firestore.Source;
 import com.example.avifacil.data.local.dao.AvicultorDao;
 import com.example.avifacil.data.local.dao.LoteDao;
 import com.example.avifacil.data.local.dao.RegistroDao;
@@ -114,8 +115,14 @@ public class SyncRepository {
     }
 
     public boolean baixarDados(String avicultorUuid) throws ExecutionException, InterruptedException {
-        // 1. Baixar Avicultor
-        DocumentSnapshot avDoc = Tasks.await(firestore.collection("avicultores").document(avicultorUuid).get());
+        // 1. Baixar Avicultor - Tenta forçar do servidor para obter status atualizado (bloqueio, senha)
+        DocumentSnapshot avDoc;
+        try {
+            avDoc = Tasks.await(firestore.collection("avicultores").document(avicultorUuid).get(Source.SERVER));
+        } catch (Exception e) {
+            Log.w(TAG, "Falha ao buscar do servidor, tentando cache/padrão: " + e.getMessage());
+            avDoc = Tasks.await(firestore.collection("avicultores").document(avicultorUuid).get());
+        }
         if (avDoc.exists()) {
             AvicultorEntity remoteAv = avDoc.toObject(AvicultorEntity.class);
             if (remoteAv != null) {

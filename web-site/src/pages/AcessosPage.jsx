@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { db, firebaseConfig } from '../firebase';
-import { collection, getDocs, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import Sidebar from '../components/Sidebar';
 import {
   Users, RefreshCw, UserPlus, Power, Key, X, User, Home, Eye, EyeOff, ShieldCheck, Mail
@@ -18,9 +18,8 @@ const AcessosPage = () => {
   const [showPassModal, setShowPassModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [visiblePasswords, setVisiblePasswords] = useState({});
 
-  const [newUser, setNewUser] = useState({ nome: '', email: '', nomePropriedade: '', senha: '' });
+  const [newUser, setNewUser] = useState({ email: '', senha: '' });
   const [newPass, setNewPass] = useState('');
   const [actionLoading, setActionLoading] = useState(false);
 
@@ -28,9 +27,9 @@ const AcessosPage = () => {
     setLoading(true);
     try {
       const snapshot = await getDocs(collection(db, 'avicultores'));
-      const userList = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
+      const userList = snapshot.docs.map(d => ({
+        ...d.data(),
+        id: d.id // Garante que o ID do documento Firestore seja o 'id' do objeto, sem ser sobrescrito
       }));
       setUsers(userList);
     } catch (error) {
@@ -38,13 +37,6 @@ const AcessosPage = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const togglePasswordVisibility = (userId) => {
-    setVisiblePasswords(prev => ({
-      ...prev,
-      [userId]: !prev[userId]
-    }));
   };
 
   useEffect(() => {
@@ -70,17 +62,15 @@ const AcessosPage = () => {
 
       await setDoc(doc(db, 'avicultores', userCredential.user.uid), {
         uid: userCredential.user.uid,
-        nome: newUser.nome,
         email: newUser.email.toLowerCase().trim(),
-        nomePropriedade: newUser.nomePropriedade,
         status: 'ATIVO',
-        senhaTemporaria: newUser.senha,
+        perfilCompleto: false,
         dataCriacao: new Date()
       });
 
       alert("Sucesso! Usuário criado com e-mail e senha definidos.");
       setShowModal(false);
-      setNewUser({ nome: '', email: '', nomePropriedade: '', senha: '' });
+      setNewUser({ email: '', senha: '' });
       fetchUsers();
     } catch (error) {
       if (error.code === 'auth/email-already-in-use') {
@@ -95,45 +85,53 @@ const AcessosPage = () => {
   };
 
   const handleChangePassword = async (e) => {
-    e.preventDefault();
-    if (newPass.length < 6) return alert("A nova senha deve ter no mínimo 6 caracteres.");
+    if (e) e.preventDefault();
+    if (!selectedUser) return alert("Nenhum usuário selecionado.");
+
+    const email = selectedUser.email;
+    if (!email) return alert("Erro: E-mail do usuário não identificado.");
+
+    if (!window.confirm(`Enviar um e-mail de redefinição de senha para ${email}?`)) return;
 
     setActionLoading(true);
     try {
-      const userRef = doc(db, 'avicultores', selectedUser.id);
-      await updateDoc(userRef, {
-        senhaTemporaria: newPass,
-        precisaSincronizarSenha: true
-      });
+      const auth = getAuth();
+      await sendPasswordResetEmail(auth, email);
 
-      alert(`Senha de ${selectedUser.nome} alterada! Informe ao produtor a nova senha.`);
+      alert(`Sucesso! Um e-mail com o link para redefinir a senha foi enviado para ${email}.`);
       setShowPassModal(false);
-      setNewPass('');
-      fetchUsers();
     } catch (error) {
-      console.error("Erro ao alterar senha:", error);
-      alert("Erro ao alterar senha: " + error.message);
+      console.error("Erro ao enviar e-mail de redefinição:", error);
+      alert("Erro ao enviar e-mail: " + (error?.message || "Erro desconhecido"));
     } finally {
       setActionLoading(false);
     }
   };
 
   const toggleStatus = async (user) => {
+    if (!user) return;
+    const userId = user.uid || user.id;
+    if (!userId) return alert("Erro: ID do usuário não identificado.");
+
     const isBlocking = user.status !== 'INATIVO';
     const novoStatus = isBlocking ? 'INATIVO' : 'ATIVO';
 
-    if (!window.confirm(`Tem certeza que deseja ${isBlocking ? 'BLOQUEAR' : 'ATIVAR'} o acesso de ${user.nome}?`)) return;
+    if (!window.confirm(`Tem certeza que deseja ${isBlocking ? 'BLOQUEAR' : 'ATIVAR'} o acesso de ${user.email}?`)) return;
 
     setActionLoading(true);
     try {
-      await updateDoc(doc(db, 'avicultores', user.id), {
+      // Usando o formato de string única para o caminho
+      const userRef = doc(db, "avicultores/" + String(userId).trim());
+
+      await updateDoc(userRef, {
         status: novoStatus,
-        ultimaAlteracaoStatus: new Date()
+        bloqueado: isBlocking,
+        ultimaAlteracaoStatus: serverTimestamp()
       });
       fetchUsers();
     } catch (error) {
       console.error("Erro ao atualizar status:", error);
-      alert("Erro de Permissão: Verifique se você está logado com o e-mail administrativo correto.");
+      alert("Erro de Status: " + (error?.message || "Erro de permissão ou conexão"));
     } finally {
       setActionLoading(false);
     }
@@ -163,7 +161,6 @@ const AcessosPage = () => {
               <tr style={{ background: '#F8FAFB', textAlign: 'left', borderBottom: '2px solid #E2E8F0' }}>
                 <th style={thStyle}>Produtor / Propriedade</th>
                 <th style={thStyle}>E-mail de Login</th>
-                <th style={thStyle}>Senha Atual</th>
                 <th style={thStyle}>Status</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Ações</th>
               </tr>
@@ -172,34 +169,10 @@ const AcessosPage = () => {
               {users.map(u => (
                 <tr key={u.id} style={{ borderBottom: '1px solid #EDF2F7' }}>
                   <td style={tdStyle}>
-                    <div style={{ fontWeight: 'bold', color: '#0B3B75' }}>{u.nome}</div>
-                    <div style={{ fontSize: '12px', color: '#718096' }}>{u.nomePropriedade}</div>
+                    <div style={{ fontWeight: 'bold', color: '#0B3B75' }}>{u.nome || 'Novo Produtor'}</div>
+                    <div style={{ fontSize: '12px', color: '#718096' }}>{u.nomePropriedade || 'Pendente no App'}</div>
                   </td>
                   <td style={tdStyle}>{u.email}</td>
-                  <td style={tdStyle}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <code style={{
-                        background: '#F0F4F8',
-                        padding: '4px 10px',
-                        borderRadius: '6px',
-                        fontSize: '13px',
-                        fontWeight: 'bold',
-                        color: '#008858',
-                        minWidth: '85px',
-                        display: 'inline-block',
-                        textAlign: 'center'
-                      }}>
-                        {visiblePasswords[u.id] ? (u.senhaTemporaria || "******") : "••••••••"}
-                      </code>
-                      <button
-                        onClick={() => togglePasswordVisibility(u.id)}
-                        style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#718096', display: 'flex', alignItems: 'center' }}
-                        title={visiblePasswords[u.id] ? "Ocultar Senha" : "Mostrar Senha"}
-                      >
-                        {visiblePasswords[u.id] ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
-                  </td>
                   <td style={tdStyle}>
                     {u.status === 'INATIVO' ? (
                       <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E53E3E', background: '#FFF5F5', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', width: 'fit-content', border: '1px solid #FED7D7' }}>
@@ -258,17 +231,6 @@ const AcessosPage = () => {
               </div>
 
               <form onSubmit={handleCreateUser} style={{ padding: '30px' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '18px' }}>
-                  <div className="adm-field" style={{ marginBottom: 0 }}>
-                    <label><User size={14} style={{ marginRight: '6px' }} /> Nome Completo</label>
-                    <input type="text" required value={newUser.nome} onChange={e => setNewUser({...newUser, nome: e.target.value})} placeholder="Ex: João Silva" />
-                  </div>
-                  <div className="adm-field" style={{ marginBottom: 0 }}>
-                    <label><Home size={14} style={{ marginRight: '6px' }} /> Propriedade</label>
-                    <input type="text" required value={newUser.nomePropriedade} onChange={e => setNewUser({...newUser, nomePropriedade: e.target.value})} placeholder="Ex: Sítio Alvorada" />
-                  </div>
-                </div>
-
                 <div className="adm-field">
                   <label><Mail size={14} style={{ marginRight: '6px' }} /> E-mail (Login de acesso)</label>
                   <input type="email" required value={newUser.email} onChange={e => setNewUser({...newUser, email: e.target.value})} placeholder="exemplo@email.com" />
@@ -317,7 +279,7 @@ const AcessosPage = () => {
                   </div>
                   <div>
                     <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '900' }}>Alterar Senha</h3>
-                    <p style={{ margin: 0, opacity: 0.8, fontSize: '12px' }}>{selectedUser?.nome}</p>
+                    <p style={{ margin: 0, opacity: 0.8, fontSize: '12px' }}>{selectedUser?.email}</p>
                   </div>
                 </div>
                 <X
@@ -326,32 +288,23 @@ const AcessosPage = () => {
                 />
               </div>
 
-              <form onSubmit={handleChangePassword} style={{ padding: '25px' }}>
-                <div className="adm-field">
-                  <label>Nova Senha de Acesso</label>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      required
-                      value={newPass}
-                      onChange={e => setNewPass(e.target.value)}
-                      placeholder="Mínimo 6 dígitos"
-                      style={{ paddingRight: '45px' }}
-                    />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} style={eyeBtnStyle}>
-                      {showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}
-                    </button>
-                  </div>
+              <div style={{ padding: '25px' }}>
+                <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', padding: '15px', borderRadius: '12px', marginBottom: '25px', display: 'flex', gap: '12px' }}>
+                  <Mail size={20} color="#0284C7" style={{ flexShrink: 0 }} />
+                  <p style={{ margin: 0, fontSize: '13px', color: '#0369A1', lineHeight: '1.5' }}>
+                    Um link de redefinição será enviado para o e-mail: <strong>{selectedUser?.email}</strong>. O produtor poderá escolher sua própria senha.
+                  </p>
                 </div>
 
-                <p style={{ fontSize: '12px', color: '#718096', marginBottom: '20px', lineHeight: '1.4' }}>
-                  Ao confirmar, o produtor precisará usar esta nova senha no próximo login no aplicativo.
-                </p>
-
-                <button type="submit" disabled={actionLoading} className="btn-primary" style={{ width: '100%', padding: '14px', borderRadius: '10px', fontWeight: '800', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-                  {actionLoading ? <RefreshCw className="animate-spin" size={20} /> : "ATUALIZAR SENHA AGORA"}
+                <button
+                  onClick={handleChangePassword}
+                  disabled={actionLoading}
+                  className="btn-primary"
+                  style={{ width: '100%', padding: '14px', borderRadius: '10px', fontWeight: '800', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}
+                >
+                  {actionLoading ? <RefreshCw className="animate-spin" size={20} /> : <><Mail size={18} /> ENVIAR E-MAIL DE RECUPERAÇÃO</>}
                 </button>
-              </form>
+              </div>
             </div>
           </div>
         )}

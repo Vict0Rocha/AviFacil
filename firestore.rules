@@ -22,5 +22,10 @@ service cloud.firestore {
         allow read, write: if isAdmin() || (request.auth != null && request.auth.uid == uid);
       }
     }
+
+    // Fallback explícito para garantir que o admin possa listar e editar avicultores
+    match /avicultores {
+      allow list: if isAdmin();
+    }
   }
 }

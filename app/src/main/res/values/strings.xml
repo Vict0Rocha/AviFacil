@@ -65,6 +65,8 @@
     <string name="hint_email">E-mail</string>
     <string name="hint_senha">Senha</string>
     <string name="btn_entrar">Entrar</string>
+    <string name="msg_bloqueado">Sua conta está bloqueada. Entre em contato com o administrador.</string>
+    <string name="msg_precisa_trocar_senha">O administrador resetou sua senha. Por favor, altere-a agora.</string>
 
 
     <!-- Registros Diários -->

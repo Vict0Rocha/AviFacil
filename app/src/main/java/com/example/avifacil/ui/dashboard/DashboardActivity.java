@@ -33,6 +33,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
 
 import java.util.Locale;
 
@@ -182,6 +184,14 @@ public class DashboardActivity extends AppCompatActivity {
 
         avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
             if (avicultor != null) {
+                if (avicultor.isBloqueado() || "BLOQUEADO".equalsIgnoreCase(avicultor.getStatus())) {
+                    FirebaseAuth.getInstance().signOut();
+                    Toast.makeText(this, R.string.msg_bloqueado, Toast.LENGTH_LONG).show();
+                    startActivity(new Intent(this, com.example.avifacil.ui.auth.LoginActivity.class));
+                    finish();
+                    return;
+                }
+
                 txtBoasVindas.setText(getString(R.string.welcome_message, avicultor.getNome()));
                 txtPropriedade.setText(avicultor.getNomePropriedade());
                 
@@ -225,9 +235,19 @@ public class DashboardActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         // Atualiza os dados sempre que a tela voltar ao topo
-        String currentUid = FirebaseAuth.getInstance().getUid();
-        if (currentUid != null) {
-            avicultorViewModel.carregarAvicultorPorUuid(currentUid);
+        com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // Recarrega para verificar se a conta foi desativada ou senha alterada
+            user.reload().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    avicultorViewModel.carregarAvicultorPorUuid(user.getUid());
+                } else {
+                    deslogar();
+                    Toast.makeText(this, "Sessão expirada ou conta desativada.", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            deslogar();
         }
     }
 

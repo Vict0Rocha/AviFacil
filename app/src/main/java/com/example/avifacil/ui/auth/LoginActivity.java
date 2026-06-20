@@ -15,6 +15,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
 import com.example.avifacil.ui.avicultor.CadastroAvicultorActivity;
+import com.example.avifacil.ui.avicultor.PerfilActivity;
 import com.example.avifacil.ui.dashboard.DashboardActivity;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.google.android.material.textfield.TextInputEditText;
@@ -76,11 +77,22 @@ public class LoginActivity extends AppCompatActivity {
 
         btnLogin.setOnClickListener(v -> loginUsuario());
 
+        findViewById(R.id.textEsqueciSenha).setOnClickListener(v -> recuperarSenha());
+
         // Observar o perfil logado
         avicultorViewModel.getAvicultorLogado().observe(this, avicultor -> {
             progressBar.setVisibility(View.GONE);
             btnLogin.setEnabled(true);
             if (avicultor != null) {
+                // Verifica tanto a flag booleana quanto o status em String para garantir o bloqueio vindo do site
+                if (avicultor.isBloqueado() || "BLOQUEADO".equalsIgnoreCase(avicultor.getStatus())) {
+                    mAuth.signOut();
+                    Toast.makeText(this, R.string.msg_bloqueado, Toast.LENGTH_LONG).show();
+                    return;
+                }
+                
+                // Após o login com sucesso, redireciona para o Dashboard
+                // A flag precisaSincronizarSenha não deve bloquear o acesso se ele já logou com a senha nova
                 startActivity(new Intent(this, DashboardActivity.class));
                 finish();
             } else {
@@ -107,6 +119,25 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
+    private void recuperarSenha() {
+        String email = editEmail.getText().toString().trim();
+        if (email.isEmpty()) {
+            Toast.makeText(this, "Informe seu e-mail para receber o link de recuperação", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        progressBar.setVisibility(View.VISIBLE);
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    progressBar.setVisibility(View.GONE);
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, "E-mail de recuperação enviado para: " + email, Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, "Erro ao enviar e-mail: " + getErrorMessage(task.getException()), Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
     private void loginUsuario() {
         String email = editEmail.getText().toString().trim();
         String senha = editSenha.getText().toString().trim();
@@ -118,6 +149,9 @@ public class LoginActivity extends AppCompatActivity {
 
         progressBar.setVisibility(View.VISIBLE);
         btnLogin.setEnabled(false);
+
+        // Garante que qualquer sessão anterior seja encerrada antes de tentar o novo login
+        mAuth.signOut();
 
         mAuth.signInWithEmailAndPassword(email, senha)
                 .addOnCompleteListener(this, task -> {
@@ -135,8 +169,20 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void verificarPerfilLocal(String uuid) {
-        progressBar.setVisibility(View.VISIBLE);
-        avicultorViewModel.carregarAvicultorPorUuid(uuid);
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            progressBar.setVisibility(View.VISIBLE);
+            // Recarrega o usuário para validar se o login ainda é válido (senha alterada, conta excluída)
+            user.reload().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    avicultorViewModel.carregarAvicultorPorUuid(uuid);
+                } else {
+                    progressBar.setVisibility(View.GONE);
+                    mAuth.signOut();
+                    Toast.makeText(this, "Sessão expirada ou conta desativada.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     private String getErrorMessage(Exception exception) {
@@ -149,7 +195,15 @@ public class LoginActivity extends AppCompatActivity {
                 case "ERROR_USER_NOT_FOUND": errorMsg = "Não existe usuário correspondente a este e-mail."; break;
                 case "ERROR_TOO_MANY_REQUESTS": errorMsg = "Muitas tentativas. Tente novamente mais tarde."; break;
                 case "ERROR_NETWORK_REQUEST_FAILED": errorMsg = "Erro de rede. Verifique sua conexão."; break;
+                case "ERROR_USER_DISABLED": errorMsg = "Esta conta de usuário foi desativada."; break;
+                case "ERROR_USER_TOKEN_EXPIRED": 
+                case "ERROR_INVALID_USER_TOKEN": errorMsg = "Sessão expirada. Por favor, faça login novamente."; break;
+                case "ERROR_WEAK_PASSWORD": errorMsg = "A senha é muito fraca."; break;
+                default: errorMsg = "Erro de autenticação (" + errorCode + "): " + exception.getLocalizedMessage(); break;
             }
+        } else if (exception != null) {
+            // Captura erros de rede, SSL ou outros erros inesperados
+            errorMsg = "Erro: " + exception.getLocalizedMessage();
         }
         return errorMsg;
     }

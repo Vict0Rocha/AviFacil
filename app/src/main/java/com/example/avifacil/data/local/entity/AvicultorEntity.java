@@ -14,6 +14,9 @@ public class AvicultorEntity {
     private String nome;
     private String email;
     private String nomePropriedade;
+    private String status = "ATIVO";
+    private boolean bloqueado = false;
+    private boolean perfilCompleto = false;
     private boolean deleted = false;
     private boolean sincronizado = false;
     private long updatedAt;
@@ -41,6 +44,16 @@ public class AvicultorEntity {
     public void setEmail(String email) { this.email = email; }
     public String getNomePropriedade() { return nomePropriedade; }
     public void setNomePropriedade(String nomePropriedade) { this.nomePropriedade = nomePropriedade; }
+    
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+    
+    public boolean isBloqueado() { return bloqueado; }
+    public void setBloqueado(boolean bloqueado) { this.bloqueado = bloqueado; }
+    
+    public boolean isPerfilCompleto() { return perfilCompleto; }
+    public void setPerfilCompleto(boolean perfilCompleto) { this.perfilCompleto = perfilCompleto; }
+
     public boolean isDeleted() { return deleted; }
     public void setDeleted(boolean deleted) { this.deleted = deleted; }
     public boolean isSincronizado() { return sincronizado; }

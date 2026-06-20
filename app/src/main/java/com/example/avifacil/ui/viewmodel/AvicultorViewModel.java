@@ -52,27 +52,28 @@ public class AvicultorViewModel extends AndroidViewModel {
     public void carregarAvicultorPorUuid(String uuid) {
         executorService.execute(() -> {
             try {
-                // Tenta carregar local primeiro
+                // Sempre tenta baixar do Firestore primeiro para garantir dados atualizados (bloqueio, flags)
+                syncRepository.baixarDados(uuid);
+                
                 AvicultorEntity avicultor = repository.getByUuid(uuid);
                 
                 if (avicultor == null) {
-                    // Se não tem local, tenta baixar do Firestore
-                    boolean encontrado = syncRepository.baixarDados(uuid);
-                    if (encontrado) {
-                        avicultor = repository.getByUuid(uuid);
-                    } else {
-                        // Não existe nem no Firestore, é uma conta realmente nova
-                        errorMessage.postValue("Perfil não encontrado");
-                        avicultorLogado.postValue(null);
-                        return;
-                    }
+                    errorMessage.postValue("Perfil não encontrado");
+                    avicultorLogado.postValue(null);
+                    return;
                 }
                 
                 avicultorLogado.postValue(avicultor);
             } catch (Exception e) {
                 Log.e("AvicultorViewModel", "Erro ao carregar dados", e);
-                errorMessage.postValue("Erro ao carregar dados: " + e.getMessage());
-                avicultorLogado.postValue(null);
+                // Se der erro de rede, tenta usar o local como fallback
+                AvicultorEntity local = repository.getByUuid(uuid);
+                if (local != null) {
+                    avicultorLogado.postValue(local);
+                } else {
+                    errorMessage.postValue("Erro ao carregar dados: " + e.getMessage());
+                    avicultorLogado.postValue(null);
+                }
             }
         });
     }
@@ -92,6 +93,7 @@ public class AvicultorViewModel extends AndroidViewModel {
                 if (existente != null) {
                     existente.setNome(nome);
                     existente.setNomePropriedade(propriedade);
+                    existente.setPerfilCompleto(true);
                     existente.setSincronizado(false);
                     existente.setUpdatedAt(System.currentTimeMillis());
                     repository.update(existente);
@@ -100,6 +102,7 @@ public class AvicultorViewModel extends AndroidViewModel {
                     if (uuid != null) {
                         avicultor.setUuid(uuid);
                     }
+                    avicultor.setPerfilCompleto(true);
                     repository.insert(avicultor);
                 }
                 successMessage.postValue(true);
@@ -123,7 +126,7 @@ public class AvicultorViewModel extends AndroidViewModel {
         if (user != null) {
             user.updatePassword(novaSenha).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
-                    successMessage.setValue(true);
+                    successMessage.postValue(true);
                 } else {
                     errorMessage.setValue("Erro ao alterar senha: " + task.getException().getMessage());
                 }
