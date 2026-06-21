@@ -70,10 +70,6 @@ const Sidebar = () => {
             <span>Acessos App Mobile</span>
           </NavLink>
         )}
-        <NavLink to="/guias" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
-          <ClipboardList size={18} />
-          <span>Guias de Decisão</span>
-        </NavLink>
       </nav>
 
       <div className="nav-link" onClick={handleLogout} style={{ marginTop: 'auto', cursor: 'pointer', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
