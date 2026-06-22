@@ -106,15 +106,17 @@ const Sidebar = () => {
         </NavLink>
       </nav>
 
-      <div className="sidebar-label">{isAdmin ? "Gestão e Segurança" : "Segurança e Campo"}</div>
-      <nav>
-        {isAdmin && (
-          <NavLink to="/acessos" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
-            <Users size={18} />
-            <span>Acessos App Mobile</span>
-          </NavLink>
-        )}
-      </nav>
+      {isAdmin && (
+        <>
+          <div className="sidebar-label">Gestão e Segurança</div>
+          <nav>
+            <NavLink to="/acessos" className={({ isActive }) => isActive ? "nav-link active-green" : "nav-link"}>
+              <Users size={18} />
+              <span>Acessos App Mobile</span>
+            </NavLink>
+          </nav>
+        </>
+      )}
 
       <div className="nav-link" onClick={handleLogout} style={{ marginTop: 'auto', cursor: 'pointer', borderTop: '1px solid var(--border-color)', paddingTop: '20px' }}>
         <LogOut size={18} />
