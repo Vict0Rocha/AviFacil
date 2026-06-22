@@ -74,7 +74,23 @@ const LoginPage = () => {
           </div>
 
           <div className="input-group-login">
-            <Lock size={18} />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                color: 'inherit',
+                marginRight: '12px'
+              }}
+              title={showPassword ? "Ocultar senha" : "Ver senha"}
+            >
+              <Lock size={18} />
+            </button>
             <input
               type={showPassword ? "text" : "password"}
               className="input-field-login"
@@ -82,27 +98,7 @@ const LoginPage = () => {
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
               required
-              style={{ paddingRight: '45px' }}
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              style={{
-                position: 'absolute',
-                right: '15px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: '#0B3B75',
-                display: 'flex',
-                alignItems: 'center',
-                padding: 0
-              }}
-            >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
           </div>
 
           <div style={{ textAlign: 'right', marginBottom: '20px' }}>
