@@ -35,11 +35,22 @@ export const calcularViabilidade = (lote, registros) => {
     return round((vivas / lote.quantidadeAvesInicial) * 100.0, 2);
 };
 
-export const calcularIdadeDias = (lote, dataReferencia = new Date()) => {
+export const calcularIdadeDias = (lote, dataReferencia = null) => {
     if (!lote || !lote.dataInicio) return 0;
     const dataInicio = safeDate(lote.dataInicio);
-    const dataRef = safeDate(dataReferencia);
-    const diffInMs = dataRef.getTime() - dataInicio.getTime();
+
+    let ref = dataReferencia;
+    if (!ref) {
+        if (lote.status === 'FINALIZADO' && lote.dataFim) {
+            ref = safeDate(lote.dataFim);
+        } else {
+            ref = new Date();
+        }
+    } else {
+        ref = safeDate(ref);
+    }
+
+    const diffInMs = ref.getTime() - dataInicio.getTime();
     if (diffInMs < 0) return 0;
     return Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 };
@@ -72,9 +83,10 @@ export const calcularCustoTotalRacao = (registros) => {
 
 export const calcularGanhoMedioPeso = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
-    const pesoMedioG = calcularPesoMedioAtual(registros);
+    const sorted = [...registros].sort((a, b) => safeDate(b.dataRegistro) - safeDate(a.dataRegistro));
+    const pesoMedioG = Number(sorted[0].pesoAtualMedio) || 0;
     const pesoInicialG = Number(lote.pesoInicial) || 0;
-    const idadeDias = calcularIdadeDias(lote);
+    const idadeDias = calcularIdadeDias(lote, sorted[0].dataRegistro);
     if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
     return round((pesoMedioG - pesoInicialG) / idadeDias, 2);
 };
@@ -96,9 +108,10 @@ export const calcularConversaoAlimentar = (lote, registros) => {
 export const calcularFatorProducao = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
 
-    const pesoMedioKg = calcularPesoMedioAtual(registros) / 1000.0;
+    const sorted = [...registros].sort((a, b) => safeDate(b.dataRegistro) - safeDate(a.dataRegistro));
+    const pesoMedioKg = (Number(sorted[0].pesoAtualMedio) || 0) / 1000.0;
     const viabilidade = calcularViabilidade(lote, registros);
-    const idade = calcularIdadeDias(lote);
+    const idade = calcularIdadeDias(lote, sorted[0].dataRegistro);
     const ca = calcularConversaoAlimentar(lote, registros);
 
     if (idade <= 0 || ca <= 0) return 0;

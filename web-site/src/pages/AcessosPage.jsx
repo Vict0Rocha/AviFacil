@@ -145,18 +145,19 @@ const AcessosPage = () => {
       <Sidebar />
       <main className="main-content" style={{ background: '#F4F7F6' }}>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div className="top-bar-scientific" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', margin: 0, paddingBottom: '20px' }}>
           <div>
             <h1 style={{ color: '#0B3B75', fontSize: '26px', fontWeight: '900', margin: 0 }}>Gestão de Acessos App</h1>
-            <p style={{ color: '#718096', fontWeight: '600' }}>Controle total de usuários e senhas (sem e-mail)</p>
+            <p style={{ color: '#718096', fontWeight: '600' }} className="hidden-mobile">Controle total de usuários e senhas</p>
           </div>
           <button onClick={() => setShowModal(true)} className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '8px' }}>
-            <UserPlus size={20} /> Novo Produtor
+            <UserPlus size={20} /> <span className="hidden-mobile">Novo Produtor</span>
           </button>
         </div>
 
         <div className="card-scientific" style={{ padding: 0, overflow: 'hidden' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: '#F8FAFB', textAlign: 'left', borderBottom: '2px solid #E2E8F0' }}>
                 <th style={thStyle}>Produtor / Propriedade</th>
@@ -209,6 +210,7 @@ const AcessosPage = () => {
             </tbody>
           </table>
         </div>
+      </div>
 
         {/* Modal Novo Usuário */}
         {showModal && (

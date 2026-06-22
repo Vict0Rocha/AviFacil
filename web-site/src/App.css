@@ -209,28 +209,98 @@ body { background-color: var(--bg-scientific); color: var(--text-main); width: 1
 
 
 /* --- Media Queries para Mobile --- */
+@media (max-width: 992px) {
+  .sidebar {
+    width: 240px;
+  }
+}
+
 @media (max-width: 768px) {
   .app-layout {
     flex-direction: column;
   }
 
   .sidebar {
-    width: 100%;
-    border-right: none;
-    border-bottom: 1px solid var(--border-color);
-    padding: 20px;
+    position: fixed;
+    top: 0;
+    left: -280px; /* Escondido por padrão */
+    width: 280px;
+    height: 100vh;
+    z-index: 1050;
+    transition: all 0.3s ease;
+    box-shadow: 10px 0 15px rgba(0,0,0,0.1);
+  }
+
+  .sidebar.open {
+    left: 0; /* Mostra ao abrir */
+  }
+
+  .sidebar-label {
+    margin: 15px 0 8px 12px;
   }
 
   .main-content {
-    padding: 20px;
+    padding: 15px;
+    margin-top: 60px; /* Espaço para o botão hambúrguer fixo */
   }
 
   .top-bar-scientific {
     flex-direction: column;
     align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
   }
 
-  .logo-title-login {
-    font-size: 1.8rem;
+  .top-bar-scientific h1 {
+    font-size: 18px !important;
+  }
+
+  .card-scientific {
+    padding: 15px;
+  }
+
+  /* Ajustes para tabelas em mobile */
+  .table-responsive {
+    margin: 0;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .info-table {
+    min-width: 600px;
+  }
+
+  .info-table th, .info-table td {
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+
+  /* Grid de cards do Dashboard */
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+    gap: 15px !important;
+  }
+
+  /* Modais Responsivos */
+  .adm-modal-content {
+    width: 95% !important;
+    margin: 10px;
   }
 }
+
+/* Utilitários de responsividade */
+.hidden-mobile {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
+}
+
+.show-mobile {
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+  }
+}
+

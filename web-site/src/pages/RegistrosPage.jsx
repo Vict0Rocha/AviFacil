@@ -5,9 +5,12 @@ import Sidebar from '../components/Sidebar';
 import * as Zootecnia from '../utils/zootecnia';
 import {
   RefreshCw, AlertTriangle, User, Database, Activity, TrendingUp, Calendar, Hash,
-  ArrowUpRight, Users, HeartPulse, Scale, DollarSign, Eye, X
+  ArrowUpRight, Users, HeartPulse, Scale, DollarSign, Eye, X, Download, FileText, Table
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const RegistrosPage = () => {
   const { user, isAdmin } = useAuth();
@@ -17,6 +20,7 @@ const RegistrosPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedLote, setSelectedLote] = useState(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   const loadProducers = useCallback(async () => {
     if (!user) return;
@@ -36,6 +40,83 @@ const RegistrosPage = () => {
       setError("Erro ao carregar lista de produtores.");
     }
   }, [user]);
+
+  const exportToPDF = () => {
+    try {
+      const doc = new jsPDF('l', 'mm', 'a4');
+      const producer = avicultores.find(a => a.uid_oficial === selectedUid);
+      const date = new Date().toLocaleDateString('pt-BR');
+
+      doc.setFontSize(18);
+      doc.setTextColor(11, 59, 117);
+      doc.text(`AviFácil - Relatório de Rastreabilidade`, 14, 15);
+
+      doc.setFontSize(12);
+      doc.setTextColor(45, 55, 72);
+      doc.text(`Produtor: ${producer?.nome_exibicao || '---'}`, 14, 22);
+      doc.text(`Data: ${date}`, 14, 28);
+
+      const tableData = (processedData || []).map(l => [
+        `Lote ${l.numeroLote || '---'}`,
+        l.idade || 0,
+        l.quantidadeAvesInicial || 0,
+        l.vivas || 0,
+        l.mortas || 0,
+        (l.mortalidade || 0).toFixed(2) + '%',
+        (l.viabilidade || 0).toFixed(2) + '%',
+        (l.pesoAtual || 0) + 'g',
+        (l.gpd || 0).toFixed(2),
+        (l.ca || 0).toFixed(3),
+        (l.fatorProducao || 0).toFixed(2),
+        l.status || '---'
+      ]);
+
+      autoTable(doc, {
+        startY: 35,
+        head: [['Lote', 'Idade', 'Inicial', 'Vivas', 'Mortas', 'Mort.%', 'Viab.%', 'Peso', 'GPD', 'C.A.', 'F.P.', 'Status']],
+        body: tableData,
+        theme: 'striped',
+        headStyles: { fillColor: [11, 59, 117], fontSize: 9 },
+        styles: { fontSize: 8 },
+        columnStyles: {
+          10: { fontStyle: 'bold', fillColor: [230, 244, 239] }
+        }
+      });
+
+      const fileName = `Rastreabilidade_${(producer?.nome_exibicao || 'Export').replace(/\s/g, '_')}_${date.replace(/\//g, '-')}.pdf`;
+      doc.save(fileName);
+    } catch (err) {
+      console.error("Erro ao exportar PDF:", err);
+      alert("Erro ao gerar o PDF. Verifique se os dados estão carregados corretamente.");
+    }
+    setShowExportMenu(false);
+  };
+
+  const exportToExcel = () => {
+    const producer = avicultores.find(a => a.uid_oficial === selectedUid);
+    const worksheet = XLSX.utils.json_to_sheet(processedData.map(l => ({
+      'Lote': l.numeroLote,
+      'Linhagem': l.linhagem || 'Cobb-500',
+      'Idade (dias)': l.idade,
+      'Aves Iniciais': l.quantidadeAvesInicial,
+      'Aves Vivas': l.vivas,
+      'Aves Mortas': l.mortas,
+      'Mortalidade %': l.mortalidade.toFixed(2),
+      'Viabilidade %': l.viabilidade.toFixed(2),
+      'Peso Médio (g)': l.pesoAtual,
+      'GPD': l.gpd.toFixed(2),
+      'Consumo (kg)': l.consumoTotal,
+      'Conversão Alimentar': l.ca.toFixed(3),
+      'Custo Ração (R$)': l.custoTotal,
+      'Fator Produção': l.fatorProducao.toFixed(2),
+      'Status': l.status
+    })));
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Rastreabilidade");
+    XLSX.writeFile(workbook, `Rastreabilidade_${producer?.nome_exibicao.replace(/\s/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    setShowExportMenu(false);
+  };
 
   useEffect(() => {
     if (isAdmin) loadProducers();
@@ -103,30 +184,30 @@ const RegistrosPage = () => {
   }, [processedData]);
 
   return (
-    <div style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', background: '#F0F2F5' }}>
+    <div className="app-layout">
       <Sidebar />
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0, width: '100%' }}>
 
-        <header style={{
+        <header className="top-bar-scientific" style={{
           padding: '12px 32px', background: '#fff', borderBottom: '1px solid #E2E8F0',
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', zIndex: 10
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 10px rgba(0,0,0,0.03)', zIndex: 10, margin: 0
         }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Activity size={20} color="#008858" />
-              <h1 style={{ color: '#0B3B75', fontSize: '20px', fontWeight: '800', margin: 0 }}>BI Administrativo</h1>
+              <h1 style={{ color: '#0B3B75', fontSize: '20px', fontWeight: '800', margin: 0 }}>Consulta por produtor</h1>
             </div>
-            <p style={{ color: '#718096', fontSize: '11px', margin: 0, fontWeight: '600' }}>Sincronizado com App Mobile v1.0</p>
+            <p className="hidden-mobile" style={{ color: '#718096', fontSize: '11px', margin: 0, fontWeight: '600' }}>Sincronizado com App Mobile v1.0</p>
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
             {isAdmin && (
-              <div style={{ position: 'relative' }}>
+              <div style={{ position: 'relative', width: '250px' }}>
                 <select
                   value={selectedUid}
                   onChange={(e) => setSelectedUid(e.target.value)}
                   style={{
-                    width: '350px', height: '42px', padding: '0 12px 0 40px', borderRadius: '8px',
+                    width: '100%', height: '42px', padding: '0 12px 0 40px', borderRadius: '8px',
                     border: '1.5px solid #E2E8F0', fontSize: '13px', fontWeight: '700', color: '#2D3748', background: '#F8FAFB'
                   }}
                 >
@@ -137,16 +218,38 @@ const RegistrosPage = () => {
                 <User size={16} style={{ position: 'absolute', left: '14px', top: '13px', color: '#0B3B75' }} />
               </div>
             )}
+
+            <div style={{ position: 'relative' }}>
+              <button
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="btn-secondary"
+                style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '8px', background: '#fff', border: '1px solid #E2E8F0', color: '#4A5568', padding: '0 15px', borderRadius: '8px', cursor: 'pointer' }}
+              >
+                <Download size={16} /> <span className="hidden-mobile">Exportar</span>
+              </button>
+
+              {showExportMenu && (
+                <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '8px', background: '#fff', borderRadius: '8px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', border: '1px solid #E2E8F0', zIndex: 100, width: '180px', overflow: 'hidden' }}>
+                  <button onClick={exportToPDF} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '13px', color: '#4A5568', transition: 'background 0.2s' }} onMouseEnter={e => e.target.style.background = '#F7FAFC'} onMouseLeave={e => e.target.style.background = 'none'}>
+                    <FileText size={14} color="#E53E3E" /> PDF
+                  </button>
+                  <button onClick={exportToExcel} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: '10px', border: 'none', background: 'none', textAlign: 'left', cursor: 'pointer', fontSize: '13px', color: '#4A5568', borderTop: '1px solid #F1F5F9', transition: 'background 0.2s' }} onMouseEnter={e => e.target.style.background = '#F7FAFC'} onMouseLeave={e => e.target.style.background = 'none'}>
+                    <Table size={14} color="#2D8A4E" /> Excel (Tabela)
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button onClick={() => fetchAnalytics(selectedUid)} className="btn-primary" disabled={loading} style={{ height: '42px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-              <span>Sincronizar</span>
+              <span className="hidden-mobile">Sincronizar</span>
             </button>
           </div>
         </header>
 
-        <main style={{ flex: 1, overflowY: 'auto', padding: '24px 32px' }}>
+        <main className="main-content" style={{ flex: 1, padding: '24px 32px' }}>
           {stats && !loading && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
+            <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
               <SummaryCard icon={<Users color="#0B3B75"/>} bg="#EBF4FF" label="Aves no Campo" value={stats.totalVivas.toLocaleString()} border="#0B3B75" />
               <SummaryCard icon={<HeartPulse color="#E53E3E"/>} bg="#FFF5F5" label="Mortalidade Média" value={`${stats.mortalidadeMedia.toFixed(2)}%`} border="#E53E3E" />
               <SummaryCard icon={<TrendingUp color="#008858"/>} bg="#E6F4EF" label="Fator de Prod. Médio" value={stats.fatorProducaoMedio.toFixed(2)} border="#008858" />
@@ -159,7 +262,7 @@ const RegistrosPage = () => {
               <h2 style={{ fontSize: '15px', color: '#0B3B75', margin: 0, fontWeight: '800' }}>Rastreabilidade de Lotes</h2>
             </div>
 
-            <div style={{ overflowX: 'auto' }}>
+            <div className="table-responsive">
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ background: '#F8FAFB' }}>

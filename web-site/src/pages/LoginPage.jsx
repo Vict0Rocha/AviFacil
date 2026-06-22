@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { Eye, EyeOff, Lock, User } from 'lucide-react';
+import { signInWithEmailAndPassword, sendPasswordResetEmail, setPersistence, browserSessionPersistence } from 'firebase/auth';
+import { Eye, EyeOff, Lock, User, RefreshCw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const LoginPage = () => {
@@ -10,6 +10,8 @@ const LoginPage = () => {
   const [senha, setSenha] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
+  const [loadingAction, setLoadingAction] = useState(false);
   const navigate = useNavigate();
   const { user, loading } = useAuth();
 
@@ -22,10 +24,34 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+    setLoadingAction(true);
     try {
+      // Define a persistência para SESSION (limpa ao fechar a aba/navegador)
+      await setPersistence(auth, browserSessionPersistence);
       await signInWithEmailAndPassword(auth, email, senha);
     } catch (err) {
+      console.error(err);
       setError('E-mail ou senha incorretos.');
+      setLoadingAction(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Por favor, insira seu e-mail para recuperar a senha.');
+      return;
+    }
+    setError('');
+    setMessage('');
+    setLoadingAction(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      setMessage('E-mail de recuperação enviado! Verifique sua caixa de entrada.');
+    } catch (err) {
+      setError('Erro ao enviar e-mail de recuperação. Verifique o endereço digitado.');
+    } finally {
+      setLoadingAction(false);
     }
   };
 
@@ -79,9 +105,30 @@ const LoginPage = () => {
             </button>
           </div>
 
-          {error && <p style={{ color: '#ff8080', fontSize: '13px', marginBottom: '15px', fontWeight: 'bold' }}>{error}</p>}
+          <div style={{ textAlign: 'right', marginBottom: '20px' }}>
+            <button
+              type="button"
+              onClick={handleForgotPassword}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#0B3B75',
+                fontSize: '13px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                textDecoration: 'underline'
+              }}
+            >
+              Esqueci minha senha
+            </button>
+          </div>
 
-          <button type="submit" className="btn-login-action">Entrar</button>
+          {error && <p style={{ color: '#E53E3E', fontSize: '13px', marginBottom: '15px', fontWeight: 'bold' }}>{error}</p>}
+          {message && <p style={{ color: '#008858', fontSize: '13px', marginBottom: '15px', fontWeight: 'bold' }}>{message}</p>}
+
+          <button type="submit" className="btn-login-action" disabled={loadingAction}>
+            {loadingAction ? <RefreshCw className="animate-spin" size={20} style={{ margin: '0 auto' }} /> : 'Entrar'}
+          </button>
         </form>
       </div>
     </div>

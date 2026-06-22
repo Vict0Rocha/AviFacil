@@ -11,33 +11,45 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Monitor de Inatividade (20 minutos)
+  // Monitor de Inatividade Global (20 minutos)
   useEffect(() => {
-    let inactivityTimer;
-    const INACTIVITY_LIMIT = 20 * 60 * 1000; // 20 min em milissegundos
+    const INACTIVITY_LIMIT = 20 * 60 * 1000; // 20 min
+    const CHECK_INTERVAL = 30000; // Verifica a cada 30 segundos
 
     const resetTimer = () => {
-      if (inactivityTimer) clearTimeout(inactivityTimer);
-
       if (user) {
-        inactivityTimer = setTimeout(() => {
-          console.warn("Sessão expirada por inatividade (20 min).");
+        localStorage.setItem('lastActivity', Date.now().toString());
+      }
+    };
+
+    const checkInactivity = () => {
+      if (user) {
+        const lastActivity = parseInt(localStorage.getItem('lastActivity') || '0');
+        const now = Date.now();
+
+        if (now - lastActivity > INACTIVITY_LIMIT) {
+          console.warn("Sessão expirada por inatividade.");
           signOut(auth);
-          alert("Sua sessão expirou por inatividade. Por favor, faça login novamente.");
-        }, INACTIVITY_LIMIT);
+          localStorage.removeItem('lastActivity');
+          alert("Sua sessão expirou por inatividade para sua segurança.");
+        }
       }
     };
 
     if (user) {
-      // Eventos que reiniciam o timer de inatividade
-      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
+      // Registrar atividade inicial
+      resetTimer();
 
+      // Eventos de interação do usuário
+      const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
       events.forEach(event => window.addEventListener(event, resetTimer));
-      resetTimer(); // Inicia o timer pela primeira vez ao logar
+
+      // Intervalo de verificação
+      const interval = setInterval(checkInactivity, CHECK_INTERVAL);
 
       return () => {
-        if (inactivityTimer) clearTimeout(inactivityTimer);
         events.forEach(event => window.removeEventListener(event, resetTimer));
+        clearInterval(interval);
       };
     }
   }, [user]);
@@ -68,6 +80,7 @@ export const AuthProvider = ({ children }) => {
         } else {
           setUserData(null);
           setIsAdmin(false);
+          localStorage.removeItem('lastActivity');
         }
       } catch (error) {
         console.error("Erro na autenticação:", error);
