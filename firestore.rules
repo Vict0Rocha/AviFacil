@@ -6,8 +6,7 @@ service cloud.firestore {
     // Função centralizada para administradores
     function isAdmin() {
       return request.auth != null &&
-             (request.auth.token.email.lower() == "cristiano@gmail.com" ||
-              request.auth.token.email.lower() == "cristianoadm@gmail.com");
+             (request.auth.token.email.lower() == "cristianoadm@gmail.com");
     }
 
     match /{document=**} {

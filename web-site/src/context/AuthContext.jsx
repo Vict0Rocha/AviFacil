@@ -59,15 +59,9 @@ export const AuthProvider = ({ children }) => {
       try {
         setUser(currentUser);
         if (currentUser) {
-          // Lista de e-mails administrativos (sempre em minúsculas para comparação)
-          const adminsPermitidos = [
-            (import.meta.env?.VITE_ADMIN_EMAIL || "").toLowerCase().trim(),
-            "cristianoadm@gmail.com",
-            "cristiano@gmail.com"
-          ];
-
+          // Apenas o e-mail oficial tem permissão de administrador no portal
           const emailLogado = (currentUser.email || "").toLowerCase().trim();
-          const ehAdmin = adminsPermitidos.includes(emailLogado);
+          const ehAdmin = emailLogado === "cristianoadm@gmail.com";
 
           setIsAdmin(!!ehAdmin);
           console.log("LOGIN DETECTADO:", emailLogado, "| É ADMIN:", !!ehAdmin);
