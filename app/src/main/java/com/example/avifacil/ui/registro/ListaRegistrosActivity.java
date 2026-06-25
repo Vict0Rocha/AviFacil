@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -124,14 +125,23 @@ public class ListaRegistrosActivity extends AppCompatActivity {
     }
 
     private void mostrarDialogoExclusao(com.example.avifacil.data.local.entity.RegistroEntity registro) {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle(R.string.dialog_excluir_registro_title)
                 .setMessage(R.string.dialog_excluir_registro_msg)
-                .setPositiveButton(R.string.btn_confirmar, (dialog, which) -> {
+                .setPositiveButton(R.string.btn_confirmar, (dialogInterface, which) -> {
                     viewModel.excluirRegistro(registro.getId());
                 })
                 .setNegativeButton(R.string.btn_cancelar, null)
-                .show();
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            android.widget.Button btnConfirm = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
+            android.widget.Button btnCancel = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE);
+            if (btnConfirm != null) btnConfirm.setTextColor(ContextCompat.getColor(this, R.color.light_red));
+            if (btnCancel != null) btnCancel.setTextColor(ContextCompat.getColor(this, R.color.light_blue));
+        });
+
+        dialog.show();
     }
 
     @Override

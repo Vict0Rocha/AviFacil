@@ -10,7 +10,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.PopupMenu;
 import com.example.avifacil.ui.avicultor.PerfilActivity;
+import com.example.avifacil.ui.avicultor.PerfilActivity;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -103,12 +105,21 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void confirmarSaida() {
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Sair do AviFácil")
                 .setMessage("Deseja realmente sair e trocar de conta?")
-                .setPositiveButton("Sair", (dialog, which) -> deslogar())
+                .setPositiveButton("Sair", (dialogInterface, which) -> deslogar())
                 .setNegativeButton("Cancelar", null)
-                .show();
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            Button btnConfirm = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
+            Button btnCancel = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE);
+            if (btnConfirm != null) btnConfirm.setTextColor(ContextCompat.getColor(this, R.color.light_red));
+            if (btnCancel != null) btnCancel.setTextColor(ContextCompat.getColor(this, R.color.light_blue));
+        });
+
+        dialog.show();
     }
 
     private void deslogar() {

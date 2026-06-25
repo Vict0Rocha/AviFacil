@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -101,17 +102,26 @@ public class LotesActivity extends AppCompatActivity {
     }
 
     private void mostrarOpcoesLote(com.example.avifacil.data.local.entity.LoteEntity lote) {
-        String[] opcoes;
+        java.util.List<CharSequence> itemsList = new java.util.ArrayList<>();
+        int colorAzul = ContextCompat.getColor(this, R.color.light_blue);
+        int colorVermelho = ContextCompat.getColor(this, R.color.light_red);
+
         if (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO) {
-            opcoes = new String[]{"Encerrar Lote", "Excluir Lote"};
-        } else {
-            opcoes = new String[]{"Excluir Lote"};
+            android.text.SpannableString encerrar = new android.text.SpannableString("Encerrar Lote");
+            encerrar.setSpan(new android.text.style.ForegroundColorSpan(colorAzul), 0, encerrar.length(), 0);
+            itemsList.add(encerrar);
         }
+
+        android.text.SpannableString excluir = new android.text.SpannableString("Excluir Lote");
+        excluir.setSpan(new android.text.style.ForegroundColorSpan(colorVermelho), 0, excluir.length(), 0);
+        itemsList.add(excluir);
+
+        CharSequence[] finalItems = itemsList.toArray(new CharSequence[0]);
 
         new androidx.appcompat.app.AlertDialog.Builder(this)
                 .setTitle("Opções do Lote " + lote.getNumeroLote())
-                .setItems(opcoes, (dialog, which) -> {
-                    String opcaoSelecionada = opcoes[which];
+                .setItems(finalItems, (dialogInterface, which) -> {
+                    String opcaoSelecionada = finalItems[which].toString();
                     if (opcaoSelecionada.equals("Encerrar Lote")) {
                         mostrarDialogoConfirmacaoDigitada(lote, "encerrar");
                     } else if (opcaoSelecionada.equals("Excluir Lote")) {
@@ -139,8 +149,21 @@ public class LotesActivity extends AppCompatActivity {
                 .create();
 
         dialog.setOnShowListener(dialogInterface -> {
-            android.widget.Button button = ((androidx.appcompat.app.AlertDialog) dialog).getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
-            button.setOnClickListener(view -> {
+            android.widget.Button btnConfirm = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
+            android.widget.Button btnCancel = dialog.getButton(androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE);
+
+            btnConfirm.setTextColor(ContextCompat.getColor(this, R.color.light_red));
+            btnCancel.setTextColor(ContextCompat.getColor(this, R.color.light_blue));
+
+            android.widget.TextView titleView = dialog.findViewById(androidx.appcompat.R.id.alertTitle);
+            if (titleView != null) {
+                int colorAcao = acao.equals("excluir") ? 
+                        ContextCompat.getColor(this, R.color.light_red) : 
+                        ContextCompat.getColor(this, R.color.light_blue);
+                titleView.setTextColor(colorAcao);
+            }
+
+            btnConfirm.setOnClickListener(view -> {
                 String textoDigitado = input.getText().toString().trim().toLowerCase();
                 if (textoDigitado.equals(acao)) {
                     if (acao.equals("excluir")) {
