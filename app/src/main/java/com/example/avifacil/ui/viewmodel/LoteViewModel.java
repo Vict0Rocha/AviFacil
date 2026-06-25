@@ -104,4 +104,17 @@ public class LoteViewModel extends AndroidViewModel {
             }
         });
     }
+
+    public void excluirLote(LoteEntity lote) {
+        if (lote == null) return;
+        executorService.execute(() -> {
+            try {
+                repository.softDelete(lote.getId());
+                successMessage.postValue(true);
+                carregarLotes(lote.getAvicultorId());
+            } catch (Exception e) {
+                errorMessage.postValue("Erro ao excluir lote: " + e.getMessage());
+            }
+        });
+    }
 }

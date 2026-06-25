@@ -53,9 +53,7 @@ public class LotesActivity extends AppCompatActivity {
 
             @Override
             public void onLoteLongClick(com.example.avifacil.data.local.entity.LoteEntity lote) {
-                if (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO) {
-                    mostrarDialogoEncerrar(lote);
-                }
+                mostrarOpcoesLote(lote);
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -102,15 +100,66 @@ public class LotesActivity extends AppCompatActivity {
         }
     }
 
-    private void mostrarDialogoEncerrar(com.example.avifacil.data.local.entity.LoteEntity lote) {
+    private void mostrarOpcoesLote(com.example.avifacil.data.local.entity.LoteEntity lote) {
+        String[] opcoes;
+        if (lote.getStatus() == com.example.avifacil.data.local.entity.StatusLote.ATIVO) {
+            opcoes = new String[]{"Encerrar Lote", "Excluir Lote"};
+        } else {
+            opcoes = new String[]{"Excluir Lote"};
+        }
+
         new androidx.appcompat.app.AlertDialog.Builder(this)
-                .setTitle(R.string.dialog_encerrar_lote_title)
-                .setMessage(R.string.dialog_encerrar_lote_msg)
-                .setPositiveButton(R.string.btn_confirmar, (dialog, which) -> {
-                    loteViewModel.encerrarLote(lote);
+                .setTitle("Opções do Lote " + lote.getNumeroLote())
+                .setItems(opcoes, (dialog, which) -> {
+                    String opcaoSelecionada = opcoes[which];
+                    if (opcaoSelecionada.equals("Encerrar Lote")) {
+                        mostrarDialogoConfirmacaoDigitada(lote, "encerrar");
+                    } else if (opcaoSelecionada.equals("Excluir Lote")) {
+                        mostrarDialogoConfirmacaoDigitada(lote, "excluir");
+                    }
                 })
-                .setNegativeButton(R.string.btn_cancelar, null)
                 .show();
+    }
+
+    private void mostrarDialogoConfirmacaoDigitada(com.example.avifacil.data.local.entity.LoteEntity lote, String acao) {
+        String titulo = acao.equals("excluir") ? "Excluir Lote" : "Encerrar Lote";
+        String mensagem = acao.equals("excluir") ? 
+                "Você realmente deseja excluir esse lote? Essa ação não poderá ser desfeita. Digite \"excluir\" para confirmar:" :
+                "Você realmente deseja encerrar esse lote? Digite \"encerrar\" para confirmar:";
+
+        android.widget.EditText input = new android.widget.EditText(this);
+        input.setHint(acao);
+        
+        androidx.appcompat.app.AlertDialog dialog = new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle(titulo)
+                .setMessage(mensagem)
+                .setView(input)
+                .setPositiveButton("Confirmar", null) // Definido depois para não fechar se estiver errado
+                .setNegativeButton("Cancelar", null)
+                .create();
+
+        dialog.setOnShowListener(dialogInterface -> {
+            android.widget.Button button = ((androidx.appcompat.app.AlertDialog) dialog).getButton(androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE);
+            button.setOnClickListener(view -> {
+                String textoDigitado = input.getText().toString().trim().toLowerCase();
+                if (textoDigitado.equals(acao)) {
+                    if (acao.equals("excluir")) {
+                        loteViewModel.excluirLote(lote);
+                    } else {
+                        loteViewModel.encerrarLote(lote);
+                    }
+                    dialog.dismiss();
+                } else {
+                    input.setError("Digite \"" + acao + "\" corretamente para confirmar");
+                }
+            });
+        });
+
+        dialog.show();
+    }
+
+    private void mostrarDialogoEncerrar(com.example.avifacil.data.local.entity.LoteEntity lote) {
+        mostrarDialogoConfirmacaoDigitada(lote, "encerrar");
     }
 
     @Override
