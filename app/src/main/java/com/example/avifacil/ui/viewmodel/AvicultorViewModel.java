@@ -52,28 +52,42 @@ public class AvicultorViewModel extends AndroidViewModel {
     public void carregarAvicultorPorUuid(String uuid) {
         executorService.execute(() -> {
             try {
-                // Sempre tenta baixar do Firestore primeiro para garantir dados atualizados (bloqueio, flags)
-                syncRepository.baixarDados(uuid);
-                
-                AvicultorEntity avicultor = repository.getByUuid(uuid);
-                
-                if (avicultor == null) {
-                    errorMessage.postValue("Perfil não encontrado");
-                    avicultorLogado.postValue(null);
-                    return;
-                }
-                
-                avicultorLogado.postValue(avicultor);
-            } catch (Exception e) {
-                Log.e("AvicultorViewModel", "Erro ao carregar dados", e);
-                // Se der erro de rede, tenta usar o local como fallback
+                // 1. Tentar carregar local primeiro para resposta rápida (Offline-first)
                 AvicultorEntity local = repository.getByUuid(uuid);
                 if (local != null) {
                     avicultorLogado.postValue(local);
-                } else {
-                    errorMessage.postValue("Erro ao carregar dados: " + e.getMessage());
-                    avicultorLogado.postValue(null);
                 }
+
+                // 2. Tentar atualizar dados do servidor em background (não bloqueia a UI se estiver offline)
+                try {
+                    syncRepository.baixarDados(uuid);
+                    
+                    // Recarrega após baixar para ver se mudou algo (ex: status de bloqueio remoto)
+                    AvicultorEntity atualizado = repository.getByUuid(uuid);
+                    if (atualizado != null) {
+                        // Só postamos novamente se houver mudança relevante ou se não tínhamos nada antes
+                        if (local == null || !atualizado.getStatus().equals(local.getStatus()) || atualizado.isBloqueado() != local.isBloqueado()) {
+                            avicultorLogado.postValue(atualizado);
+                        }
+                    }
+                } catch (Exception e) {
+                    Log.w("AvicultorViewModel", "Falha ao baixar dados remotos, mantendo locais: " + e.getMessage());
+                }
+
+                // 3. Se não tem nada local nem remoto após a tentativa
+                if (local == null && avicultorLogado.getValue() == null) {
+                    // Verificamos novamente o DB pois baixarDados pode ter inserido algo
+                    AvicultorEntity finalCheck = repository.getByUuid(uuid);
+                    if (finalCheck == null) {
+                        errorMessage.postValue("Perfil não encontrado");
+                        avicultorLogado.postValue(null);
+                    } else {
+                        avicultorLogado.postValue(finalCheck);
+                    }
+                }
+            } catch (Exception e) {
+                Log.e("AvicultorViewModel", "Erro fatal ao carregar dados", e);
+                errorMessage.postValue("Erro ao carregar dados: " + e.getMessage());
             }
         });
     }

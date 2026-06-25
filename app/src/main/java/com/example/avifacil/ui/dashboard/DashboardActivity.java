@@ -237,13 +237,21 @@ public class DashboardActivity extends AppCompatActivity {
         // Atualiza os dados sempre que a tela voltar ao topo
         com.google.firebase.auth.FirebaseUser user = com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            // Recarrega para verificar se a conta foi desativada ou senha alterada
+            // Recarrega para verificar se a conta foi desativada ou senha alterada no servidor
             user.reload().addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
                     avicultorViewModel.carregarAvicultorPorUuid(user.getUid());
                 } else {
-                    deslogar();
-                    Toast.makeText(this, "Sessão expirada ou conta desativada.", Toast.LENGTH_LONG).show();
+                    Exception e = task.getException();
+                    // Se for erro de usuário inválido (deletado/desativado), desloga.
+                    // Se for erro de rede, mantemos logado e usamos os dados locais normais (Offline-first).
+                    if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidUserException) {
+                        deslogar();
+                        Toast.makeText(this, "Sessão expirada ou conta desativada.", Toast.LENGTH_LONG).show();
+                    } else {
+                        // Sem internet ou outro erro transitório, apenas carrega dados locais
+                        avicultorViewModel.carregarAvicultorPorUuid(user.getUid());
+                    }
                 }
             });
         } else {

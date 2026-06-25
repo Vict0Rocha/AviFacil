@@ -171,15 +171,16 @@ public class LoginActivity extends AppCompatActivity {
     private void verificarPerfilLocal(String uuid) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
-            progressBar.setVisibility(View.VISIBLE);
-            // Recarrega o usuário para validar se o login ainda é válido (senha alterada, conta excluída)
-            user.reload().addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    avicultorViewModel.carregarAvicultorPorUuid(uuid);
-                } else {
-                    progressBar.setVisibility(View.GONE);
+            // Offline-first: Carrega o perfil local imediatamente sem esperar o reload do Firebase
+            avicultorViewModel.carregarAvicultorPorUuid(uuid);
+            
+            // Tenta recarregar em background apenas para validar se a conta ainda existe/não foi deletada
+            // Se falhar por falta de rede, não fazemos nada (mantemos offline)
+            user.reload().addOnFailureListener(e -> {
+                if (e instanceof com.google.firebase.auth.FirebaseAuthInvalidUserException) {
                     mAuth.signOut();
-                    Toast.makeText(this, "Sessão expirada ou conta desativada.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(this, "Sessão encerrada pelo servidor.", Toast.LENGTH_LONG).show();
+                    // O observer no ViewModel cuidará de redirecionar se o avicultor sumir ou for bloqueado
                 }
             });
         }
