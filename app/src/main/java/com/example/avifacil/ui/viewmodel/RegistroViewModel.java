@@ -137,6 +137,8 @@ public class RegistroViewModel extends AndroidViewModel {
                     registro.setPrecoKgInsumo(precoInsumo);
                     registro.setTipoInsumo(tipoInsumo);
                     registro.setObservacoes(observacoes);
+                    registro.setUpdatedAt(System.currentTimeMillis());
+                    registro.setSincronizado(false);
                     repository.update(registro);
                     
                     atualizarEstatisticasLote(registro.getLoteId());

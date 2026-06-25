@@ -89,11 +89,15 @@ public class LoteViewModel extends AndroidViewModel {
     }
 
     public void encerrarLote(LoteEntity lote) {
+        if (lote == null) return;
         executorService.execute(() -> {
             try {
                 lote.setStatus(com.example.avifacil.data.local.entity.StatusLote.ENCERRADO);
+                lote.setUpdatedAt(System.currentTimeMillis());
+                lote.setSincronizado(false);
                 repository.update(lote);
                 successMessage.postValue(true);
+                // Após encerrar, recarrega a lista para refletir a mudança de status
                 carregarLotes(lote.getAvicultorId());
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao encerrar lote: " + e.getMessage());

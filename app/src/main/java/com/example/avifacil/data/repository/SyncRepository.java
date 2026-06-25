@@ -131,12 +131,16 @@ public class SyncRepository {
                 if (localAv == null) {
                     remoteAv.setId(0); // Garante que o Room gere um novo ID local
                     avLocalId = avicultorDao.insert(remoteAv);
+                    avicultorDao.marcarComoSincronizado(avLocalId);
                 } else {
                     avLocalId = localAv.getId();
-                    remoteAv.setId(avLocalId);
-                    avicultorDao.update(remoteAv);
+                    // Só atualiza se o local já estiver sincronizado e o remoto for mais recente
+                    if (localAv.isSincronizado() && remoteAv.getUpdatedAt() > localAv.getUpdatedAt()) {
+                        remoteAv.setId(avLocalId);
+                        avicultorDao.update(remoteAv);
+                        avicultorDao.marcarComoSincronizado(avLocalId);
+                    }
                 }
-                avicultorDao.marcarComoSincronizado(avLocalId);
 
                 // 2. Baixar Lotes (Sync secundário - não deve impedir o login se falhar)
                 try {
@@ -164,12 +168,17 @@ public class SyncRepository {
                 if (localLote == null) {
                     remoteLote.setId(0);
                     loteLocalId = loteDao.insert(remoteLote);
+                    loteDao.marcarComoSincronizado(loteLocalId);
                 } else {
                     loteLocalId = localLote.getId();
-                    remoteLote.setId(loteLocalId);
-                    loteDao.update(remoteLote);
+                    // Só atualiza se o local já estiver sincronizado (não tem alterações pendentes)
+                    // E se o remoto for mais recente que o local
+                    if (localLote.isSincronizado() && remoteLote.getUpdatedAt() > localLote.getUpdatedAt()) {
+                        remoteLote.setId(loteLocalId);
+                        loteDao.update(remoteLote);
+                        loteDao.marcarComoSincronizado(loteLocalId);
+                    }
                 }
-                loteDao.marcarComoSincronizado(loteLocalId);
 
                 // 3. Baixar Registros
                 QuerySnapshot regDocs = Tasks.await(firestore.collection("avicultores")
@@ -188,9 +197,12 @@ public class SyncRepository {
                             long regId = registroDao.insert(remoteReg);
                             registroDao.marcarComoSincronizado(regId);
                         } else {
-                            remoteReg.setId(localReg.getId());
-                            registroDao.update(remoteReg);
-                            registroDao.marcarComoSincronizado(localReg.getId());
+                            // Só sobrescreve se o local estiver sincronizado e o remoto for mais novo
+                            if (localReg.isSincronizado() && remoteReg.getUpdatedAt() > localReg.getUpdatedAt()) {
+                                remoteReg.setId(localReg.getId());
+                                registroDao.update(remoteReg);
+                                registroDao.marcarComoSincronizado(localReg.getId());
+                            }
                         }
                     }
                 }

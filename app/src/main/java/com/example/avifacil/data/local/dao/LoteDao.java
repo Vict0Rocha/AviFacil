@@ -12,8 +12,11 @@ public interface LoteDao {
     @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
     long insert(LoteEntity lote);
 
+    @Query("UPDATE lotes SET status = :status, sincronizado = 0, updatedAt = :timestamp WHERE id = :id")
+    void updateStatus(long id, String status, long timestamp);
+
     @Update
-    void update(LoteEntity lote);
+    int update(LoteEntity lote);
 
     @Query("UPDATE lotes SET deleted = 1, sincronizado = 0, updatedAt = :timestamp WHERE id = :id")
     void softDelete(long id, long timestamp);
