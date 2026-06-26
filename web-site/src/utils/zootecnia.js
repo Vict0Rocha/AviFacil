@@ -102,7 +102,7 @@ export const calcularConversaoAlimentar = (lote, registros) => {
 
     // Biomassa total (igual ao mobile)
     const pesoTotalLoteKg = pesoMedioKg * vivas;
-    return round(consumoTotalKg / pesoTotalLoteKg, 3);
+    return round(consumoTotalKg / pesoTotalLoteKg, 2);
 };
 
 export const calcularFatorProducao = (lote, registros) => {
@@ -117,5 +117,6 @@ export const calcularFatorProducao = (lote, registros) => {
     if (ca <= 0) return 0;
 
     // Nova Fórmula: ((GPD(kg) * Viabilidade %) / CA) * 100
-    return round(((gpdKg * viabilidade) / ca) * 100.0, 2);
+    // Arredondado para 0 casas decimais
+    return round(((gpdKg * viabilidade) / ca) * 100.0, 0);
 };

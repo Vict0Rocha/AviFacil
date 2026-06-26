@@ -137,9 +137,9 @@ public class DetalheLoteActivity extends AppCompatActivity {
         txtPesoMedio.setText(pesoMedioG > 0 ? String.format(Locale.getDefault(), "%.1f g", pesoMedioG) : "---");
         txtViabilidade.setText(String.format(Locale.getDefault(), "%.1f%%", viabilidade));
         txtConsumoTotal.setText(String.format(Locale.getDefault(), "%.2f kg", consumoTotalKg));
-        txtCA.setText(ca > 0 ? String.format(Locale.getDefault(), "%.3f", ca) : "---");
+        txtCA.setText(ca > 0 ? String.format(Locale.getDefault(), "%.2f", ca) : "---");
         txtGPD.setText(gpdG > 0 ? String.format(Locale.getDefault(), "%.2f g/dia", gpdG) : "---");
-        txtFatorProducao.setText(fatorProducao > 0 ? String.format(Locale.getDefault(), "%.2f", fatorProducao) : "---");
+        txtFatorProducao.setText(fatorProducao > 0 ? String.format(Locale.getDefault(), "%.0f", fatorProducao) : "---");
         txtCustoRacao.setText(String.format(Locale.getDefault(), "R$ %.2f", custoTotal));
     }
 

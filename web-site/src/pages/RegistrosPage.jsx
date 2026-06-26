@@ -66,8 +66,8 @@ const RegistrosPage = () => {
         (l.viabilidade || 0).toFixed(2) + '%',
         (l.pesoAtual || 0) + 'g',
         (l.gpd || 0).toFixed(2),
-        (l.ca || 0).toFixed(3),
-        (l.fatorProducao || 0).toFixed(2),
+        (l.ca || 0).toFixed(2),
+        (l.fatorProducao || 0).toFixed(0),
         l.status || '---'
       ]);
 
@@ -106,9 +106,9 @@ const RegistrosPage = () => {
       'Peso Médio (g)': l.pesoAtual,
       'GPD': l.gpd.toFixed(2),
       'Consumo (kg)': l.consumoTotal,
-      'Conversão Alimentar': l.ca.toFixed(3),
+      'Conversão Alimentar': l.ca.toFixed(2),
       'Custo Ração (R$)': l.custoTotal,
-      'Fator Produção': l.fatorProducao.toFixed(2),
+      'Fator Produção': l.fatorProducao.toFixed(0),
       'Status': l.status
     })));
 
@@ -252,7 +252,7 @@ const RegistrosPage = () => {
             <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px', marginBottom: '24px' }}>
               <SummaryCard icon={<Users color="#0B3B75"/>} bg="#EBF4FF" label="Aves no Campo" value={stats.totalVivas.toLocaleString()} border="#0B3B75" />
               <SummaryCard icon={<HeartPulse color="#E53E3E"/>} bg="#FFF5F5" label="Mortalidade Média" value={`${stats.mortalidadeMedia.toFixed(2)}%`} border="#E53E3E" />
-              <SummaryCard icon={<TrendingUp color="#008858"/>} bg="#E6F4EF" label="Fator de Prod. Médio" value={stats.fatorProducaoMedio.toFixed(2)} border="#008858" />
+              <SummaryCard icon={<TrendingUp color="#008858"/>} bg="#E6F4EF" label="Fator de Prod. Médio" value={stats.fatorProducaoMedio.toFixed(0)} border="#008858" />
               <SummaryCard icon={<Scale color="#3182CE"/>} bg="#EBF8FF" label="Peso Médio Ativos" value={`${Math.round(stats.pesoMedio)}g`} border="#3182CE" />
             </div>
           )}
@@ -301,12 +301,12 @@ const RegistrosPage = () => {
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.pesoAtual}g</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.gpd.toFixed(2)}</td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{lote.consumoTotal.toLocaleString()} kg</td>
-                      <td style={{ ...tdStyle, textAlign: 'center', color: '#3182CE', fontWeight: '800' }}>{lote.ca.toFixed(3)}</td>
+                      <td style={{ ...tdStyle, textAlign: 'center', color: '#3182CE', fontWeight: '800' }}>{lote.ca.toFixed(2)}</td>
                       <td style={{ ...tdStyle, textAlign: 'center', color: '#008858', fontWeight: '700' }}>
                         R$ {lote.custoTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'center', background: '#F0FFF4', fontWeight: '900', color: '#008858' }}>
-                        {lote.fatorProducao.toFixed(2)}
+                        {lote.fatorProducao.toFixed(0)}
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>
                         <span className={`badge ${lote.status}`}>{lote.status}</span>

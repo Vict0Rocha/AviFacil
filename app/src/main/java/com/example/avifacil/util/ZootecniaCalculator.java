@@ -81,8 +81,8 @@ public class ZootecniaCalculator {
         // Biomassa total (peso vivo total no galpão)
         double pesoTotalLoteKg = pesoMedioKg * vivas;
         
-        // Padrão de mercado: CA com 3 casas decimais
-        return round(consumoTotalKg / pesoTotalLoteKg, 3);
+        // Padrão de mercado: CA com 2 casas decimais
+        return round(consumoTotalKg / pesoTotalLoteKg, 2);
     }
 
     public static double calcularGPD(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
@@ -108,7 +108,8 @@ public class ZootecniaCalculator {
         if (ca <= 0) return 0;
 
         // Novo Cálculo solicitado: Fator de produção = ((GPD(kg) * viabilidade(%)) / C.A.) * 100
-        return round(((gpdKg * viabilidade) / ca) * 100.0, 2);
+        // Arredondado para 0 casas decimais conforme solicitado
+        return round(((gpdKg * viabilidade) / ca) * 100.0, 0);
     }
 
     public static double calcularCustoTotalRacao(List<RegistroEntity> registros) {

@@ -54,10 +54,10 @@ public class ZootecniaCalculatorTest {
         // Peso Final Total = 950 * 2.0 = 1900 kg
         // Peso Inicial Total = 1000 * 0.045 = 45 kg
         // Ganho Peso Total = 1900 - 45 = 1855 kg
-        // CA = 3500 / 1855 = 1.88679...
+        // CA = 3500 / 1855 = 1.88679... -> Arredondado para 2 casas: 1.89
         
         double ca = ZootecniaCalculator.calcularConversaoAlimentar(lote, registros);
-        assertEquals(1.88679, ca, 0.0001);
+        assertEquals(1.89, ca, 0.01);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class ZootecniaCalculatorTest {
         Date dataFim = cal.getTime();
 
         double fp = ZootecniaCalculator.calcularFatorProducao(lote, registros, dataFim);
-        // O valor esperado arredondado para 2 casas decimais é 246.09
-        assertEquals(246.09, fp, 0.01);
+        // O valor esperado arredondado para 0 casas decimais é 246
+        assertEquals(246.0, fp, 0.01);
     }
 }

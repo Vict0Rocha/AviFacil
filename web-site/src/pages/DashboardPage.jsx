@@ -199,7 +199,7 @@ const DashboardPage = () => {
           viabilidade: (geralAlojadas > 0 ? (100 - (geralMortas / geralAlojadas) * 100) : 100).toFixed(2) + "%",
           avesVivas: geralVivas.toLocaleString('pt-BR'),
           totalLotes: `${totalLotesAtivos} / ${totalLotesEncerrados}`,
-          iepMedio: totalCountFP > 0 ? (totalSomaFP / totalCountFP).toFixed(2) : "0.00"
+          iepMedio: totalCountFP > 0 ? (totalSomaFP / totalCountFP).toFixed(0) : "0"
         },
         produtores: resumoProdutores.sort((a, b) => b.mortalidadeNum - a.mortalidadeNum)
       });
