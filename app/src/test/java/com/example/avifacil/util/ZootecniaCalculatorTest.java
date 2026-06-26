@@ -76,26 +76,23 @@ public class ZootecniaCalculatorTest {
 
     @Test
     public void testCalcularFatorProducao() {
+        // Cenário:
+        // Peso Final = 2.0 kg, Peso Inicial = 0.045 kg, Idade = 40 dias
+        // GPD = (2.0 - 0.045) / 40 = 0.048875 kg/dia
         // Viabilidade = 95%
-        // GPD = 0.05 kg/dia
-        // CA = 1.88679
-        // FP = (95 * 0.05) / (1.88679 * 10) = 4.75 / 18.8679 = 0.2517...
+        // CA = 1.886792
+        // Novo FP = ((GPD * Viabilidade) / CA) * 100
+        // FP = ((0.048875 * 95) / 1.886792) * 100 = (4.643125 / 1.886792) * 100 = 246.0856...
         
-        registros.add(new RegistroEntity(1, "u1", dataInicio, 50, 3500.0, 2.0, 2.0, "milho"));
+        registros.add(new RegistroEntity(1, "u1", dataInicio, 50, 3500.0, 2.0 * 1000, 2.0, "milho"));
         
         Calendar cal = Calendar.getInstance();
         cal.setTime(dataInicio);
         cal.add(Calendar.DAY_OF_YEAR, 39);
         Date dataFim = cal.getTime();
 
-        // Recalculando GPD para este cenário:
-        // Peso médio no registro é 2.0. Peso inicial 0.045. Idade 40.
-        // GPD = (2.0 - 0.045) / 40 = 1.955 / 40 = 0.048875
-        // Viabilidade = (950 / 1000) * 100 = 95%
-        // CA = 3500 / (950 * 2.0 - 45) = 3500 / 1855 = 1.886792
-        // FP = (95 * 0.048875) / (18.86792) = 4.643125 / 18.86792 = 0.24608
-        
         double fp = ZootecniaCalculator.calcularFatorProducao(lote, registros, dataFim);
-        assertEquals(0.24608, fp, 0.0001);
+        // O valor esperado arredondado para 2 casas decimais é 246.09
+        assertEquals(246.09, fp, 0.01);
     }
 }

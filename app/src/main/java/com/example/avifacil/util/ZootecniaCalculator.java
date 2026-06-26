@@ -100,15 +100,15 @@ public class ZootecniaCalculator {
     public static double calcularFatorProducao(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
         if (lote == null || registros == null || registros.isEmpty()) return 0;
 
-        double pesoMedioKg = calcularPesoMedioAtualKg(registros);
+        double gpdGramas = calcularGPD(lote, registros, dataReferencia);
+        double gpdKg = gpdGramas / 1000.0;
         double viabilidade = calcularViabilidadePercentual(lote, registros);
-        int idadeDias = calcularIdadeDias(lote, dataReferencia);
         double ca = calcularConversaoAlimentar(lote, registros);
 
-        if (idadeDias <= 0 || ca <= 0) return 0;
+        if (ca <= 0) return 0;
 
-        // FP = ((Peso Médio Kg * Viabilidade %) / (Idade * CA)) * 100
-        return round(((pesoMedioKg * viabilidade) / (idadeDias * ca)) * 100.0, 2);
+        // Novo Cálculo solicitado: Fator de produção = ((GPD(kg) * viabilidade(%)) / C.A.) * 100
+        return round(((gpdKg * viabilidade) / ca) * 100.0, 2);
     }
 
     public static double calcularCustoTotalRacao(List<RegistroEntity> registros) {

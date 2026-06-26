@@ -23,7 +23,7 @@
     <string name="label_linhagem_galpao">%1$s - %2$s</string>
     <string name="hint_data_inicio">Data de Alojamento</string>
     <string name="hint_quantidade_inicial">Quantidade Inicial de Aves *</string>
-    <string name="label_peso_inicial">Peso Inicial (g) *</string>
+    <string name="label_peso_inicial">Peso médio inicial (g) *</string>
     <string name="label_observacoes">Observações</string>
     <string name="btn_criar_lote">CRIAR LOTE</string>
     <string name="msg_erro_numero_lote">Informe o número do lote</string>

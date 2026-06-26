@@ -109,13 +109,13 @@ export const calcularFatorProducao = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
 
     const sorted = [...registros].sort((a, b) => safeDate(b.dataRegistro) - safeDate(a.dataRegistro));
-    const pesoMedioKg = (Number(sorted[0].pesoAtualMedio) || 0) / 1000.0;
+    const gpdGramas = calcularGanhoMedioPeso(lote, registros);
+    const gpdKg = gpdGramas / 1000.0;
     const viabilidade = calcularViabilidade(lote, registros);
-    const idade = calcularIdadeDias(lote, sorted[0].dataRegistro);
     const ca = calcularConversaoAlimentar(lote, registros);
 
-    if (idade <= 0 || ca <= 0) return 0;
+    if (ca <= 0) return 0;
 
-    // Fórmula: ((Peso Médio Kg * Viabilidade %) / (Idade * CA)) * 100
-    return round(((pesoMedioKg * viabilidade) / (idade * ca)) * 100.0, 2);
+    // Nova Fórmula: ((GPD(kg) * Viabilidade %) / CA) * 100
+    return round(((gpdKg * viabilidade) / ca) * 100.0, 2);
 };
