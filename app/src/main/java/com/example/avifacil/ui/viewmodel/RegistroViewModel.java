@@ -103,6 +103,9 @@ public class RegistroViewModel extends AndroidViewModel {
                 
                 atualizarEstatisticasLote(loteId);
                 
+                // Dispara sincronização automática
+                com.example.avifacil.util.SyncManager.enviarDados(getApplication());
+                
                 successMessage.postValue(true);
                 carregarRegistros(loteId);
             } catch (Exception e) {
@@ -143,6 +146,9 @@ public class RegistroViewModel extends AndroidViewModel {
                     
                     atualizarEstatisticasLote(registro.getLoteId());
                     
+                    // Dispara sincronização automática
+                    com.example.avifacil.util.SyncManager.enviarDados(getApplication());
+                    
                     successMessage.postValue(true);
                     carregarRegistros(registro.getLoteId());
                 }
@@ -161,6 +167,9 @@ public class RegistroViewModel extends AndroidViewModel {
                     repository.softDelete(id);
                     
                     atualizarEstatisticasLote(loteId);
+                    
+                    // Dispara sincronização automática
+                    com.example.avifacil.util.SyncManager.enviarDados(getApplication());
                     
                     successMessage.postValue(true);
                     carregarRegistros(loteId);

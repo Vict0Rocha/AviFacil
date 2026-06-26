@@ -24,7 +24,7 @@ import java.util.Locale;
 public class DetalheLoteActivity extends AppCompatActivity {
 
     private TextView txtNumero, txtLinhagem, txtGalpao, txtData;
-    private TextView txtAvesInicial, txtAvesVivas, txtAvesMortas, txtIdade, txtMortalidade, txtPesoMedio, txtViabilidade, txtConsumoTotal, txtCA, txtGPD, txtFatorProducao, txtCustoRacao, txtPesoInicial;
+    private TextView txtAvesInicial, txtAvesVivas, txtAvesMortas, txtIdade, txtMortalidade, txtPesoMedio, txtViabilidade, txtConsumoTotal, txtCA, txtGPD, txtFatorProducao, txtCustoRacao, txtCustoRacaoAve, txtCustoRacaoKg, txtPesoInicial;
     private Button btnGerenciar;
     private LoteViewModel loteViewModel;
     private RegistroViewModel registroViewModel;
@@ -102,6 +102,8 @@ public class DetalheLoteActivity extends AppCompatActivity {
         txtGPD = findViewById(R.id.txtIndicadorGPD);
         txtFatorProducao = findViewById(R.id.txtIndicadorFatorProducao);
         txtCustoRacao = findViewById(R.id.txtIndicadorCustoRacao);
+        txtCustoRacaoAve = findViewById(R.id.txtIndicadorCustoRacaoAve);
+        txtCustoRacaoKg = findViewById(R.id.txtIndicadorCustoRacaoKg);
         txtPesoInicial = findViewById(R.id.txtIndicadorPesoInicial);
         
         btnGerenciar = findViewById(R.id.btnGerenciarRegistros);
@@ -129,6 +131,8 @@ public class DetalheLoteActivity extends AppCompatActivity {
         double gpdG = ZootecniaCalculator.calcularGPD(currentLote, registros, new java.util.Date());
         double fatorProducao = ZootecniaCalculator.calcularFatorProducao(currentLote, registros, new java.util.Date());
         double custoTotal = ZootecniaCalculator.calcularCustoTotalRacao(registros);
+        double custoAve = ZootecniaCalculator.calcularCustoRacaoPorAve(currentLote, registros);
+        double custoKg = ZootecniaCalculator.calcularCustoRacaoPorKgFrango(currentLote, registros);
 
         txtAvesVivas.setText(String.valueOf(vivas));
         txtAvesMortas.setText(String.valueOf(mortas));
@@ -141,6 +145,8 @@ public class DetalheLoteActivity extends AppCompatActivity {
         txtGPD.setText(gpdG > 0 ? String.format(Locale.getDefault(), "%.2f g/dia", gpdG) : "---");
         txtFatorProducao.setText(fatorProducao > 0 ? String.format(Locale.getDefault(), "%.0f", fatorProducao) : "---");
         txtCustoRacao.setText(String.format(Locale.getDefault(), "R$ %.2f", custoTotal));
+        txtCustoRacaoAve.setText(String.format(Locale.getDefault(), "R$ %.2f", custoAve));
+        txtCustoRacaoKg.setText(String.format(Locale.getDefault(), "R$ %.2f", custoKg));
     }
 
     @Override

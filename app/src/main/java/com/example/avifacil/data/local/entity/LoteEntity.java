@@ -5,6 +5,7 @@ import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
+import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
 @Entity(tableName = "lotes",
@@ -21,6 +22,7 @@ import java.util.Date;
         })
 public class LoteEntity {
     @PrimaryKey(autoGenerate = true)
+    @Exclude
     private long id;
     
     private String uuid; // ID estável para Firebase

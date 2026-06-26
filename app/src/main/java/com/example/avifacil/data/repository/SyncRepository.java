@@ -115,38 +115,37 @@ public class SyncRepository {
     }
 
     public boolean baixarDados(String avicultorUuid) throws ExecutionException, InterruptedException {
-        // 1. Baixar Avicultor - Tenta forçar do servidor para obter status atualizado (bloqueio, senha)
+        // 1. Baixar Avicultor - Tenta forçar do servidor para obter status atualizado
         DocumentSnapshot avDoc;
         try {
             avDoc = Tasks.await(firestore.collection("avicultores").document(avicultorUuid).get(Source.SERVER));
         } catch (Exception e) {
-            Log.w(TAG, "Falha ao buscar do servidor, tentando cache/padrão: " + e.getMessage());
+            Log.w(TAG, "Falha ao buscar do servidor, tentando cache: " + e.getMessage());
             avDoc = Tasks.await(firestore.collection("avicultores").document(avicultorUuid).get());
         }
         if (avDoc.exists()) {
             AvicultorEntity remoteAv = avDoc.toObject(AvicultorEntity.class);
             if (remoteAv != null) {
-                AvicultorEntity localAv = avicultorDao.getByUuid(remoteAv.getUuid());
+                // Busca sem filtro para ver se já existe mesmo deletado
+                AvicultorEntity localAv = avicultorDao.getByUuidSemFiltro(remoteAv.getUuid());
                 long avLocalId;
                 if (localAv == null) {
-                    remoteAv.setId(0); // Garante que o Room gere um novo ID local
                     avLocalId = avicultorDao.insert(remoteAv);
                     avicultorDao.marcarComoSincronizado(avLocalId);
                 } else {
                     avLocalId = localAv.getId();
-                    // Só atualiza se o local já estiver sincronizado e o remoto for mais recente
-                    if (localAv.isSincronizado() && remoteAv.getUpdatedAt() > localAv.getUpdatedAt()) {
+                    // Atualiza apenas se local estiver sincronizado (sem mudanças pendentes) e remoto for mais novo
+                    if (!localAv.isDeleted() && localAv.isSincronizado() && remoteAv.getUpdatedAt() > localAv.getUpdatedAt()) {
                         remoteAv.setId(avLocalId);
                         avicultorDao.update(remoteAv);
                         avicultorDao.marcarComoSincronizado(avLocalId);
                     }
                 }
 
-                // 2. Baixar Lotes (Sync secundário - não deve impedir o login se falhar)
                 try {
                     baixarLotesERegistros(avicultorUuid, avLocalId);
                 } catch (Exception e) {
-                    Log.e(TAG, "Erro ao baixar lotes/registros (não fatal): " + e.getMessage());
+                    Log.e(TAG, "Erro ao baixar lotes/registros: " + e.getMessage());
                 }
                 return true;
             }
@@ -155,50 +154,51 @@ public class SyncRepository {
     }
 
     private void baixarLotesERegistros(String avicultorUuid, long avLocalId) throws ExecutionException, InterruptedException {
+        // Busca do servidor para evitar dados obsoletos do cache
         QuerySnapshot loteDocs = Tasks.await(firestore.collection("avicultores")
                 .document(avicultorUuid)
-                .collection("lotes").get());
+                .collection("lotes").get(Source.SERVER));
 
         for (QueryDocumentSnapshot loteDoc : loteDocs) {
             LoteEntity remoteLote = loteDoc.toObject(LoteEntity.class);
             if (remoteLote != null) {
-                LoteEntity localLote = loteDao.getByUuid(remoteLote.getUuid(), avLocalId);
+                // Busca por UUID garantindo que não criamos duplicatas por causa de IDs locais
+                LoteEntity localLote = loteDao.getByUuidSemFiltro(remoteLote.getUuid());
                 long loteLocalId;
                 remoteLote.setAvicultorId(avLocalId);
+                
                 if (localLote == null) {
-                    remoteLote.setId(0);
                     loteLocalId = loteDao.insert(remoteLote);
                     loteDao.marcarComoSincronizado(loteLocalId);
                 } else {
                     loteLocalId = localLote.getId();
-                    // Só atualiza se o local já estiver sincronizado (não tem alterações pendentes)
-                    // E se o remoto for mais recente que o local
-                    if (localLote.isSincronizado() && remoteLote.getUpdatedAt() > localLote.getUpdatedAt()) {
+                    // Importante: se o lote está deletado ou encerrado localmente, a versão do servidor
+                    // só deve sobrescrever se for explicitamente mais nova E o local já estiver sincronizado
+                    if (!localLote.isDeleted() && localLote.isSincronizado() && remoteLote.getUpdatedAt() > localLote.getUpdatedAt()) {
                         remoteLote.setId(loteLocalId);
                         loteDao.update(remoteLote);
                         loteDao.marcarComoSincronizado(loteLocalId);
                     }
                 }
 
-                // 3. Baixar Registros
+                // Baixar Registros do servidor
                 QuerySnapshot regDocs = Tasks.await(firestore.collection("avicultores")
                         .document(avicultorUuid)
                         .collection("lotes")
                         .document(remoteLote.getUuid())
-                        .collection("registros").get());
+                        .collection("registros").get(Source.SERVER));
 
                 for (QueryDocumentSnapshot regDoc : regDocs) {
                     RegistroEntity remoteReg = regDoc.toObject(RegistroEntity.class);
                     if (remoteReg != null) {
-                        RegistroEntity localReg = registroDao.getByUuid(remoteReg.getUuid());
+                        RegistroEntity localReg = registroDao.getByUuidSemFiltro(remoteReg.getUuid());
                         remoteReg.setLoteId(loteLocalId);
+                        
                         if (localReg == null) {
-                            remoteReg.setId(0);
                             long regId = registroDao.insert(remoteReg);
                             registroDao.marcarComoSincronizado(regId);
                         } else {
-                            // Só sobrescreve se o local estiver sincronizado e o remoto for mais novo
-                            if (localReg.isSincronizado() && remoteReg.getUpdatedAt() > localReg.getUpdatedAt()) {
+                            if (!localReg.isDeleted() && localReg.isSincronizado() && remoteReg.getUpdatedAt() > localReg.getUpdatedAt()) {
                                 remoteReg.setId(localReg.getId());
                                 registroDao.update(remoteReg);
                                 registroDao.marcarComoSincronizado(localReg.getId());

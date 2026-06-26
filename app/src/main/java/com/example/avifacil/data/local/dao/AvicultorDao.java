@@ -9,7 +9,7 @@ import java.util.List;
 
 @Dao
 public interface AvicultorDao {
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE)
     long insert(AvicultorEntity avicultor);
 
     @Update
@@ -26,6 +26,9 @@ public interface AvicultorDao {
 
     @Query("SELECT * FROM avicultores WHERE uuid = :uuid AND deleted = 0")
     AvicultorEntity getByUuid(String uuid);
+
+    @Query("SELECT * FROM avicultores WHERE uuid = :uuid")
+    AvicultorEntity getByUuidSemFiltro(String uuid);
 
     @Query("SELECT * FROM avicultores WHERE sincronizado = 0")
     List<AvicultorEntity> getPendentesSincronizacao();

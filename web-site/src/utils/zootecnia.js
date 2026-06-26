@@ -120,3 +120,18 @@ export const calcularFatorProducao = (lote, registros) => {
     // Arredondado para 0 casas decimais
     return round(((gpdKg * viabilidade) / ca) * 100.0, 0);
 };
+
+export const calcularCustoRacaoPorAve = (lote, registros) => {
+    const vivas = calcularAvesVivas(lote, registros);
+    if (vivas <= 0) return 0;
+    return round(calcularCustoTotalRacao(registros) / vivas, 2);
+};
+
+export const calcularCustoRacaoPorKgFrango = (lote, registros) => {
+    const ca = calcularConversaoAlimentar(lote, registros);
+    const consumoTotal = calcularTotalConsumoRacao(registros);
+    if (consumoTotal <= 0 || ca <= 0) return 0;
+
+    const precoMedioKg = calcularCustoTotalRacao(registros) / consumoTotal;
+    return round(ca * precoMedioKg, 2);
+};

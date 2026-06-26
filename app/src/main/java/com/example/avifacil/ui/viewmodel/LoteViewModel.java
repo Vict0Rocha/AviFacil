@@ -97,6 +97,10 @@ public class LoteViewModel extends AndroidViewModel {
                 lote.setSincronizado(false);
                 repository.update(lote);
                 successMessage.postValue(true);
+                
+                // Dispara sincronização automática
+                com.example.avifacil.util.SyncManager.enviarDados(getApplication());
+                
                 // Após encerrar, recarrega a lista para refletir a mudança de status
                 carregarLotes(lote.getAvicultorId());
             } catch (Exception e) {
@@ -111,6 +115,10 @@ public class LoteViewModel extends AndroidViewModel {
             try {
                 repository.softDelete(lote.getId());
                 successMessage.postValue(true);
+                
+                // Dispara sincronização automática
+                com.example.avifacil.util.SyncManager.enviarDados(getApplication());
+
                 carregarLotes(lote.getAvicultorId());
             } catch (Exception e) {
                 errorMessage.postValue("Erro ao excluir lote: " + e.getMessage());

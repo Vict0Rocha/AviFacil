@@ -9,7 +9,7 @@ import java.util.List;
 
 @Dao
 public interface LoteDao {
-    @Insert(onConflict = androidx.room.OnConflictStrategy.REPLACE)
+    @Insert(onConflict = androidx.room.OnConflictStrategy.IGNORE)
     long insert(LoteEntity lote);
 
     @Query("UPDATE lotes SET status = :status, sincronizado = 0, updatedAt = :timestamp WHERE id = :id")
@@ -30,7 +30,10 @@ public interface LoteDao {
     @Query("SELECT * FROM lotes WHERE uuid = :uuid AND avicultorId = :avicultorId AND deleted = 0")
     LoteEntity getByUuid(String uuid, long avicultorId);
 
-    @Query("SELECT * FROM lotes WHERE id = :id AND deleted = 0")
+    @Query("SELECT * FROM lotes WHERE uuid = :uuid")
+    LoteEntity getByUuidSemFiltro(String uuid);
+
+    @Query("SELECT * FROM lotes WHERE id = :id")
     LoteEntity getByIdSemFiltro(long id);
 
     @Query("SELECT * FROM lotes WHERE avicultorId = :avicultorId AND status = 'ATIVO' AND deleted = 0 LIMIT 1")

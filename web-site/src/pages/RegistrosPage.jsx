@@ -67,19 +67,21 @@ const RegistrosPage = () => {
         (l.pesoAtual || 0) + 'g',
         (l.gpd || 0).toFixed(2),
         (l.ca || 0).toFixed(2),
+        (l.custoAve || 0).toFixed(2),
+        (l.custoKg || 0).toFixed(2),
         (l.fatorProducao || 0).toFixed(0),
         l.status || '---'
       ]);
 
       autoTable(doc, {
         startY: 35,
-        head: [['Lote', 'Idade', 'Inicial', 'Vivas', 'Mortas', 'Mort.%', 'Viab.%', 'Peso', 'GPD', 'C.A.', 'F.P.', 'Status']],
+        head: [['Lote', 'Idade', 'Inicial', 'Vivas', 'Mortas', 'Mort.%', 'Viab.%', 'Peso', 'GPD', 'C.A.', 'R$/Ave', 'R$/kg', 'F.P.', 'Status']],
         body: tableData,
         theme: 'striped',
-        headStyles: { fillColor: [11, 59, 117], fontSize: 9 },
-        styles: { fontSize: 8 },
+        headStyles: { fillColor: [11, 59, 117], fontSize: 8 },
+        styles: { fontSize: 7 },
         columnStyles: {
-          10: { fontStyle: 'bold', fillColor: [230, 244, 239] }
+          12: { fontStyle: 'bold', fillColor: [230, 244, 239] }
         }
       });
 
@@ -108,6 +110,8 @@ const RegistrosPage = () => {
       'Consumo (kg)': l.consumoTotal,
       'Conversão Alimentar': l.ca.toFixed(2),
       'Custo Ração (R$)': l.custoTotal,
+      'Custo Ração/Ave (R$)': l.custoAve.toFixed(2),
+      'Custo Ração/kg (R$)': l.custoKg.toFixed(2),
       'Fator Produção': l.fatorProducao.toFixed(0),
       'Status': l.status
     })));
@@ -155,6 +159,8 @@ const RegistrosPage = () => {
             idade: Zootecnia.calcularIdadeDias(loteData),
             consumoTotal: Zootecnia.calcularTotalConsumoRacao(registros),
             custoTotal: Zootecnia.calcularCustoTotalRacao(registros),
+            custoAve: Zootecnia.calcularCustoRacaoPorAve(loteData, registros),
+            custoKg: Zootecnia.calcularCustoRacaoPorKgFrango(loteData, registros),
             registros: registros.sort((a, b) => Zootecnia.safeDate(b.dataRegistro) - Zootecnia.safeDate(a.dataRegistro))
           };
         } catch (e) { return null; }
@@ -277,7 +283,9 @@ const RegistrosPage = () => {
                     <th style={thCenter}>G.P.D.</th>
                     <th style={thCenter}>Consumo (kg)</th>
                     <th style={thCenter}>C.A.</th>
-                    <th style={thCenter}>Custo Ração</th>
+                    <th style={thCenter}>Custo Total</th>
+                    <th style={thCenter}>R$/Ave</th>
+                    <th style={thCenter}>R$/kg</th>
                     <th style={{ ...thCenter, background: '#E6F4EF', color: '#008858' }}>Fator Prod.</th>
                     <th style={thCenter}>Status</th>
                     <th style={thCenter}>Ações</th>
@@ -304,6 +312,12 @@ const RegistrosPage = () => {
                       <td style={{ ...tdStyle, textAlign: 'center', color: '#3182CE', fontWeight: '800' }}>{lote.ca.toFixed(2)}</td>
                       <td style={{ ...tdStyle, textAlign: 'center', color: '#008858', fontWeight: '700' }}>
                         R$ {lote.custoTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>
+                        R$ {lote.custoAve.toFixed(2)}
+                      </td>
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>
+                        R$ {lote.custoKg.toFixed(2)}
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'center', background: '#F0FFF4', fontWeight: '900', color: '#008858' }}>
                         {lote.fatorProducao.toFixed(0)}

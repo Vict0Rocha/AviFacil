@@ -3,11 +3,13 @@ package com.example.avifacil.data.local.entity;
 import androidx.room.Entity;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import com.google.firebase.firestore.Exclude;
 
 @Entity(tableName = "avicultores",
         indices = {@Index(value = {"uuid"}, unique = true)})
 public class AvicultorEntity {
     @PrimaryKey(autoGenerate = true)
+    @Exclude
     private long id;
     
     private String uuid; // ID estável para Firebase

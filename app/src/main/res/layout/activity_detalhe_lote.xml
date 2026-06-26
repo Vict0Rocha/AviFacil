@@ -413,7 +413,7 @@
                                 android:textStyle="bold" />
                         </LinearLayout>
 
-                        <!-- Custo Ração -->
+                        <!-- Custo Ração Total -->
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
@@ -430,6 +430,54 @@
 
                             <TextView
                                 android:id="@+id/txtIndicadorCustoRacao"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/primary_dark_blue"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Custo Ração Por Ave -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_custo_racao_ave"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorCustoRacaoAve"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:textColor="@color/primary_dark_blue"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Custo Ração Por Kg -->
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_columnWeight="1"
+                            android:layout_marginBottom="16dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_custo_racao_kg"
+                                android:textColor="@color/secondary_text"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/txtIndicadorCustoRacaoKg"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/primary_dark_blue"

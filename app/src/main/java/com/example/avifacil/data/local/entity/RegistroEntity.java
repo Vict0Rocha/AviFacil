@@ -4,6 +4,7 @@ import androidx.room.Entity;
 import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
+import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
 @Entity(tableName = "registros",
@@ -20,6 +21,7 @@ import java.util.Date;
         })
 public class RegistroEntity {
     @PrimaryKey(autoGenerate = true)
+    @Exclude
     private long id;
     
     private String uuid; // ID estável para Firebase

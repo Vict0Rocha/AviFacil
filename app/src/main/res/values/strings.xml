@@ -102,7 +102,9 @@
     <string name="label_ca_full">C.A.</string>
     <string name="label_gpd">G.P.D.</string>
     <string name="label_fator_producao">Fator de Produção</string>
-    <string name="label_custo_racao">Custo Ração (R$)</string>
+    <string name="label_custo_racao">Custo Ração Total</string>
+    <string name="label_custo_racao_ave">Custo Ração/Ave</string>
+    <string name="label_custo_racao_kg">Custo Ração/kg</string>
     <string name="label_consumo_total">Consumo Total</string>
     <string name="label_precos_insumos">Preços dos Insumos (R$/kg)</string>
     <string name="label_preco_medio_racao">Preço Médio Ração (R$/kg)</string>
