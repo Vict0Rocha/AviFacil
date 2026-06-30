@@ -17,6 +17,12 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Activity responsável por capturar as informações iniciais do avicultor
+ * após o primeiro login ou caso o perfil local não exista.
+ * 
+ * Vincula o UUID do Firebase Auth ao objeto Avicultor para sincronização posterior.
+ */
 public class CadastroAvicultorActivity extends AppCompatActivity {
 
     private AvicultorViewModel viewModel;

@@ -5,6 +5,11 @@ import androidx.room.Index;
 import androidx.room.PrimaryKey;
 import com.google.firebase.firestore.Exclude;
 
+/**
+ * Entidade que representa o Avicultor (Usuário).
+ * O campo 'id' é local e excluído da sincronização via @Exclude.
+ * O campo 'uuid' é utilizado como chave global estável.
+ */
 @Entity(tableName = "avicultores",
         indices = {@Index(value = {"uuid"}, unique = true)})
 public class AvicultorEntity {

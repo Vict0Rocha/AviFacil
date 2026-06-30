@@ -19,6 +19,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Tela de lançamento de dados diários ou periódicos do lote.
+ * 
+ * Permite registrar mortalidade, consumo de ração, peso médio e 
+ * compras de insumos. Realiza cálculos de validação baseados na 
+ * data de alojamento do lote.
+ */
 public class CadastroRegistroActivity extends AppCompatActivity {
 
     private TextInputEditText editData, editMortas, editConsumo, editPeso, editObs;

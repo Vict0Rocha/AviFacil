@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * ViewModel para gestão do perfil do Avicultor.
+ * 
+ * Implementa a orquestração entre repositório local e sincronização remota,
+ * expondo LiveData para a UI reagir a mudanças de estado do usuário.
+ */
 public class AvicultorViewModel extends AndroidViewModel {
     private final AvicultorRepository repository;
     private final SyncRepository syncRepository;

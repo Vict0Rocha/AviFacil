@@ -40,6 +40,16 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Locale;
 
+/**
+ * DashboardActivity: Tela principal do aplicativo.
+ * Exibe um resumo dos indicadores de desempenho (Viabilidade, Mortalidade, Aves Alojadas)
+ * e a lista dos lotes mais recentes.
+ * 
+ * Tratamento de Eventos:
+ * - Menu lateral para Perfil e Logout.
+ * - Sincronização manual via botão.
+ * - Navegação para detalhes de lotes.
+ */
 public class DashboardActivity extends AppCompatActivity {
 
     private DashboardViewModel dashboardViewModel;
@@ -136,16 +146,20 @@ public class DashboardActivity extends AppCompatActivity {
     }
 
     private void iniciarSincronizacao() {
+        // Define restrições para a sincronização: necessita de conexão com a internet
         Constraints constraints = new Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build();
 
+        // Cria uma requisição única para o Worker de sincronização
         OneTimeWorkRequest syncRequest = new OneTimeWorkRequest.Builder(SyncWorker.class)
                 .setConstraints(constraints)
                 .build();
 
+        // Agenda a execução no WorkManager (Gerenciador de tarefas em segundo plano do Android)
         WorkManager.getInstance(this).enqueue(syncRequest);
         
+        // Observa o estado da tarefa para atualizar a interface em tempo real
         WorkManager.getInstance(this).getWorkInfoByIdLiveData(syncRequest.getId())
                 .observe(this, workInfo -> {
                     if (workInfo != null) {

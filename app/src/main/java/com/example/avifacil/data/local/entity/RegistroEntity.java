@@ -7,6 +7,10 @@ import androidx.room.PrimaryKey;
 import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
+/**
+ * Entidade que representa um lançamento diário de dados técnicos.
+ * Contém informações sobre mortalidade, consumo de ração e pesagem.
+ */
 @Entity(tableName = "registros",
         foreignKeys = @ForeignKey(
                 entity = LoteEntity.class,

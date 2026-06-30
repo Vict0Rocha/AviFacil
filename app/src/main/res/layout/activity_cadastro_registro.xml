@@ -64,9 +64,6 @@
                         android:clickable="true"
                         android:focusable="false"
                         android:gravity="center_vertical"
-                        android:hint="@string/hint_formato_data"
-                        android:inputType="none"
-                        android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:textColor="@color/main_text" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -96,9 +93,6 @@
                         android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
                         android:gravity="center_vertical"
-                        android:hint="@string/hint_zero"
-                        android:inputType="number"
-                        android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:textColor="@color/main_text" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -128,9 +122,6 @@
                         android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
                         android:gravity="center_vertical"
-                        android:hint="0"
-                        android:inputType="numberDecimal"
-                        android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:textColor="@color/main_text" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -160,9 +151,6 @@
                         android:layout_height="60dp"
                         android:background="@drawable/bg_edit_text"
                         android:gravity="center_vertical"
-                        android:hint="0.00"
-                        android:inputType="numberDecimal"
-                        android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:textColor="@color/main_text" />
                 </com.google.android.material.textfield.TextInputLayout>
@@ -214,9 +202,6 @@
                                 android:layout_height="60dp"
                                 android:background="@drawable/bg_edit_text"
                                 android:gravity="center_vertical"
-                                android:hint="0.00"
-                                android:inputType="numberDecimal"
-                                android:paddingStart="12dp"
                                 android:paddingEnd="12dp"
                                 android:textColor="@color/main_text" />
                         </com.google.android.material.textfield.TextInputLayout>
@@ -298,9 +283,6 @@
                         android:layout_height="wrap_content"
                         android:background="@drawable/bg_edit_text"
                         android:gravity="top"
-                        android:hint="..."
-                        android:inputType="textMultiLine"
-                        android:minLines="3"
                         android:padding="16dp"
                         android:textColor="@color/main_text" />
                 </com.google.android.material.textfield.TextInputLayout>

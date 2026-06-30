@@ -17,6 +17,13 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Tela para criação de novos lotes de aves.
+ * 
+ * Coleta dados técnicos (linhagem, galpão, peso inicial) e vincula 
+ * ao perfil do avicultor logado. O número do lote é validado para 
+ * evitar duplicidade dentro da mesma propriedade.
+ */
 public class CadastroLoteActivity extends AppCompatActivity {
 
     private TextInputLayout layoutNumero, layoutLinhagem, layoutData, layoutQtd, layoutPeso;

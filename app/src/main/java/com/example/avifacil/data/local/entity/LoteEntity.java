@@ -8,6 +8,10 @@ import androidx.room.TypeConverters;
 import com.google.firebase.firestore.Exclude;
 import java.util.Date;
 
+/**
+ * Entidade que representa um Lote de Aves.
+ * Agrupa os registros diários e consolida indicadores de desempenho.
+ */
 @Entity(tableName = "lotes",
         foreignKeys = @ForeignKey(
                 entity = AvicultorEntity.class,

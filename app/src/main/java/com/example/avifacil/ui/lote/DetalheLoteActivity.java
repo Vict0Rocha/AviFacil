@@ -21,6 +21,12 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Tela de visualização detalhada de um lote específico.
+ * 
+ * Centraliza os cálculos zootécnicos (CA, GPD, Fator de Produção, Custos)
+ * e exibe indicadores consolidados para o produtor.
+ */
 public class DetalheLoteActivity extends AppCompatActivity {
 
     private TextView txtNumero, txtLinhagem, txtGalpao, txtData;
@@ -110,11 +116,18 @@ public class DetalheLoteActivity extends AppCompatActivity {
     }
 
     private void preencherDadosLote() {
-        txtNumero.setText(getString(R.string.label_lote_numero, currentLote.getNumeroLote()));
-        txtLinhagem.setText(currentLote.getLinhagem());
-        txtGalpao.setText(currentLote.getGalpao());
+        String numero = currentLote.getNumeroLote() != null ? currentLote.getNumeroLote() : "---";
+        txtNumero.setText(getString(R.string.label_lote_numero, numero));
+        
+        txtLinhagem.setText(currentLote.getLinhagem() != null && !currentLote.getLinhagem().isEmpty() 
+                ? currentLote.getLinhagem() : "Linhagem não informada");
+        
+        txtGalpao.setText(currentLote.getGalpao() != null && !currentLote.getGalpao().isEmpty() 
+                ? currentLote.getGalpao() : "Não informado");
+        
         txtData.setText(dateFormat.format(currentLote.getDataInicio()));
         txtAvesInicial.setText(String.valueOf(currentLote.getQuantidadeAvesInicial()));
+
         // Peso inicial em GRAMAS
         txtPesoInicial.setText(String.format(Locale.getDefault(), "%.1f g", currentLote.getPesoInicial()));
     }

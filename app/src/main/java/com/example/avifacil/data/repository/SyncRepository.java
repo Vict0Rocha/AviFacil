@@ -16,6 +16,13 @@ import com.google.firebase.firestore.QuerySnapshot;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+/**
+ * SyncRepository: Motor de Sincronização entre SQLite (Local) e Firestore (Nuvem).
+ * 
+ * Estratégia: Offline-first com reconciliação baseada em timestamps (updatedAt).
+ * - Sincronização de saída (Local -> Nuvem): Envia registros pendentes (sincronizado = 0).
+ * - Sincronização de entrada (Nuvem -> Local): Baixa dados novos respeitando edições locais não enviadas.
+ */
 public class SyncRepository {
     private static final String TAG = "SyncRepository";
     private final AvicultorDao avicultorDao;
@@ -30,6 +37,9 @@ public class SyncRepository {
         this.firestore = FirebaseFirestore.getInstance();
     }
 
+    /**
+     * Sincroniza todos os dados pendentes de envio para o servidor.
+     */
     public void sincronizarPendentes() throws ExecutionException, InterruptedException {
         sincronizarAvicultores();
         sincronizarLotes();

@@ -13,6 +13,13 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * ViewModel para gestão dos registros técnicos diários.
+ * 
+ * Além do CRUD de registros, é responsável por disparar a atualização
+ * dos indicadores consolidados no LoteEntity (denormalização para performance)
+ * e garantir a integridade dos dados zootécnicos.
+ */
 public class RegistroViewModel extends AndroidViewModel {
     private final RegistroRepository repository;
     private final ExecutorService executorService;

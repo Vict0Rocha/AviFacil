@@ -35,7 +35,6 @@
     <string name="empty_lotes_message">Nenhum lote cadastrado.\nClique no botão abaixo para começar.</string>
     <string name="label_quantidade">%1$d aves</string>
     <string name="label_data_inicio">Alojamento: %1$s</string>
-    <string name="hint_ex_lote">Ex: Lote 2024-01</string>
     <string name="hint_formato_data">DD/MM/AAAA</string>
     <string name="hint_zero">0</string>
     <string name="btn_encerrar_lote">ENCERRAR LOTE</string>
@@ -53,8 +52,8 @@
     <!-- Perfil -->
     <string name="title_perfil">Meu Perfil</string>
     <string name="label_alterar_senha">Alterar Senha</string>
-    <string name="hint_nova_senha">Nova Senha</string>
-    <string name="hint_confirmar_senha">Confirmar Nova Senha</string>
+    <string name="hint_nova_senha">Digite a nova senha</string>
+    <string name="hint_confirmar_senha">Confirme sua nova senha</string>
     <string name="msg_erro_senhas_diferentes">As senhas não coincidem</string>
     <string name="msg_erro_senha_curta">A senha deve ter pelo menos 6 caracteres</string>
     <string name="msg_sucesso_perfil">Perfil atualizado com sucesso</string>
@@ -127,4 +126,7 @@
     <string name="msg_erro_data_lote">A data não pode ser anterior ao alojamento do lote (%1$s)</string>
     <string name="dialog_excluir_registro_title">Excluir Registro</string>
     <string name="dialog_excluir_registro_msg">Deseja realmente excluir este registro? Esta ação não pode ser desfeita.</string>
+    <string name="label_detalhe_carregando">Carregando...</string>
+    <string name="label_placeholder_vazio">---</string>
+    <string name="label_lote_numero_vazio">Lote: ---</string>
 </resources>

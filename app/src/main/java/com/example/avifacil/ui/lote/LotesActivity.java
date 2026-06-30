@@ -18,6 +18,13 @@ import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.ui.viewmodel.LoteViewModel;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+/**
+ * Tela de listagem completa de lotes do avicultor.
+ * 
+ * Permite visualizar todos os lotes, filtrar por status, acessar detalhes
+ * e realizar ações críticas como encerramento ou exclusão via gestos 
+ * de clique longo com confirmação textual de segurança.
+ */
 public class LotesActivity extends AppCompatActivity {
 
     private LoteViewModel loteViewModel;

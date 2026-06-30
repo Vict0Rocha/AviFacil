@@ -13,6 +13,11 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 
+/**
+ * Tela de Perfil do Usuário.
+ * Permite a atualização do nome, propriedade e troca de senha.
+ * A senha é atualizada diretamente no Firebase Auth.
+ */
 public class PerfilActivity extends AppCompatActivity {
 
     private AvicultorViewModel viewModel;

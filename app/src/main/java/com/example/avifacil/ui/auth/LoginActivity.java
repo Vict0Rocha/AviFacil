@@ -24,6 +24,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Tela de Autenticação (Login)
+ * 
+ * Responsável por gerenciar o acesso do usuário via Firebase Auth e 
+ * garantir a consistência do perfil local (SQLite) com a nuvem (Firestore).
+ * Implementa estratégia offline-first permitindo entrada se a sessão estiver ativa.
+ */
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText editEmail, editSenha;
@@ -138,6 +145,10 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Realiza a autenticação via Firebase Auth.
+     * Ao obter sucesso, dispara o carregamento do perfil no ViewModel.
+     */
     private void loginUsuario() {
         String email = editEmail.getText().toString().trim();
         String senha = editSenha.getText().toString().trim();
@@ -168,6 +179,11 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Estratégia Offline-first:
+     * Verifica se existe um perfil localmente para o UUID autenticado.
+     * Tenta atualizar o token em background sem interromper o fluxo do usuário.
+     */
     private void verificarPerfilLocal(String uuid) {
         FirebaseUser user = mAuth.getCurrentUser();
         if (user != null) {
@@ -186,6 +202,9 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Mapeamento de erros técnicos do Firebase para mensagens amigáveis ao usuário final.
+     */
     private String getErrorMessage(Exception exception) {
         String errorMsg = "Ocorreu um erro inesperado. Tente novamente.";
         if (exception instanceof FirebaseAuthException) {

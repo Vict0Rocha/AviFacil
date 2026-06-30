@@ -50,7 +50,8 @@
                         android:layout_marginTop="12dp"
                         android:textColor="@color/main_text"
                         android:textSize="22sp"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        android:text="@string/label_lote_numero_vazio" />
 
                     <TextView
                         android:id="@+id/txtDetalheLinhagem"
@@ -58,7 +59,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/secondary_text"
-                        android:textSize="16sp" />
+                        android:textSize="16sp"
+                        android:text="@string/label_detalhe_carregando" />
 
                     <View
                         android:layout_width="match_parent"
@@ -90,7 +92,8 @@
                                 android:layout_height="wrap_content"
                                 android:textColor="@color/main_text"
                                 android:textSize="14sp"
-                                android:textStyle="bold" />
+                                android:textStyle="bold"
+                                android:text="@string/label_placeholder_vazio" />
                         </LinearLayout>
 
                         <LinearLayout

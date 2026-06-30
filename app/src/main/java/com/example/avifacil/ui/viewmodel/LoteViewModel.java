@@ -13,6 +13,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * ViewModel para gestão do ciclo de vida dos Lotes.
+ * 
+ * Orquestra a criação, encerramento e exclusão lógica de lotes, 
+ * além de gerenciar os estados de carregamento para a UI.
+ */
 public class LoteViewModel extends AndroidViewModel {
     private final LoteRepository repository;
     private final ExecutorService executorService;
