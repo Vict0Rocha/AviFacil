@@ -247,6 +247,12 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
+        dashboardViewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) {
+                Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+            }
+        });
+
         String currentUid = FirebaseAuth.getInstance().getUid();
         if (currentUid != null) {
             avicultorViewModel.carregarAvicultorPorUuid(currentUid);

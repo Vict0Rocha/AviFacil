@@ -16,6 +16,7 @@ public class DashboardViewModel extends AndroidViewModel {
     private final ExecutorService executorService;
 
     private final MutableLiveData<DashboardData> dashboardData = new MutableLiveData<>();
+    private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
 
     public DashboardViewModel(@NonNull Application application) {
         super(application);
@@ -25,6 +26,10 @@ public class DashboardViewModel extends AndroidViewModel {
 
     public LiveData<DashboardData> getDashboardData() {
         return dashboardData;
+    }
+
+    public LiveData<String> getErrorMessage() {
+        return errorMessage;
     }
 
     public void carregarDados(long avicultorId) {
@@ -44,6 +49,7 @@ public class DashboardViewModel extends AndroidViewModel {
                 ));
             } catch (Exception e) {
                 android.util.Log.e("DashboardVM", "Erro ao carregar dados", e);
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_carregar_dados));
                 // Posta dados vazios para evitar crash na UI
                 dashboardData.postValue(new DashboardData(0, 0, 0, 0, 0, 0, new java.util.ArrayList<>()));
             }

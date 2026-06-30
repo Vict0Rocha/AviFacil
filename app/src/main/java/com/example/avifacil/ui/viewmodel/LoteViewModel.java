@@ -57,7 +57,7 @@ public class LoteViewModel extends AndroidViewModel {
             try {
                 loteAtual.postValue(repository.getById(id, avicultorId));
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar lote: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_carregar_dados));
             }
         });
     }
@@ -67,20 +67,20 @@ public class LoteViewModel extends AndroidViewModel {
             try {
                 lotesAtivos.postValue(repository.getLotesAtivosPorAvicultor(avicultorId));
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar lotes: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_carregar_dados));
             }
         });
     }
 
     public void criarLote(long avicultorId, String avicultorUuid, String numero, String linhagem, String galpao, Date inicio, int qtdInicial, double pesoInicial, String observacoes) {
         if (numero == null || numero.trim().isEmpty()) {
-            errorMessage.setValue("Número do lote é obrigatório");
+            errorMessage.setValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_numero_lote));
             return;
         }
         executorService.execute(() -> {
             try {
                 if (repository.existeNumeroLote(avicultorId, numero)) {
-                    errorMessage.postValue("Este número de lote já existe para este avicultor");
+                    errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_lote_existe));
                     return;
                 }
                 LoteEntity lote = new LoteEntity(avicultorId, avicultorUuid, numero, linhagem, galpao, inicio, qtdInicial, pesoInicial, observacoes);
@@ -89,7 +89,7 @@ public class LoteViewModel extends AndroidViewModel {
                 successMessage.postValue(true);
                 carregarLotes(avicultorId);
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao criar lote: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_salvar_dados));
             }
         });
     }
@@ -110,7 +110,7 @@ public class LoteViewModel extends AndroidViewModel {
                 // Após encerrar, recarrega a lista para refletir a mudança de status
                 carregarLotes(lote.getAvicultorId());
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao encerrar lote: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_salvar_dados));
             }
         });
     }
@@ -127,7 +127,7 @@ public class LoteViewModel extends AndroidViewModel {
 
                 carregarLotes(lote.getAvicultorId());
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao excluir lote: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_excluir));
             }
         });
     }

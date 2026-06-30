@@ -85,7 +85,7 @@ public class AvicultorViewModel extends AndroidViewModel {
                     // Verificamos novamente o DB pois baixarDados pode ter inserido algo
                     AvicultorEntity finalCheck = repository.getByUuid(uuid);
                     if (finalCheck == null) {
-                        errorMessage.postValue("Perfil não encontrado");
+                        errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_perfil_nao_encontrado));
                         avicultorLogado.postValue(null);
                     } else {
                         avicultorLogado.postValue(finalCheck);
@@ -93,7 +93,7 @@ public class AvicultorViewModel extends AndroidViewModel {
                 }
             } catch (Exception e) {
                 Log.e("AvicultorViewModel", "Erro fatal ao carregar dados", e);
-                errorMessage.postValue("Erro ao carregar dados: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_carregar_dados));
             }
         });
     }
@@ -127,7 +127,7 @@ public class AvicultorViewModel extends AndroidViewModel {
                 }
                 successMessage.postValue(true);
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao salvar: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_salvar_dados));
             }
         });
     }
@@ -148,7 +148,7 @@ public class AvicultorViewModel extends AndroidViewModel {
                 if (task.isSuccessful()) {
                     successMessage.postValue(true);
                 } else {
-                    errorMessage.setValue("Erro ao alterar senha: " + task.getException().getMessage());
+                    errorMessage.setValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_salvar_dados));
                 }
             });
         }

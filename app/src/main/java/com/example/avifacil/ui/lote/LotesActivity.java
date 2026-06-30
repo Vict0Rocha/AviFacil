@@ -91,6 +91,12 @@ public class LotesActivity extends AppCompatActivity {
             }
         });
 
+        loteViewModel.getErrorMessage().observe(this, error -> {
+            if (error != null) {
+                android.widget.Toast.makeText(this, error, android.widget.Toast.LENGTH_LONG).show();
+            }
+        });
+
         fab.setOnClickListener(v -> {
             if (avicultorId != -1) {
                 Intent intent = new Intent(this, CadastroLoteActivity.class);

@@ -60,7 +60,7 @@ public class RegistroViewModel extends AndroidViewModel {
             try {
                 registrosLote.postValue(repository.getRegistrosPorLote(loteId));
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar registros: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_carregar_dados));
             }
         });
     }
@@ -70,7 +70,7 @@ public class RegistroViewModel extends AndroidViewModel {
             try {
                 registroParaEdicao.postValue(repository.getById(id));
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao carregar registro: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_carregar_dados));
             }
         });
     }
@@ -85,21 +85,21 @@ public class RegistroViewModel extends AndroidViewModel {
 
                 RegistroEntity ultimo = repository.getUltimoRegistro(loteId);
                 if (ultimo != null && !data.after(ultimo.getDataRegistro())) {
-                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
-                    errorMessage.postValue("A data do novo registro deve ser posterior ao último registro (" + sdf.format(ultimo.getDataRegistro()) + ")");
+                    errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_data_registro_sequencia));
                     return;
                 }
 
                 com.example.avifacil.data.local.entity.LoteEntity lote = db.loteDao().getByIdSemFiltro(loteId);
                 if (lote != null) {
                     if (data.before(lote.getDataInicio())) {
-                        errorMessage.postValue("A data do registro não pode ser anterior ao alojamento");
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                        errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_data_lote, sdf.format(lote.getDataInicio())));
                         return;
                     }
 
                     int totalMortasAtual = repository.getTotalAvesMortas(loteId);
                     if (totalMortasAtual + mortas > lote.getQuantidadeAvesInicial()) {
-                        errorMessage.postValue("A mortalidade total não pode exceder a quantidade inicial de aves (" + lote.getQuantidadeAvesInicial() + ")");
+                        errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_mortalidade_excedida));
                         return;
                     }
                 }
@@ -116,7 +116,7 @@ public class RegistroViewModel extends AndroidViewModel {
                 successMessage.postValue(true);
                 carregarRegistros(loteId);
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao salvar registro: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_salvar_dados));
             }
         });
     }
@@ -135,7 +135,7 @@ public class RegistroViewModel extends AndroidViewModel {
                     if (lote != null) {
                         int totalMortasOutros = repository.getTotalAvesMortas(lote.getId()) - registro.getAvesMortasPeriodo();
                         if (totalMortasOutros + mortas > lote.getQuantidadeAvesInicial()) {
-                            errorMessage.postValue("A mortalidade total não pode exceder a quantidade inicial de aves (" + lote.getQuantidadeAvesInicial() + ")");
+                            errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_mortalidade_excedida));
                             return;
                         }
                     }
@@ -160,7 +160,7 @@ public class RegistroViewModel extends AndroidViewModel {
                     carregarRegistros(registro.getLoteId());
                 }
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao editar registro: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_salvar_dados));
             }
         });
     }
@@ -182,7 +182,7 @@ public class RegistroViewModel extends AndroidViewModel {
                     carregarRegistros(loteId);
                 }
             } catch (Exception e) {
-                errorMessage.postValue("Erro ao excluir registro: " + e.getMessage());
+                errorMessage.postValue(getApplication().getString(com.example.avifacil.R.string.msg_erro_excluir));
             }
         });
     }

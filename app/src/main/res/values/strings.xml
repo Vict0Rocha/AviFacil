@@ -129,4 +129,14 @@
     <string name="label_detalhe_carregando">Carregando...</string>
     <string name="label_placeholder_vazio">---</string>
     <string name="label_lote_numero_vazio">Lote: ---</string>
+    <string name="msg_erro_padrao">Ocorreu um erro inesperado. Tente novamente.</string>
+    <string name="msg_erro_carregar_dados">Erro ao carregar dados do servidor.</string>
+    <string name="msg_erro_sessao_expirada">Sua sessão expirou. Por favor, faça login novamente.</string>
+    <string name="msg_erro_perfil_nao_encontrado">Perfil não encontrado. Redirecionando para cadastro...</string>
+    <string name="msg_erro_salvar_dados">Erro ao salvar as informações. Verifique sua conexão.</string>
+    <string name="msg_erro_excluir">Erro ao excluir o item. Tente novamente.</string>
+    <string name="msg_erro_lote_encerrado">Este lote já foi encerrado e não permite novos registros.</string>
+    <string name="msg_erro_mortalidade_excedida">A mortalidade total não pode exceder a quantidade inicial de aves.</string>
+    <string name="msg_erro_data_futura">A data não pode ser posterior ao dia de hoje.</string>
+    <string name="msg_erro_data_registro_sequencia">A data deve ser posterior ao último registro lançado.</string>
 </resources>
