@@ -108,34 +108,6 @@ const AcessosPage = () => {
     }
   };
 
-  const toggleStatus = async (user) => {
-    if (!user) return;
-    const userId = user.uid || user.id;
-    if (!userId) return alert("Erro: ID do usuário não identificado.");
-
-    const isBlocking = user.status !== 'INATIVO';
-    const novoStatus = isBlocking ? 'INATIVO' : 'ATIVO';
-
-    if (!window.confirm(`Tem certeza que deseja ${isBlocking ? 'BLOQUEAR' : 'ATIVAR'} o acesso de ${user.email}?`)) return;
-
-    setActionLoading(true);
-    try {
-      // Usando o formato de string única para o caminho
-      const userRef = doc(db, "avicultores/" + String(userId).trim());
-
-      await updateDoc(userRef, {
-        status: novoStatus,
-        bloqueado: isBlocking,
-        ultimaAlteracaoStatus: serverTimestamp()
-      });
-      fetchUsers();
-    } catch (error) {
-      console.error("Erro ao atualizar status:", error);
-      alert("Erro de Status: " + (error?.message || "Erro de permissão ou conexão"));
-    } finally {
-      setActionLoading(false);
-    }
-  };
 
   if (authLoading) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}><RefreshCw className="animate-spin" size={48} color="#008858" /></div>;
   if (!isAdmin) return <Navigate to="/dashboard" />;
@@ -162,7 +134,6 @@ const AcessosPage = () => {
               <tr style={{ background: '#F8FAFB', textAlign: 'left', borderBottom: '2px solid #E2E8F0' }}>
                 <th style={thStyle}>Produtor / Propriedade</th>
                 <th style={thStyle}>E-mail de Login</th>
-                <th style={thStyle}>Status</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Ações</th>
               </tr>
             </thead>
@@ -175,17 +146,6 @@ const AcessosPage = () => {
                   </td>
                   <td style={tdStyle}>{u.email}</td>
                   <td style={tdStyle}>
-                    {u.status === 'INATIVO' ? (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#E53E3E', background: '#FFF5F5', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', width: 'fit-content', border: '1px solid #FED7D7' }}>
-                        <Power size={14} /> BLOQUEADO
-                      </span>
-                    ) : (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#008858', background: '#E6F4EF', padding: '6px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800', width: 'fit-content', border: '1px solid #C6F6D5' }}>
-                        <ShieldCheck size={14} /> ATIVO
-                      </span>
-                    )}
-                  </td>
-                  <td style={tdStyle}>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                       <button
                         onClick={() => { setSelectedUser(u); setShowPassModal(true); }}
@@ -194,14 +154,6 @@ const AcessosPage = () => {
                         style={{ boxShadow: '0 2px 4px rgba(11, 59, 117, 0.1)' }}
                       >
                         <Key size={18} />
-                      </button>
-                      <button
-                        onClick={() => toggleStatus(u)}
-                        className={`act-btn ${u.status === 'INATIVO' ? 'green' : 'red'}`}
-                        title={u.status === 'INATIVO' ? "Ativar Acesso" : "Bloquear Acesso"}
-                        style={{ boxShadow: u.status === 'INATIVO' ? '0 2px 4px rgba(0, 136, 88, 0.1)' : '0 2px 4px rgba(229, 62, 62, 0.1)' }}
-                      >
-                        <Power size={18} />
                       </button>
                     </div>
                   </td>
