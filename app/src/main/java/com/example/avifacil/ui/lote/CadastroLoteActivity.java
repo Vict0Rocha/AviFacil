@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
 import com.example.avifacil.ui.viewmodel.LoteViewModel;
+import com.example.avifacil.util.NumberParser;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import java.text.SimpleDateFormat;
@@ -137,7 +138,7 @@ public class CadastroLoteActivity extends AppCompatActivity {
 
         if (isValid) {
             int qtd = Integer.parseInt(qtdStr);
-            double peso = Double.parseDouble(pesoStr);
+            double peso = NumberParser.parseDouble(pesoStr);
             
             viewModel.criarLote(avicultorId, avicultorUuid, numero, linhagem, galpao, dataInicio, qtd, peso, obs);
         }

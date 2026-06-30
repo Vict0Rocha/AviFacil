@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.avifacil.R;
 import com.example.avifacil.ui.viewmodel.AvicultorViewModel;
 import com.example.avifacil.ui.viewmodel.RegistroViewModel;
+import com.example.avifacil.util.NumberParser;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import java.text.SimpleDateFormat;
@@ -143,10 +144,10 @@ public class CadastroRegistroActivity extends AppCompatActivity {
                 calendar.setTime(registro.getDataRegistro());
                 atualizarLabelData();
                 editMortas.setText(String.valueOf(registro.getAvesMortasPeriodo()));
-                editConsumo.setText(String.valueOf(registro.getConsumoRacaoPeriodo()));
-                editPeso.setText(String.valueOf(registro.getPesoAtualMedio()));
+                editConsumo.setText(NumberParser.formatDouble(registro.getConsumoRacaoPeriodo()));
+                editPeso.setText(NumberParser.formatDouble(registro.getPesoAtualMedio()));
                 
-                editPrecoInsumo.setText(String.valueOf(registro.getPrecoKgInsumo()));
+                editPrecoInsumo.setText(NumberParser.formatDouble(registro.getPrecoKgInsumo()));
                 setTipoInsumoRadio(registro.getTipoInsumo());
                 
                 editObs.setText(registro.getObservacoes());
@@ -266,9 +267,9 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         if (precoInsumoStr.isEmpty()) precoInsumoStr = "0";
 
         int mortas = Integer.parseInt(mortasStr);
-        double consumo = Double.parseDouble(consumoStr);
-        double peso = Double.parseDouble(pesoStr);
-        double precoInsumo = Double.parseDouble(precoInsumoStr);
+        double consumo = NumberParser.parseDouble(consumoStr);
+        double peso = NumberParser.parseDouble(pesoStr);
+        double precoInsumo = NumberParser.parseDouble(precoInsumoStr);
         String tipoInsumo = getTipoInsumoSelecionado();
 
         if (mortas < 0) { layoutMortas.setError("Mortalidade inválida"); return; }
