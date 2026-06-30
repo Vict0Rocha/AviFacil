@@ -13,33 +13,48 @@ import com.example.avifacil.data.local.entity.LoteEntity;
 import com.example.avifacil.data.local.entity.RegistroEntity;
 
 /**
- * AppDatabase: Configuração do Banco de Dados Local (SQLite via Room).
- * Define as tabelas (entidades), versão do banco e conversores de tipos.
+ * ARMAZENAMENTO DE DADOS - PERSISTÊNCIA LOCAL (SGBD SQLITE):
  * 
- * SGBD: SQLite
- * Persistência: Local e Offline-first
+ * O AviFácil utiliza a biblioteca Room (abstração do SQLite) para persistência local.
+ * Esta arquitetura permite que o aplicativo funcione totalmente OFFLINE, garantindo
+ * que o produtor rural possa registrar dados mesmo sem internet no aviário.
  */
-@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 15, exportSchema = false)
-@TypeConverters({Converters.class})
+@Database(
+    entities = {
+        AvicultorEntity.class, 
+        LoteEntity.class, 
+        RegistroEntity.class
+    }, 
+    version = 15, // Versão do esquema do banco de dados
+    exportSchema = false
+)
+@TypeConverters({Converters.class}) // Conversores para tipos complexos como Date
 public abstract class AppDatabase extends RoomDatabase {
+    
+    // Instância estática para o padrão Singleton
     private static volatile AppDatabase instance;
 
-    // DAOs (Data Access Objects) para manipulação das tabelas
+    /**
+     * DAOs (Data Access Objects):
+     * Interfaces que definem as consultas SQL (SELECT, INSERT, UPDATE, DELETE).
+     * O Room gera automaticamente a implementação desses métodos.
+     */
     public abstract AvicultorDao avicultorDao();
     public abstract LoteDao loteDao();
     public abstract RegistroDao registroDao();
 
     /**
-     * Padrão Singleton para garantir uma única instância do banco de dados em todo o app.
+     * Singleton: Garante que exista apenas uma conexão aberta com o banco de dados
+     * durante todo o ciclo de vida do aplicativo, economizando memória e recursos.
      */
     public static AppDatabase getInstance(Context context) {
         if (instance == null) {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
+                    // Criação do banco de dados físico no armazenamento interno do celular
                     instance = Room.databaseBuilder(context.getApplicationContext(),
                             AppDatabase.class, "avifacil_pro_v15_db")
-                            .fallbackToDestructiveMigration() // Recria o banco se a versão mudar sem migração definida
-                            .fallbackToDestructiveMigrationOnDowngrade()
+                            .fallbackToDestructiveMigration() // Recria o banco caso a versão mude
                             .build();
                 }
             }
