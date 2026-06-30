@@ -83,11 +83,16 @@ export const calcularCustoTotalRacao = (registros) => {
 
 export const calcularGanhoMedioPeso = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
+    // Ordena para garantir que pegamos o registro mais recente
     const sorted = [...registros].sort((a, b) => safeDate(b.dataRegistro) - safeDate(a.dataRegistro));
-    const pesoMedioG = Number(sorted[0].pesoAtualMedio) || 0;
+    const ultimo = sorted[0];
+    const pesoMedioG = Number(ultimo.pesoAtualMedio) || 0;
     const pesoInicialG = Number(lote.pesoInicial) || 0;
-    const idadeDias = calcularIdadeDias(lote, sorted[0].dataRegistro);
+    const idadeDias = calcularIdadeDias(lote, ultimo.dataRegistro);
+
     if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
+
+    // Retorna GPD em gramas arredondado para 2 casas (padrão exibição)
     return round((pesoMedioG - pesoInicialG) / idadeDias, 2);
 };
 
@@ -109,14 +114,31 @@ export const calcularFatorProducao = (lote, registros) => {
     if (!lote || !registros || registros.length === 0) return 0;
 
     const sorted = [...registros].sort((a, b) => safeDate(b.dataRegistro) - safeDate(a.dataRegistro));
-    const gpdGramas = calcularGanhoMedioPeso(lote, registros);
-    const gpdKg = gpdGramas / 1000.0;
-    const viabilidade = calcularViabilidade(lote, registros);
-    const ca = calcularConversaoAlimentar(lote, registros);
+    const ultimo = sorted[0];
+    const pesoMedioG = Number(ultimo.pesoAtualMedio) || 0;
+    const pesoInicialG = Number(lote.pesoInicial) || 0;
+    const idadeDias = calcularIdadeDias(lote, ultimo.dataRegistro);
+
+    if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
+
+    // GPD em kg (Sem arredondamento intermediário para precisão)
+    const gpdKg = ((pesoMedioG - pesoInicialG) / idadeDias) / 1000.0;
+
+    // Viabilidade em %
+    const inicial = Number(lote.quantidadeAvesInicial) || 0;
+    const vivas = calcularAvesVivas(lote, registros);
+    const viabilidade = (vivas / inicial) * 100.0;
+
+    // C.A. (Consumo Total / Biomassa Total)
+    const consumoTotalKg = calcularTotalConsumoRacao(registros);
+    const pesoTotalLoteKg = (pesoMedioG / 1000.0) * vivas;
+
+    if (pesoTotalLoteKg <= 0) return 0;
+    const ca = consumoTotalKg / pesoTotalLoteKg;
 
     if (ca <= 0) return 0;
 
-    // Nova Fórmula: ((GPD(kg) * Viabilidade %) / CA) * 100
+    // Fórmula: ((GPD_kg * Viabilidade_%) / CA) * 100
     // Arredondado para 0 casas decimais
     return round(((gpdKg * viabilidade) / ca) * 100.0, 0);
 };

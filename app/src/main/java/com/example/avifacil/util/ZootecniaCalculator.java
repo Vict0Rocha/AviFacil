@@ -88,9 +88,11 @@ public class ZootecniaCalculator {
     public static double calcularGPD(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
         if (lote == null || registros == null || registros.isEmpty()) return 0;
 
-        double pesoMedioG = registros.get(registros.size() - 1).getPesoAtualMedio();
+        // Para o GPD ser preciso, devemos usar a idade na data da última pesagem
+        RegistroEntity ultimo = registros.get(registros.size() - 1);
+        double pesoMedioG = ultimo.getPesoAtualMedio();
         double pesoInicialG = lote.getPesoInicial();
-        int idadeDias = calcularIdadeDias(lote, dataReferencia);
+        int idadeDias = calcularIdadeDias(lote, ultimo.getDataRegistro());
 
         if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
 
@@ -100,15 +102,32 @@ public class ZootecniaCalculator {
     public static double calcularFatorProducao(LoteEntity lote, List<RegistroEntity> registros, Date dataReferencia) {
         if (lote == null || registros == null || registros.isEmpty()) return 0;
 
-        double gpdGramas = calcularGPD(lote, registros, dataReferencia);
-        double gpdKg = gpdGramas / 1000.0;
-        double viabilidade = calcularViabilidadePercentual(lote, registros);
-        double ca = calcularConversaoAlimentar(lote, registros);
+        // Pegamos o último registro para garantir consistência entre peso e idade
+        RegistroEntity ultimo = registros.get(registros.size() - 1);
+        double pesoMedioG = ultimo.getPesoAtualMedio();
+        double pesoInicialG = lote.getPesoInicial();
+        int idadeDias = calcularIdadeDias(lote, ultimo.getDataRegistro());
+
+        if (idadeDias <= 0 || pesoMedioG <= 0) return 0;
+
+        // GPD em kg (Sem arredondamento intermediário para precisão máxima do FP)
+        double gpdKg = ((pesoMedioG - pesoInicialG) / idadeDias) / 1000.0;
+        
+        // Viabilidade em %
+        int vivas = calcularAvesVivasAtual(lote, registros);
+        double viabilidade = ((double) vivas / lote.getQuantidadeAvesInicial()) * 100.0;
+        
+        // C.A. (Consumo Total / Biomassa Total)
+        double consumoTotalKg = calcularConsumoTotalRacaoKg(registros);
+        double pesoTotalLoteKg = (pesoMedioG / 1000.0) * vivas;
+        
+        if (pesoTotalLoteKg <= 0) return 0;
+        double ca = consumoTotalKg / pesoTotalLoteKg;
 
         if (ca <= 0) return 0;
 
-        // Novo Cálculo solicitado: Fator de produção = ((GPD(kg) * viabilidade(%)) / C.A.) * 100
-        // Arredondado para 0 casas decimais conforme solicitado
+        // Fórmula solicitada: Fator de produção = ((GPD_kg * viabilidade_%) / C.A.) * 100
+        // Arredondado para 0 casas decimais conforme padrão do setor
         return round(((gpdKg * viabilidade) / ca) * 100.0, 0);
     }
 
