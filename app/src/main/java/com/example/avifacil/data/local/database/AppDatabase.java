@@ -19,7 +19,7 @@ import com.example.avifacil.data.local.entity.RegistroEntity;
  * SGBD: SQLite
  * Persistência: Local e Offline-first
  */
-@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 14, exportSchema = false)
+@Database(entities = {AvicultorEntity.class, LoteEntity.class, RegistroEntity.class}, version = 15, exportSchema = false)
 @TypeConverters({Converters.class})
 public abstract class AppDatabase extends RoomDatabase {
     private static volatile AppDatabase instance;
@@ -37,7 +37,7 @@ public abstract class AppDatabase extends RoomDatabase {
             synchronized (AppDatabase.class) {
                 if (instance == null) {
                     instance = Room.databaseBuilder(context.getApplicationContext(),
-                            AppDatabase.class, "avifacil_pro_v14_db")
+                            AppDatabase.class, "avifacil_pro_v15_db")
                             .fallbackToDestructiveMigration() // Recria o banco se a versão mudar sem migração definida
                             .fallbackToDestructiveMigrationOnDowngrade()
                             .build();

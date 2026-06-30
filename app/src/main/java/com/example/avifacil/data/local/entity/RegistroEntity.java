@@ -20,7 +20,7 @@ import java.util.Date;
         ),
         indices = {
                 @Index("loteId"),
-                @Index(value = {"loteId", "dataRegistro"}, unique = true),
+                @Index(value = {"loteId", "dataRegistro"}),
                 @Index(value = {"uuid"}, unique = true)
         })
 public class RegistroEntity {
