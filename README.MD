@@ -4,25 +4,7 @@ O **AviFácil** é uma solução inteligente para o monitoramento e gestão de l
 
 ---
 
-## 📱 O Aplicativo (Android)
-
-O app mobile é a ferramenta de campo do produtor. 
-- **Modo Offline**: Funciona sem internet. Os dados são salvos localmente em um banco de dados **Room** (v15) e sincronizados automaticamente quando houver conexão.
-- **Teclado Otimizado**: Todos os campos numéricos (Peso, Consumo, Preço) abrem automaticamente o teclado numérico.
-- **Localização Brasileira**: Suporte completo para entrada de números com **vírgula** (ex: `1,250`), adaptado ao padrão nacional.
-- **Cálculos em Tempo Real**: O produtor vê o desempenho do lote (GPD, C.A., IEP) instantaneamente após cada registro diário.
-
-## 💻 O Painel Web (Dashboard)
-
-Uma interface React integrada ao **Firebase** que consolida os dados de todos os avicultores.
-- **Visão Geral**: Acompanhamento de múltiplos lotes simultaneamente.
-- **Transparência**: Fórmulas idênticas às do aplicativo, garantindo que o técnico e o produtor falem a mesma língua.
-
----
-
-## 📊 Documentação de Cálculos Zootécnicos
-
-O motor de cálculo segue os padrões da indústria (Cobb/Ross).
+## 📊 Cálculos Zootécnicos
 
 ### Fórmulas Principais:
 *   **GPD (Ganho de Peso Diário)**: `(Peso Atual (g) - Peso Inicial (g)) / Idade` (em gramas).
@@ -59,8 +41,6 @@ O motor de cálculo segue os padrões da indústria (Cobb/Ross).
 2. Certifique-se de que o Google Services (`google-services.json`) está configurado na pasta `/app`.
 3. Sincronize o Gradle.
 4. Rode no Emulador ou Dispositivo Físico (API 26+).
-
-> **Aviso de Migração**: Este projeto utiliza a versão **15** do banco de dados local (`avifacil_pro_v15_db`). Caso instale sobre uma versão muito antiga e encontre erros, limpe o cache do app ou reinstale-o.
 
 ---
 *AviFácil - Otimizando a produção avícola de ponta a ponta.*
