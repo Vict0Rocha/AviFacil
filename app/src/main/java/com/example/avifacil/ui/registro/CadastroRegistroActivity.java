@@ -254,9 +254,38 @@ public class CadastroRegistroActivity extends AppCompatActivity {
         return null;
     }
 
+    private void setTipoInsumoRadio(String tipo) {
+        uncheckAllRadios();
+        if (tipo == null) {
+            lastCheckedId = -1;
+            return;
+        }
+
+        switch (tipo) {
+            case "milho": lastCheckedId = R.id.radioMilho; break;
+            case "soja": lastCheckedId = R.id.radioSoja; break;
+            case "núcleo": lastCheckedId = R.id.radioNucleo; break;
+            case "outro": lastCheckedId = R.id.radioOutro; break;
+            default: lastCheckedId = -1; break;
+        }
+
+        if (lastCheckedId != -1) {
+            android.widget.RadioButton rb = findViewById(lastCheckedId);
+            if (rb != null) rb.setChecked(true);
+        }
+    }
+
     private void desabilitarEdicao() {
         btnSalvar.setVisibility(android.view.View.GONE);
         editMortas.setEnabled(false);
-        // ... desabilita demais campos
+        editConsumo.setEnabled(false);
+        editPeso.setEnabled(false);
+        editPrecoInsumo.setEnabled(false);
+        editData.setEnabled(false);
+        editObs.setEnabled(false);
+        findViewById(R.id.radioMilho).setEnabled(false);
+        findViewById(R.id.radioSoja).setEnabled(false);
+        findViewById(R.id.radioNucleo).setEnabled(false);
+        findViewById(R.id.radioOutro).setEnabled(false);
     }
 }

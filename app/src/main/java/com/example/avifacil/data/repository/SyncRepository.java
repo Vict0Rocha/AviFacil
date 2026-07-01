@@ -51,6 +51,31 @@ public class SyncRepository {
     }
 
     /**
+     * Sincroniza os dados dos avicultores pendentes.
+     */
+    private void sincronizarAvicultores() {
+        List<AvicultorEntity> pendentes = avicultorDao.getPendentesSincronizacao();
+        for (AvicultorEntity avicultor : pendentes) {
+            try {
+                if (avicultor.getUuid() == null) continue;
+
+                if (avicultor.isDeleted()) {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(avicultor.getUuid())
+                            .delete());
+                } else {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(avicultor.getUuid())
+                            .set(avicultor));
+                }
+                avicultorDao.marcarComoSincronizado(avicultor.getId());
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao sincronizar avicultor: " + avicultor.getUuid(), e);
+            }
+        }
+    }
+
+    /**
      * Exemplo de lógica de sincronização de lotes:
      * 1. Busca lotes marcados como pendentes no SQLite.
      * 2. Se deletado localmente -> Deleta na nuvem.
@@ -82,6 +107,42 @@ public class SyncRepository {
                 loteDao.marcarComoSincronizado(lote.getId());
             } catch (Exception e) {
                 Log.e(TAG, "Erro ao sincronizar lote: " + lote.getUuid(), e);
+            }
+        }
+    }
+
+    /**
+     * Sincroniza os registros de produção pendentes.
+     */
+    private void sincronizarRegistros() {
+        List<RegistroEntity> pendentes = registroDao.getPendentesSincronizacao();
+        for (RegistroEntity registro : pendentes) {
+            try {
+                if (registro.getUuid() == null || registro.getLoteUuid() == null) continue;
+
+                LoteEntity lote = loteDao.getByUuidSemFiltro(registro.getLoteUuid());
+                if (lote == null || lote.getAvicultorUuid() == null) continue;
+
+                if (registro.isDeleted()) {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(lote.getAvicultorUuid())
+                            .collection("lotes")
+                            .document(registro.getLoteUuid())
+                            .collection("registros")
+                            .document(registro.getUuid())
+                            .delete());
+                } else {
+                    Tasks.await(firestore.collection("avicultores")
+                            .document(lote.getAvicultorUuid())
+                            .collection("lotes")
+                            .document(registro.getLoteUuid())
+                            .collection("registros")
+                            .document(registro.getUuid())
+                            .set(registro));
+                }
+                registroDao.marcarComoSincronizado(registro.getId());
+            } catch (Exception e) {
+                Log.e(TAG, "Erro ao sincronizar registro: " + registro.getUuid(), e);
             }
         }
     }
@@ -122,6 +183,60 @@ public class SyncRepository {
             avicultorDao.update(remoteAv);
         }
     }
-    
-    // ... lógica similar aplicada para Lotes e Registros no método baixarLotesERegistros
+
+    private void baixarLotesERegistros(String avicultorUuid, long localAvicultorId) throws ExecutionException, InterruptedException {
+        QuerySnapshot lotesSnapshot = Tasks.await(firestore.collection("avicultores")
+                .document(avicultorUuid)
+                .collection("lotes")
+                .get(Source.SERVER));
+
+        for (QueryDocumentSnapshot loteDoc : lotesSnapshot) {
+            LoteEntity remoteLote = loteDoc.toObject(LoteEntity.class);
+            if (remoteLote != null) {
+                remoteLote.setAvicultorId(localAvicultorId);
+                long localLoteId = atualizarLoteLocalmente(remoteLote);
+                baixarRegistros(avicultorUuid, remoteLote.getUuid(), localLoteId);
+            }
+        }
+    }
+
+    private long atualizarLoteLocalmente(LoteEntity remoteLote) {
+        LoteEntity localLote = loteDao.getByUuidSemFiltro(remoteLote.getUuid());
+        if (localLote == null) {
+            return loteDao.insert(remoteLote);
+        } else {
+            if (remoteLote.getUpdatedAt() > localLote.getUpdatedAt()) {
+                remoteLote.setId(localLote.getId());
+                loteDao.update(remoteLote);
+            }
+            return localLote.getId();
+        }
+    }
+
+    private void baixarRegistros(String avicultorUuid, String loteUuid, long localLoteId) throws ExecutionException, InterruptedException {
+        QuerySnapshot registrosSnapshot = Tasks.await(firestore.collection("avicultores")
+                .document(avicultorUuid)
+                .collection("lotes")
+                .document(loteUuid)
+                .collection("registros")
+                .get(Source.SERVER));
+
+        for (QueryDocumentSnapshot regDoc : registrosSnapshot) {
+            RegistroEntity remoteReg = regDoc.toObject(RegistroEntity.class);
+            if (remoteReg != null) {
+                remoteReg.setLoteId(localLoteId);
+                atualizarRegistroLocalmente(remoteReg);
+            }
+        }
+    }
+
+    private void atualizarRegistroLocalmente(RegistroEntity remoteReg) {
+        RegistroEntity localReg = registroDao.getByUuidSemFiltro(remoteReg.getUuid());
+        if (localReg == null) {
+            registroDao.insert(remoteReg);
+        } else if (remoteReg.getUpdatedAt() > localReg.getUpdatedAt()) {
+            remoteReg.setId(localReg.getId());
+            registroDao.update(remoteReg);
+        }
+    }
 }

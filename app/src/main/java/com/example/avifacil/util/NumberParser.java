@@ -17,16 +17,29 @@ public class NumberParser {
             return 0.0;
         }
         
+        String cleanValue = value.trim();
+        
         try {
-            // Tenta converter usando o padrão brasileiro (vírgula como separador decimal)
-            NumberFormat format = NumberFormat.getInstance(PT_BR);
-            Number number = format.parse(value.replace(".", "")); // Remove pontos de milhar se existirem
-            return number.doubleValue();
-        } catch (ParseException e) {
+            // Lógica robusta para tratar diferentes formatos de entrada:
+            
+            // 1. Se contém vírgula e ponto: Assumimos padrão BR (ex: 1.250,50)
+            if (cleanValue.contains(",") && cleanValue.contains(".")) {
+                cleanValue = cleanValue.replace(".", "").replace(",", ".");
+            } 
+            // 2. Se contém apenas vírgula: É o decimal brasileiro (ex: 1,50)
+            else if (cleanValue.contains(",")) {
+                cleanValue = cleanValue.replace(",", ".");
+            }
+            // 3. Se contém apenas ponto: No Android, é comum o teclado numérico 
+            // fornecer apenas o ponto, mesmo em PT-BR. Tratamos como decimal.
+            
+            return Double.parseDouble(cleanValue);
+        } catch (NumberFormatException e) {
+            // Fallback final usando NumberFormat
             try {
-                // Fallback para o padrão americano (caso o usuário ainda digite ponto)
-                return Double.parseDouble(value.replace(",", "."));
-            } catch (NumberFormatException e2) {
+                NumberFormat format = NumberFormat.getInstance(PT_BR);
+                return format.parse(value).doubleValue();
+            } catch (Exception e2) {
                 return 0.0;
             }
         }
@@ -36,6 +49,7 @@ public class NumberParser {
         NumberFormat format = NumberFormat.getInstance(PT_BR);
         format.setMinimumFractionDigits(0);
         format.setMaximumFractionDigits(3);
+        format.setGroupingUsed(false); // Desabilitado para facilitar a edição no campo
         return format.format(value);
     }
 }
