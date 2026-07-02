@@ -43,4 +43,17 @@ O **AviFácil** é uma solução inteligente para o monitoramento e gestão de l
 4. Rode no Emulador ou Dispositivo Físico (API 26+).
 
 ---
+
+## 🔒 Política de Privacidade
+
+O **AviFácil** preza pela segurança e privacidade dos dados dos produtores.
+
+1.  **Coleta de Dados**: Coletamos o e-mail do usuário apenas para fins de autenticação e segurança.
+2.  **Uso de Informações**: Os dados zootécnicos (pesos, mortalidade, consumo) inseridos no sistema são de propriedade exclusiva do usuário e utilizados apenas para gerar os relatórios de desempenho do próprio lote.
+3.  **Armazenamento**: Utilizamos o **Google Firebase** para armazenamento em nuvem com criptografia de ponta a ponta e o **Room/SQLite** para armazenamento local protegido.
+4.  **Compartilhamento**: Não compartilhamos dados pessoais ou de produção com terceiros.
+5.  **Exclusão**: O usuário pode solicitar a exclusão total de seus dados a qualquer momento através das configurações do perfil.
+
+---
+
 *AviFácil - Otimizando a produção avícola de ponta a ponta.*

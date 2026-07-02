@@ -4,17 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.unemat.ifmt"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    namespace = "com.unemat.avifacil"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.avifacil"
+        applicationId = "com.unemat.avifacil"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
