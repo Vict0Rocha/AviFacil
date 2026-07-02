@@ -44,16 +44,105 @@ O **AviFácil** é uma solução inteligente para o monitoramento e gestão de l
 
 ---
 
-## 🔒 Política de Privacidade
+## 🔒 Política de Privacidade — AviFácil
 
-O **AviFácil** preza pela segurança e privacidade dos dados dos produtores.
+**Última atualização: 21 de maio de 2024**
 
-1.  **Coleta de Dados**: Coletamos o e-mail do usuário apenas para fins de autenticação e segurança.
-2.  **Uso de Informações**: Os dados zootécnicos (pesos, mortalidade, consumo) inseridos no sistema são de propriedade exclusiva do usuário e utilizados apenas para gerar os relatórios de desempenho do próprio lote.
-3.  **Armazenamento**: Utilizamos o **Google Firebase** para armazenamento em nuvem com criptografia de ponta a ponta e o **Room/SQLite** para armazenamento local protegido.
-4.  **Compartilhamento**: Não compartilhamos dados pessoais ou de produção com terceiros.
-5.  **Exclusão**: O usuário pode solicitar a exclusão total de seus dados a qualquer momento através das configurações do perfil.
+Esta Política de Privacidade descreve como o aplicativo AviFácil trata dados pessoais e informações operacionais dos usuários. O AviFácil é uma solução voltada à gestão avícola, permitindo o cadastro de avicultores, propriedades, lotes de aves, registros produtivos e indicadores zootécnicos.
+
+Ao utilizar o AviFácil, você declara estar ciente das práticas descritas nesta Política.
+
+### 1. Responsável pelo tratamento dos dados
+O responsável pelo tratamento dos dados pessoais no AviFácil é:
+*   **Responsável/Desenvolvedor:** Cristiano (Gestão AviFácil)
+*   **E-mail de contato:** cristianoadm@gmail.com
+*   **Aplicativo:** AviFácil
+*   **País:** Brasil
+
+Este contato deve ser utilizado para solicitações relacionadas à privacidade, acesso, correção, exclusão ou dúvidas sobre o tratamento de dados.
+
+### 2. Dados que coletamos
+O AviFácil pode coletar e tratar os seguintes dados:
+
+**2.1 Dados de conta e autenticação**
+Para permitir o acesso ao aplicativo, autenticação e recuperação de senha, podemos tratar:
+- nome do usuário;
+- endereço de e-mail;
+- identificador único da conta (UUID);
+- senha, quando utilizada para login, sendo gerenciada pelo serviço de autenticação (Firebase Auth);
+- informações de sessão e status de autenticação;
+- dados técnicos necessários para segurança do login.
+
+**2.2 Dados do perfil do avicultor**
+Para identificação e organização do uso do sistema, podemos coletar:
+- nome do avicultor;
+- e-mail;
+- nome da propriedade;
+- status do perfil;
+- indicação de perfil completo ou incompleto;
+- status de bloqueio ou ativação da conta;
+- datas de atualização e sincronização.
+
+**2.3 Dados de lotes avícolas**
+Para permitir a gestão da produção, o aplicativo pode armazenar:
+- número do lote, linhagem e galpão;
+- data de início do lote, quantidade inicial de aves e peso inicial;
+- indicadores calculados: peso médio atual, conversão alimentar, mortalidade acumulada, viabilidade, ganho de peso diário e índice de eficiência produtiva;
+- observações inseridas pelo usuário e status do lote.
+
+**2.4 Dados de registros produtivos**
+Durante o uso do aplicativo, o usuário pode registrar informações como:
+- data do registro;
+- quantidade de aves mortas no período;
+- consumo de ração;
+- peso médio atual;
+- preço por quilo de insumo e tipo de insumo;
+- observações operacionais.
+
+**2.5 Dados técnicos e de segurança**
+Podemos tratar dados técnicos necessários ao funcionamento, segurança e sincronização do aplicativo, como:
+- identificadores internos da conta;
+- informações de autenticação;
+- registros de sincronização;
+- data e hora de atualização;
+- informações técnicas processadas por serviços de terceiros utilizados no app, como Firebase.
+
+### 3. Como usamos os dados
+Os dados são utilizados para:
+- permitir login e autenticação do usuário;
+- criar e manter o perfil do avicultor;
+- cadastrar e gerenciar lotes;
+- registrar informações diárias de produção;
+- calcular indicadores zootécnicos automáticos;
+- exibir dados no aplicativo e no painel web;
+- sincronizar informações entre o dispositivo e a nuvem;
+- permitir uso offline com posterior sincronização;
+- proteger contas contra acesso indevido;
+- corrigir erros, melhorar estabilidade e manter a segurança.
+
+### 4. Armazenamento local e sincronização em nuvem
+O AviFácil possui funcionamento **offline-first**. Isso significa que as informações são salvas primeiro no próprio dispositivo do usuário (Room/SQLite) e depois sincronizadas com a nuvem (**Google Firebase/Firestore**) quando houver conexão disponível.
+
+### 5. Compartilhamento de dados
+O AviFácil não vende dados pessoais dos usuários. Os dados podem ser compartilhados apenas com provedores de tecnologia necessários para funcionamento do app (Google Firebase), com administradores autorizados para suporte ou quando exigido por lei.
+
+### 6. Serviços de terceiros
+O AviFácil utiliza serviços de terceiros para autenticação, armazenamento e sincronização de dados, incluindo:
+- Firebase Authentication;
+- Firebase Firestore;
+- Serviços Google relacionados à infraestrutura Firebase.
+
+### 7. Retenção dos dados
+Os dados serão mantidos pelo tempo necessário para o funcionamento da conta, prestação das funcionalidades do aplicativo e manutenção de histórico produtivo. Quando o usuário solicita a exclusão da conta, o AviFácil removerá os dados aplicáveis, salvo obrigações legais de retenção.
+
+### 8. Segurança dos dados
+Adotamos medidas técnicas e organizacionais para proteger os dados, incluindo autenticação de usuários, regras de acesso ao banco de dados em nuvem e separação de dados por usuário.
+
+### 9. Direitos do titular dos dados
+Nos termos da **LGPD**, o usuário pode solicitar confirmação de tratamento, acesso, correção ou exclusão de seus dados pessoais através do e-mail: **cristianoadm@gmail.com**.
+
+### 10. Transferência internacional de dados
+Como utilizamos a infraestrutura do Firebase/Google, os dados podem ser armazenados ou processados em servidores localizados fora do Brasil, observando as medidas legais de proteção.
 
 ---
-
 *AviFácil - Otimizando a produção avícola de ponta a ponta.*
