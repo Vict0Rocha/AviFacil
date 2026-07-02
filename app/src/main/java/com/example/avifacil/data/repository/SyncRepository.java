@@ -230,7 +230,7 @@ public class SyncRepository {
         }
     }
 
-    private void atualizarRegistroLocalmente(RegistroEntity remoteReg) {
+    private void (RegistroEntity remoteReg) {
         RegistroEntity localReg = registroDao.getByUuidSemFiltro(remoteReg.getUuid());
         if (localReg == null) {
             registroDao.insert(remoteReg);

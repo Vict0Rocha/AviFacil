@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.avifacil"
+    namespace = "com.unemat.ifmt"
     compileSdk {
         version = release(36) {
             minorApiLevel = 1
