@@ -1,6 +1,6 @@
 ## 🔒 Política de Privacidade — AviFácil
 
-**Última atualização: 21 de maio de 2024**
+**Última atualização: 1 de julho de 2026**
 
 Esta Política de Privacidade descreve como o aplicativo AviFácil trata dados pessoais e informações operacionais dos usuários. O AviFácil é uma solução voltada à gestão avícola, permitindo o cadastro de avicultores, propriedades, lotes de aves, registros produtivos e indicadores zootécnicos.
 
@@ -10,7 +10,7 @@ Ao utilizar o AviFácil, você declara estar ciente das práticas descritas nest
 O responsável pelo tratamento dos dados pessoais no AviFácil é:
 *   **Responsável/Desenvolvedor:** Cristiano (Gestão AviFácil)
 *   **E-mail de contato:** cristianoadm@gmail.com
-*   **Aplicativo:** AviFácil
+*   **Aplicativo:** IFMAT
 *   **País:** Brasil
 
 Este contato deve ser utilizado para solicitações relacionadas à privacidade, acesso, correção, exclusão ou dúvidas sobre o tratamento de dados.
